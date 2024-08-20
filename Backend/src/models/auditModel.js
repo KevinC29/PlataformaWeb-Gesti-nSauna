@@ -38,4 +38,4 @@ auditSchema.index({ timestamp: 1 });
 
 const Audit = mongoose.model('Audit', auditSchema);
 
-module.exports = Audit;
+export default Audit;

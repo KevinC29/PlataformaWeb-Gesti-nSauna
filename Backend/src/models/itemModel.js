@@ -9,9 +9,9 @@ const itemSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    imagen: {
-        data: Buffer,
-        contentType: String
+    imageUrl: {
+        type: String, 
+        required: true,
     },
     isActive: {
         type: Boolean,
@@ -27,4 +27,5 @@ const itemSchema = new mongoose.Schema({
 
 const Item = mongoose.model('Item', itemSchema);
 
-module.exports = Item;
+export default Item;
+

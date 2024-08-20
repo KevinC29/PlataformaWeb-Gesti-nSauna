@@ -23,4 +23,4 @@ const itemTypeSchema = new mongoose.Schema({
 
 const ItemType = mongoose.model('ItemType', itemTypeSchema);
 
-module.exports = ItemType;
+export default ItemType;

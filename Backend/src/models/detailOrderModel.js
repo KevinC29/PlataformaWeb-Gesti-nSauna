@@ -28,4 +28,4 @@ const detailOrderSchema = new mongoose.Schema({
 
 const DetailOrder = mongoose.model('DetailOrder', detailOrderSchema);
 
-module.exports = DetailOrder;
+export default DetailOrder;
