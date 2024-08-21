@@ -1,245 +1,159 @@
-// import express from 'express';
 import mongoose from 'mongoose';
 import Section from '../models/sectionModel.js';
 import ItemType from '../models/itemTypeModel.js';
+import handleError from '../utils/helpers/handleError.js';
+import handleAudit from '../utils/helpers/handleAudit.js';
 
-// Crear una nueva seccion
+// Crear una nueva sección
 export const createSection = async (req, res) => {
-  // const errors = validationResult(req);
-  // if (!errors.isEmpty()) {
-  //     return res.status(400).json({ errors: errors.array() });
-  // }
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
-    const { name } = req.body;
-    const existingSection = await Section.findOne({ name }).exec();
+    session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (existingSection) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(409)
-        .json({ message: 'La sección ya existe' });
+    const { name } = req.body;
+
+    if (await Section.exists({ name })) {
+      return handleError(res, null, session, 409, 'La sección ya existe');
     }
 
-    const newSection = await new Section({
-      name,
-    }).save({ session });
+    const newSection = new Section({ name });
+    await newSection.save({ session });
 
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(201)
-      .json({ data: newSection, message: "Sección creada con éxito" });
-
+    res.status(201).json({ data: newSection, message: "Sección creada con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al crear la sección" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al crear la sección");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
-//Obtener todos los Secciones
+// Obtener todas las secciones
 export const getSections = async (req, res) => {
-  
   try {
-
-    const sections = await Section.find()
-      .select("_id name isActive")
-      .exec();
-
-    if (sections.length === 0) {
-      return res
-        .status(404)
-        .json({ error: 'No existen secciones' });
+    const sections = await Section.find().select("_id name isActive").exec();
+    if (!sections.length) {
+      return res.status(404).json({ error: 'No existen secciones' });
     }
-
-    res
-      .status(200)
-      .json({ data: sections, message: "Secciones extraídos con éxito" });
-
+    res.status(200).json({ data: sections, message: "Secciones extraídas con éxito" });
   } catch (error) {
-
-    res
-      .status(500)
-      .json({ error: "Error al obtener las secciones" });
-
+    handleError(res, error);
   }
 };
 
-//Obtener una sola seccion
+// Obtener una sola sección
 export const getSection = async (req, res) => {
-
   try {
-
-    const { id } = req.params;
-    const section = await Section.findById(id)
-      .select("_id name isActive").exec();
-
+    const section = await Section.findById(req.params.id).select("_id name isActive").exec();
     if (!section) {
-      return res
-        .status(404)
-        .send({ error: "Sección no encontrada" });
+      return res.status(404).json({ error: "Sección no encontrada" });
     }
-
-    res
-      .status(200)
-      .json({ data: section, message: "Sección encontrada" });
-
+    res.status(200).json({ data: section, message: "Sección encontrada" });
   } catch (error) {
-
-    res
-      .status(500)
-      .json({ error: "Error al obtener la sección" });
-
+    handleError(res, error);
   }
 };
 
-
+// Actualizar una sección
 export const updateSection = async (req, res) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const { id } = req.params;
     const { name } = req.body;
-    const updatedFields = {};
-    if (name) updatedFields.name = name;
-    const section = await Section.findById(id).lean()
 
+    const section = await Section.findById(id).exec();
     if (!section) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(404)
-        .json({ error: "La sección  no existe" });
+      return handleError(res, null, session, 404, "La sección no existe");
     }
 
-    const existingSection = await Section.findOne({ name, _id: { $ne: id } });
-
-    if (existingSection) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ error: "No puede repetir el nombre de otra sección creada" });
+    if (name && await Section.exists({ name, _id: { $ne: id } })) {
+      return handleError(res, null, session, 400, "No puede repetir el nombre de otra sección creada");
     }
 
-    const sectionUpdate = await Section.findByIdAndUpdate(
-      section._id,
-      { $set: updatedFields },
-      { new: true }
-    );
+    const updatedSection = await Section.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
 
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(200)
-      .json({ data: sectionUpdate, message: "Sección actualizada con éxito" });
-
+    res.status(200).json({ data: updatedSection, message: "Sección actualizada con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al actualizar el usuario" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al actualizar la sección");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
+// Actualizar el estado de una sección
 export const updateSectionStatus = async (req, res) => {
-
   try {
-
     const { _id, isActive } = req.body;
-    const section = await Section.findById(_id).lean()
+    const section = await Section.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
     if (!section) {
-      return res
-        .status(404)
-        .send({ error: "La sección no se encuentra registrada" });
+      return res.status(404).json({ error: "La sección no se encuentra registrada" });
     }
 
-    const updateSectionStatus = await Section.findByIdAndUpdate(
-      section._id,
-      { isActive: isActive },
-      { new: true }
-    );
-
-    // await logsAudit(req, 'CREATE', 'USER', user, Object.keys(req.body), "Actualizar USER");
-
-    const successMessage = isActive
-      ? "Sección activada con éxito"
-      : "Sección desactivada con éxito";
-
-    res
-      .status(200)
-      .json({ message: successMessage, data: updateSectionStatus });
-
+    const successMessage = isActive ? "Sección activada con éxito" : "Sección desactivada con éxito";
+    res.status(200).json({ message: successMessage, data: section });
   } catch (error) {
-
-    res
-      .status(500)
-      .send({ error: "Error al actualizar el estado de la sección" });
-
+    handleError(res, error);
   }
 };
 
-
-//Eliminar sección
+// Eliminar sección
 export const deleteSection = async (req, res) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const { id } = req.params;
-    const section = await Section.findById(id);
-    const checkItemTypeInSection = await ItemType.find({ section: id }).exec();
-    
+
+    const section = await Section.findById(id).exec();
     if (!section) {
-      await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(404)
-        .json({ error: "Sección no encontrada" });
+      return handleError(res, null, session, 404, "Sección no encontrada");
     }
 
-    if (checkItemTypeInSection.length > 0) {
-      return res
-        .status(404)
-        .json({ error: "Existen tipos de ítems asociados a esta sección" });
+    if (await ItemType.exists({ section: id })) {
+      return handleError(res, null, session, 400, "Existen tipos de ítems asociados a esta sección");
     }
 
-    await Section.findByIdAndDelete(section._id);
+    await Section.findByIdAndDelete(id, { session }).exec();
 
-    // await logsAudit(req, 'DELETED', 'USER', userDeleted, "", "Eliminado Físico usuario");
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(200)
-      .json({ message: "Sección eliminada con éxito" });
-
+    res.status(200).json({ message: "Sección eliminada con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al eliminar la sección" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al eliminar la sección");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };

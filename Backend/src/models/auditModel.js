@@ -5,8 +5,7 @@ const Schema = mongoose.Schema;
 const auditSchema = new Schema({
     eventType: {
         type: String,
-        required: true,
-        enum: ['CREATE', 'UPDATE', 'DELETE']
+        required: true
     },
     documentId: {
         type: Schema.Types.ObjectId,

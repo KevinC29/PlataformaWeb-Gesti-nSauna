@@ -2,54 +2,45 @@ import mongoose from 'mongoose';
 import ItemType from '../models/itemTypeModel.js';
 import Section from '../models/sectionModel.js';
 import Item from '../models/itemModel.js';
+import handleError from '../utils/helpers/handleError.js';
 
 // Crear un nuevo ItemType
 export const createItemType = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
 
         const { name, description, section } = req.body;
-        const existingItemType = await ItemType.findOne({ name }).exec();
-        const existingSection = await Section.findById(section).exec();
 
-        if (existingItemType) {
+        if (await ItemType.exists({ name })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(409)
-                .json({ message: 'El tipo de ítem ya existe' });
+            return handleError(res, null, session, 409, 'El tipo de ítem ya existe');
         }
 
-        if (!existingSection) {
+        if (!await Section.exists({ _id: section })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(409)
-                .json({ message: 'La sección ingresada no existe' });
+            return handleError(res, null, session, 409, 'La sección ingresada no existe');
         }
 
-        const newItemType = await new ItemType({
-            name,
-            description,
-            section,
-        }).save({ session });
+        const newItemType = new ItemType({ name, description, section });
+        await newItemType.save({ session });
 
         await session.commitTransaction();
-        session.endSession();
-
-        res
-            .status(201)
-            .json({ data: newItemType, message: "Tipo de ítem creado con éxito" });
-
+        res.status(201).json({ data: newItemType, message: "Tipo de ítem creado con éxito" });
     } catch (error) {
-        console.log(error);
-        await session.abortTransaction();
-        session.endSession();
-        res
-            .status(500)
-            .json({ error: "Error al crear el tipo de ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al crear el tipo de ítem");
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };
 
@@ -62,109 +53,79 @@ export const getItemTypes = async (req, res) => {
             .exec();
 
         if (itemTypes.length === 0) {
-            return res
-                .status(404)
-                .json({ error: 'No existen tipos de ítem' });
+            return res.status(404).json({ error: 'No existen tipos de ítem' });
         }
 
-        res
-            .status(200)
-            .json({ data: itemTypes, message: "Tipos de ítem extraídos con éxito" });
-
+        res.status(200).json({ data: itemTypes, message: "Tipos de ítem extraídos con éxito" });
     } catch (error) {
-        res
-            .status(500)
-            .json({ error: "Error al obtener los tipos de ítem" });
+        handleError(res, error);
     }
 };
 
 // Obtener un solo ItemType
 export const getItemType = async (req, res) => {
     try {
-        const { id } = req.params;
-        const itemType = await ItemType.findById(id)
+        const itemType = await ItemType.findById(req.params.id)
             .select("_id name description isActive section")
             .populate('section', 'name')
             .exec();
 
         if (!itemType) {
-            return res
-                .status(404)
-                .send({ error: "Tipo de ítem no encontrado" });
+            return res.status(404).json({ error: "Tipo de ítem no encontrado" });
         }
 
-        res
-            .status(200)
-            .json({ data: itemType, message: "Tipo de ítem encontrado" });
-
+        res.status(200).json({ data: itemType, message: "Tipo de ítem encontrado" });
     } catch (error) {
-        res
-            .status(500)
-            .json({ error: "Error al obtener el tipo de ítem" });
+        handleError(res, error);
     }
 };
 
 // Actualizar un ItemType
 export const updateItemType = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { id } = req.params;
         const { name, description, section } = req.body;
-        const updatedFields = {};
-        if (name) updatedFields.name = name;
-        if (description) updatedFields.description = description;
-        if (section) updatedFields.section = section;
 
-        const itemType = await ItemType.findById(id).lean();
-        const existingSection = await Section.findById( section ).exec();
-
-        if (!itemType) {
+        if (!await ItemType.exists({ _id: id })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(404)
-                .json({ error: "El tipo de ítem no existe" });
+            return handleError(res, null, session, 404, "El tipo de ítem no existe");
         }
 
-        const existingItemType = await ItemType.findOne({ name, _id: { $ne: id } });
-
-        if (existingItemType) {
+        if (name && await ItemType.exists({ name, _id: { $ne: id } })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(400)
-                .json({ error: "No puede repetir el nombre de otro tipo de ítem creado" });
+            return handleError(res, null, session, 400, "No puede repetir el nombre de otro tipo de ítem creado");
         }
 
-        if (!existingSection) {
+        if (section && !await Section.exists({ _id: section })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(409)
-                .json({ message: 'La sección ingresada no existe' });
+            return handleError(res, null, session, 409, 'La sección ingresada no existe');
         }
 
-        const itemTypeUpdate = await ItemType.findByIdAndUpdate(
+        const updatedItemType = await ItemType.findByIdAndUpdate(
             id,
-            { $set: updatedFields },
-            { new: true }
+            { name, description, section },
+            { new: true, session }
         ).exec();
 
         await session.commitTransaction();
-        session.endSession();
-
-        res
-            .status(200)
-            .json({ data: itemTypeUpdate, message: "Tipo de ítem actualizado con éxito" });
-
+        res.status(200).json({ data: updatedItemType, message: "Tipo de ítem actualizado con éxito" });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
-        res
-            .status(500)
-            .json({ error: "Error al actualizar el tipo de ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al actualizar el tipo de ítem");
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };
 
@@ -172,73 +133,61 @@ export const updateItemType = async (req, res) => {
 export const updateItemTypeStatus = async (req, res) => {
     try {
         const { _id, isActive } = req.body;
-        const itemType = await ItemType.findById(_id).lean();
 
-        if (!itemType) {
-            return res
-                .status(404)
-                .send({ error: "El tipo de ítem no se encuentra registrado" });
-        }
-
-        const updateItemTypeStatus = await ItemType.findByIdAndUpdate(
+        const updatedItemType = await ItemType.findByIdAndUpdate(
             _id,
-            { isActive: isActive },
+            { isActive },
             { new: true }
-        );
+        ).exec();
+
+        if (!updatedItemType) {
+            return res.status(404).json({ error: "El tipo de ítem no se encuentra registrado" });
+        }
 
         const successMessage = isActive
             ? "Tipo de ítem activado con éxito"
             : "Tipo de ítem desactivado con éxito";
 
-        res
-            .status(200)
-            .json({ message: successMessage, data: updateItemTypeStatus });
-
+        res.status(200).json({ message: successMessage, data: updatedItemType });
     } catch (error) {
-        res
-            .status(500)
-            .send({ error: "Error al actualizar el estado del tipo de ítem" });
+        handleError(res, error);
     }
 };
 
 // Eliminar un ItemType
 export const deleteItemType = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { id } = req.params;
-        const itemType = await ItemType.findById(id);
-        const checkItemTypeInItem = await Item.find({ itemType: id }).exec();
 
-        if (!itemType) {
+        if (!await ItemType.exists({ _id: id })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(404)
-                .json({ error: "Tipo de ítem no encontrado" });
+            return handleError(res, null, session, 404, "Tipo de ítem no encontrado");
         }
 
-        if (checkItemTypeInItem.length > 0) {
-            return res
-                .status(404)
-                .json({ error: "Existen ítems asociados a este tipo de ítem" });
+        if (await Item.exists({ itemType: id })) {
+            await session.abortTransaction();
+            return res.status(409).json({ error: "Existen ítems asociados a este tipo de ítem" });
         }
 
-        await ItemType.findByIdAndDelete(id);
-
+        await ItemType.findByIdAndDelete(id, { session }).exec();
         await session.commitTransaction();
-        session.endSession();
-
-        res
-            .status(200)
-            .json({ message: "Tipo de ítem eliminado con éxito" });
-
+        res.status(200).json({ message: "Tipo de ítem eliminado con éxito" });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
-        res
-            .status(500)
-            .json({ error: "Error al eliminar el tipo de ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al eliminar el tipo de ítem");
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };

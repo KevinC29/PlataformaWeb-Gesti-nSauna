@@ -1,19 +1,17 @@
 import express from 'express';
-import { createdetailOrder, 
-    getdetailOrders, 
-    getdetailOrder, 
-    updatedetailOrder, 
-    deletedetailOrder, 
-    updatedetailOrderStatus } from '../controllers/detailOrderController.js';
+import { createDetailOrder, 
+    getDetailOrders, 
+    getDetailOrder, 
+    updateDetailOrder, 
+    deleteDetailOrder } from '../controllers/detailOrderController.js';
 // const checkAuth = require("../utils/validators/authCheck")
 // const {validateCreateUser} = require('../utils/validators/user.validator')
 const router = express.Router();
 
-router.post('/', createdetailOrder);
-router.get('/', getdetailOrders);
-router.get('/:id', getdetailOrder);
-router.put('/:id', updatedetailOrder);
-router.post('/isActive', updatedetailOrderStatus);
-router.delete('/:id', deletedetailOrder);
+router.post('/', createDetailOrder);
+router.get('/', getDetailOrders);
+router.get('/:id', getDetailOrder);
+router.put('/:id', updateDetailOrder);
+router.delete('/:id', deleteDetailOrder);
 
 export default router; 

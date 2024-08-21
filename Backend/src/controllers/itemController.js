@@ -1,82 +1,71 @@
 import mongoose from 'mongoose';
-import ItemType from '../models/itemTypeModel.js';
 import Item from '../models/itemModel.js';
+import ItemType from '../models/itemTypeModel.js';
 import DetailOrder from '../models/detailOrderModel.js';
 import validateImageUrl from '../validators/validateImage.js';
+import handleError from '../utils/helpers/handleError.js';
 
 // Crear un nuevo Item
 export const createItem = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { name, price, imageUrl, itemType } = req.body;
-
-        // Validar imagen
         const validationImage = await validateImageUrl(imageUrl);
+
         if (!validationImage.isValid) {
-            return res.status(400).json({ message: validationImage.message });
-        }
-
-        // Validar existencia del ítem
-        const existingItem = await Item.findOne({ name }).exec();
-        if (existingItem) {
             await session.abortTransaction();
-            return res.status(409).json({ message: 'El ítem ya existe' });
+            return handleError(res, null, session, 400, validationImage.message);
         }
 
-        // Validar existencia del tipo de ítem
-        const existingItemType = await ItemType.findById(itemType).exec();
-        if (!existingItemType) {
+        if (await Item.exists({ name })) {
             await session.abortTransaction();
-            return res.status(409).json({ message: 'El tipo de ítem ingresado no existe' });
+            return handleError(res, null, session, 409, 'El ítem ya existe');
         }
 
-        // Crear y guardar el nuevo ítem
-        const newItem = new Item({
-            name,
-            price,
-            imageUrl,
-            itemType,
-        });
+        if (!await ItemType.exists({ _id: itemType })) {
+            await session.abortTransaction();
+            return handleError(res, null, session, 409, 'El tipo de ítem ingresado no existe');
+        }
 
+        const newItem = new Item({ name, price, imageUrl, itemType });
         await newItem.save({ session });
 
         await session.commitTransaction();
         res.status(201).json({ data: newItem, message: "Ítem creado con éxito" });
-
     } catch (error) {
-        console.error('Error en createItem:', error);
-        await session.abortTransaction();
-        res.status(500).json({ error: "Error al crear el ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al crear el ítem");
     } finally {
-        session.endSession();
+        if (session) {
+            session.endSession();
+        }
     }
 };
-
 
 // Obtener todos los Items
 export const getItems = async (req, res) => {
     try {
         const items = await Item.find()
-            .select("_id name price image isActive itemType")
+            .select("_id name price imageUrl isActive itemType")
             .populate('itemType', 'name')
             .exec();
 
         if (items.length === 0) {
-            return res
-                .status(404)
-                .json({ error: 'No existen ítems' });
+            return res.status(404).json({ error: 'No existen ítems' });
         }
 
-        res
-            .status(200)
-            .json({ data: items, message: "Ítems extraídos con éxito" });
-
+        res.status(200).json({ data: items, message: "Ítems extraídos con éxito" });
     } catch (error) {
-        res
-            .status(500)
-            .json({ error: "Error al obtener los ítems" });
+        handleError(res, error);
     }
 };
 
@@ -85,89 +74,63 @@ export const getItem = async (req, res) => {
     try {
         const { id } = req.params;
         const item = await Item.findById(id)
-            .select("_id name price image isActive itemType")
+            .select("_id name price imageUrl isActive itemType")
             .populate('itemType', 'name')
             .exec();
 
         if (!item) {
-            return res
-                .status(404)
-                .send({ error: "Ítem no encontrado" });
+            return res.status(404).json({ error: "Ítem no encontrado" });
         }
 
-        res
-            .status(200)
-            .json({ data: item, message: "Ítem encontrado" });
-
+        res.status(200).json({ data: item, message: "Ítem encontrado" });
     } catch (error) {
-        res
-            .status(500)
-            .json({ error: "Error al obtener el ítem" });
+        handleError(res, error);
     }
 };
 
 // Actualizar un Item
 export const updateItem = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { id } = req.params;
         const { name, price, imageUrl, itemType } = req.body;
-        const updatedFields = {};
-        if (name) updatedFields.name = name;
-        if (price) updatedFields.price = price;
-        if (imageUrl) updatedFields.imageUrl = imageUrl;
-        if (itemType) updatedFields.itemType = itemType;
+        const updatedFields = { ...(name && { name }), ...(price && { price }), ...(imageUrl && { imageUrl }), ...(itemType && { itemType }) };
 
-        const item = await Item.findById(id).lean();
-        const existingItemType = await ItemType.findById(itemType).exec();
-
-        if (!item) {
+        if (!await Item.exists({ _id: id })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(404)
-                .json({ error: "El ítem no existe" });
+            return handleError(res, null, session, 404, "El ítem no existe");
         }
 
-        const existingItem = await Item.findOne({ name, _id: { $ne: id } });
-
-        if (existingItem) {
+        if (name && await Item.exists({ name, _id: { $ne: id } })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(400)
-                .json({ error: "El nombre del ítem ya existe" });
+            return handleError(res, null, session, 400, "El nombre del ítem ya existe");
         }
 
-        if (!existingItemType) {
+        if (itemType && !await ItemType.exists({ _id: itemType })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(409)
-                .json({ message: 'El tipo de ítem ingresado no existe' });
+            return handleError(res, null, session, 409, 'El tipo de ítem ingresado no existe');
         }
 
-        const itemUpdate = await Item.findByIdAndUpdate(
-            id,
-            { $set: updatedFields },
-            { new: true }
-        ).exec();
+        const updatedItem = await Item.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
 
         await session.commitTransaction();
-        session.endSession();
-
-        res
-            .status(200)
-            .json({ data: itemUpdate, message: "Ítem actualizado con éxito" });
-
+        res.status(200).json({ data: updatedItem, message: "Ítem actualizado con éxito" });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
-        res
-            .status(500)
-            .json({ error: "Error al actualizar el ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al actualizar el ítem");
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };
 
@@ -175,73 +138,54 @@ export const updateItem = async (req, res) => {
 export const updateItemStatus = async (req, res) => {
     try {
         const { _id, isActive } = req.body;
-        const item = await Item.findById(_id).lean();
 
-        if (!item) {
-            return res
-                .status(404)
-                .send({ error: "El ítem no se encuentra registrado" });
+        const updatedItem = await Item.findByIdAndUpdate(_id, { isActive }, { new: true }).lean();
+
+        if (!updatedItem) {
+            return res.status(404).json({ error: "El ítem no se encuentra registrado" });
         }
 
-        const updateItemStatus = await Item.findByIdAndUpdate(
-            _id,
-            { isActive: isActive },
-            { new: true }
-        );
-
-        const successMessage = isActive
-            ? "Ítem activado con éxito"
-            : "Ítem desactivado con éxito";
-
-        res
-            .status(200)
-            .json({ message: successMessage, data: updateItemStatus });
-
+        const successMessage = isActive ? "Ítem activado con éxito" : "Ítem desactivado con éxito";
+        res.status(200).json({ message: successMessage, data: updatedItem });
     } catch (error) {
-        res
-            .status(500)
-            .send({ error: "Error al actualizar el estado del ítem" });
+        handleError(res, error);
     }
 };
 
 // Eliminar un Item
 export const deleteItem = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+
         const { id } = req.params;
-        const item = await Item.findById(id);
-        const checkItemInDetailOrder = await DetailOrder.find({ item: id }).exec();
 
-        if (!item) {
+        if (!await Item.exists({ _id: id })) {
             await session.abortTransaction();
-            session.endSession();
-            return res
-                .status(404)
-                .json({ error: "Ítem no encontrado" });
+            return handleError(res, null, session, 404, "Ítem no encontrado");
         }
 
-        if (checkItemInDetailOrder.length > 0) {
-            return res
-                .status(404)
-                .json({ error: "Existen ítems asociados a este tipo de ítem" });
+        if (await DetailOrder.exists({ item: id })) {
+            await session.abortTransaction();
+            return res.status(409).json({ error: "Existen detalles de orden asociados a este ítem" });
         }
 
-        await Item.findByIdAndDelete(id);
-
+        await Item.findByIdAndDelete(id, { session }).exec();
         await session.commitTransaction();
-        session.endSession();
-
-        res
-            .status(200)
-            .json({ message: "Ítem eliminado con éxito" });
-
+        res.status(200).json({ message: "Ítem eliminado con éxito" });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
-        res
-            .status(500)
-            .json({ error: "Error al eliminar el ítem" });
+        if (session && session.inTransaction()) {
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error al abortar la transacción:', abortError);
+            }
+        }
+        handleError(res, error, session, 500, "Error al eliminar el ítem");
+    } finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };

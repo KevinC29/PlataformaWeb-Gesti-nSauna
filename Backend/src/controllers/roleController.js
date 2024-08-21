@@ -1,236 +1,157 @@
-// import express from 'express';
 import mongoose from 'mongoose';
-import Role from '../models/roleModel.js'
+import Role from '../models/roleModel.js';
+import handleError from '../utils/helpers/handleError.js';
 
 // Crear un nuevo rol
 export const createRole = async (req, res) => {
-  // const errors = validationResult(req);
-  // if (!errors.isEmpty()) {
-  //     return res.status(400).json({ errors: errors.array() });
-  // }
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
-    const { name } = req.body;
-    const existingRole = await Role.findOne({ name }).exec();
+    session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (existingRole) {
+    const { name } = req.body;
+
+    if (await Role.exists({ name })) {
       await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(409)
-        .json({ message: 'El rol ya existe' });
+      return handleError(res, null, session, 409, 'El rol ya existe');
     }
 
-    const newRole = await new Role({
-      name,
-    }).save({ session });
+    const newRole = new Role({ name });
+    await newRole.save({ session });
 
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(201)
-      .json({ data: newRole, message: "Rol creado con éxito" });
-
+    res.status(201).json({ data: newRole, message: "Rol creado con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al crear el rol" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al crear el rol");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
-//Obtener todos los roles
+// Obtener todos los roles
 export const getRoles = async (req, res) => {
   try {
-
-    const roles = await Role.find()
-      .select("_id name isActive")
-      .exec();
-
-    if (roles.length === 0) {
-      return res
-        .status(404)
-        .json({ error: 'No existen roles' });
+    const roles = await Role.find().select("_id name isActive").exec();
+    if (!roles.length) {
+      return res.status(404).json({ error: 'No existen roles' });
     }
-
-    res
-      .status(200)
-      .json({ data: roles, message: "Roles extraídos con éxito" });
-
+    res.status(200).json({ data: roles, message: "Roles extraídos con éxito" });
   } catch (error) {
-
-    res
-      .status(500)
-      .json({ error: "Error al obtener los roles" });
-
+    handleError(res, error);
   }
 };
 
-//Obtener un solo rol
+// Obtener un solo rol
 export const getRole = async (req, res) => {
-
   try {
-
-    const { id } = req.params;
-    const role = await Role.findById(id)
-      .select("_id name isActive").exec();
-
+    const role = await Role.findById(req.params.id).select("_id name isActive").exec();
     if (!role) {
-      return res
-        .status(404)
-        .send({ error: "Rol no encontrado" });
+      return res.status(404).json({ error: "Rol no encontrado" });
     }
-
-    res
-      .status(200)
-      .json({ data: role, message: "Rol encontrado" });
-
+    res.status(200).json({ data: role, message: "Rol encontrado" });
   } catch (error) {
-
-    res
-      .status(500)
-      .json({ error: "Error al obtener el rol" });
-
+    handleError(res, error);
   }
 };
 
-
+// Actualizar un rol
 export const updateRole = async (req, res) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const { id } = req.params;
     const { name } = req.body;
-    const updatedFields = {};
-    if (name) updatedFields.name = name;
-    const role = await Role.findById(id).lean()
 
+    const role = await Role.findById(id).exec();
     if (!role) {
       await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(404)
-        .json({ error: "El rol  no existe" });
+      return handleError(res, null, session, 404, "El rol no existe");
     }
 
-    const existingRole = await Role.findOne({ name, _id: { $ne: id } });
-
-    if (existingRole) {
+    if (name && await Role.exists({ name, _id: { $ne: id } })) {
       await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(400)
-        .json({ error: "No puede repetir el nombre de otro rol creado" });
+      return handleError(res, null, session, 400, "No puede repetir el nombre de otro rol creado");
     }
 
-    const roleUpdate = await Role.findByIdAndUpdate(
-      role._id,
-      { $set: updatedFields },
-      { new: true }
-    );
+    const updatedRole = await Role.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
 
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(200)
-      .json({ data: roleUpdate, message: "Rol actualizado con éxito" });
-
+    res.status(200).json({ data: updatedRole, message: "Rol actualizado con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al actualizar el usuario" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al actualizar el rol");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
 
+// Actualizar el estado de un rol
 export const updateRoleStatus = async (req, res) => {
-
   try {
-
     const { _id, isActive } = req.body;
-    const role = await Role.findById(_id).lean()
+    const role = await Role.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
     if (!role) {
-      return res
-        .status(404)
-        .send({ error: "El rol no se encuentra registrado" });
+      return res.status(404).json({ error: "El rol no se encuentra registrado" });
     }
 
-    const updateRoleStatus = await Role.findByIdAndUpdate(
-      role._id,
-      { isActive: isActive },
-      { new: true }
-    );
-
-    // await logsAudit(req, 'CREATE', 'USER', user, Object.keys(req.body), "Actualizar USER");
-
-    const successMessage = isActive
-      ? "Rol activado con éxito"
-      : "Rol desactivado con éxito";
-
-    res
-      .status(200)
-      .json({ message: successMessage, data: updateRoleStatus });
-
+    const successMessage = isActive ? "Rol activado con éxito" : "Rol desactivado con éxito";
+    res.status(200).json({ message: successMessage, data: role });
   } catch (error) {
-
-    res
-      .status(500)
-      .send({ error: "Error al actualizar el estado del rol" });
-
+    handleError(res, error);
   }
 };
 
-
-//Eliminar rol
+// Eliminar un rol
 export const deleteRole = async (req, res) => {
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const { id } = req.params;
-    const role = await Role.findById(id);
 
+    const role = await Role.findById(id).exec();
     if (!role) {
       await session.abortTransaction();
-      session.endSession();
-      return res
-        .status(404)
-        .json({ error: "Rol no encontrado" });
+      return handleError(res, null, session, 404, "Rol no encontrado");
     }
 
-    await Role.findByIdAndDelete(role._id);
-
-    // await logsAudit(req, 'DELETED', 'USER', userDeleted, "", "Eliminado Físico usuario");
+    await Role.findByIdAndDelete(id, { session }).exec();
+    
     await session.commitTransaction();
-    session.endSession();
-
-    res
-      .status(200)
-      .json({ message: "Rol eliminado con éxito" });
-
+    res.status(200).json({ message: "Rol eliminado con éxito" });
   } catch (error) {
-
-    await session.abortTransaction();
-    session.endSession();
-    res
-      .status(500)
-      .json({ error: "Error al eliminar el rol" });
-
+    if (session && session.inTransaction()) {
+      try {
+        await session.abortTransaction();
+      } catch (abortError) {
+        console.error('Error al abortar la transacción:', abortError);
+      }
+    }
+    handleError(res, error, session, 500, "Error al eliminar el rol");
+  } finally {
+    if (session) {
+      session.endSession();
+    }
   }
 };
