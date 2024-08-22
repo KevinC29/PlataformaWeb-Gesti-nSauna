@@ -1,54 +1,56 @@
 import mongoose from 'mongoose';
 
 export const validateCredentialData = (data) => {
-
-  console.log(data)
-  // Si `data` es null o no es un objeto, retornar false
+  // Si `data` es null o no es un objeto, retornar el error correspondiente
   if (data === null || typeof data !== 'object') {
-    return false;
+    return { isValid: false, message: "Datos inválidos: no es un objeto válido." };
   }
 
   // Validar `email` si está presente: debe ser una cadena de texto no vacía y tener formato de email
   if (data.hasOwnProperty('email')) {
-    if (typeof data.email !== 'string' || data.email.trim().length === 0 || !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(data.email)) {
-      return false;
+    if (
+      typeof data.email !== 'string' ||
+      data.email.trim().length === 0 ||
+      !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(data.email)
+    ) {
+      return { isValid: false, message: "El campo 'Email' debe ser una cadena no vacía con formato de email válido." };
     }
   }
 
-  // Validar `password, new o confirm` si está presente: debe ser una cadena no vacía
+  // Validar `password` si está presente: debe ser una cadena no vacía
   if (data.hasOwnProperty('password')) {
     if (typeof data.password !== 'string' || data.password.trim().length === 0) {
-      return false;
+      return { isValid: false, message: "El campo 'Contraseña' no puede estar vacío." };
     }
   }
 
   // Validar `newPassword` si está presente: debe ser una cadena no vacía
   if (data.hasOwnProperty('newPassword')) {
-    if (typeof data.password !== 'string' || data.password.trim().length === 0) {
-      return false;
+    if (typeof data.newPassword !== 'string' || data.newPassword.trim().length === 0) {
+      return { isValid: false, message: "El campo 'Nueva Contraseña' no puede estar vacío." };
     }
   }
 
-  // Validar `confirmPasword` si está presente: debe ser una cadena no vacía
+  // Validar `confirmPassword` si está presente: debe ser una cadena no vacía
   if (data.hasOwnProperty('confirmPassword')) {
-    if (typeof data.password !== 'string' || data.password.trim().length === 0) {
-      return false;
+    if (typeof data.confirmPassword !== 'string' || data.confirmPassword.trim().length === 0) {
+      return { isValid: false, message: "El campo 'Confirmar Contraseña' no puede estar vacío." };
     }
   }
 
   // Validar `isActive` si está presente: debe ser un booleano
   if (data.hasOwnProperty('isActive')) {
     if (typeof data.isActive !== 'boolean') {
-      return false;
+      return { isValid: false, message: "El campo 'Activo' debe ser un booleano." };
     }
   }
 
   // Validar `user` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('user')) {
     if (!mongoose.Types.ObjectId.isValid(data.user)) {
-      return false;
+      return { isValid: false, message: "El campo 'Usuario' es inválido." };
     }
   }
 
-  return true;
+  return { isValid: true };
 };

@@ -5,11 +5,17 @@ import DetailOrder from '../models/detailOrderModel.js';
 import validateImageUrl from '../validators/validateImage.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateItemData } from '../validators/itemValidate.js';
 
 // Crear un nuevo Item
 export const createItem = async (req, res) => {
     let session;
     try {
+
+        if (!validateItemData(req.body)) {
+            return res.status(400).json({ error: 'Datos del item inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -101,6 +107,11 @@ export const getItem = async (req, res) => {
 export const updateItem = async (req, res) => {
     let session;
     try {
+
+        if (!validateItemData(req.body)) {
+            return res.status(400).json({ error: 'Datos del item inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -154,6 +165,11 @@ export const updateItem = async (req, res) => {
 // Actualizar el estado de un Item
 export const updateItemStatus = async (req, res) => {
     try {
+
+        if (!validateItemData(req.body)) {
+            return res.status(400).json({ error: 'Datos del item inválidos' });
+        }
+
         const { _id, isActive } = req.body;
 
         const updatedItem = await Item.findByIdAndUpdate(_id, { isActive }, { new: true }).lean();

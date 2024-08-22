@@ -1,15 +1,17 @@
 import express from 'express';
-import { createComment,
+import {
+    createComment,
     getComments,
     updateCommentStatus,
-    deleteComment } from '../controllers/commentController.js';
-// const checkAuth = require("../utils/validators/authCheck")
-// const {validateCreateUser} = require('../utils/validators/user.validator')
+    deleteComment
+} from '../controllers/commentController.js';
+import checkAuth from "../utils/helpers/handleAuthCheck.js";
+
 const router = express.Router();
 
-router.post('/', createComment);
-router.get('/', getComments);
-router.post('/isActive', updateCommentStatus);
-router.delete('/:id', deleteComment);
+router.post('/', checkAuth(['ADMIN', 'CLIENT']), createComment);
+router.get('/', checkAuth(['ADMIN']), getComments);
+router.post('/isActive', checkAuth(['ADMIN']), updateCommentStatus);
+router.delete('/:id', checkAuth(['ADMIN']), deleteComment);
 
 export default router;

@@ -14,14 +14,17 @@ const orderSchema = new mongoose.Schema({
     consumptionAccount: {
         type: Number,
         required: true,
+        default: 0.00,
     },
     balance: {
         type: Number,
         required: true,
+        default: 0.00,
     },
     total: {
         type: Number,
         required: true,
+        default: 0.00,
     },
     paymentState: {
         type: String,

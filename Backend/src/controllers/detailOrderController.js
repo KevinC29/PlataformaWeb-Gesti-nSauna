@@ -4,11 +4,17 @@ import Item from '../models/itemModel.js';
 import Order from '../models/orderModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateDetailOrderData } from '../validators/detailOrderValidate.js';
 
 // Crear un nuevo DetailOrder
 export const createDetailOrder = async (req, res) => {
     let session;
     try {
+
+        if (!validateDetailOrderData(req.body)) {
+            return res.status(400).json({ error: 'Datos del detalle de orden inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -32,8 +38,15 @@ export const createDetailOrder = async (req, res) => {
             return handleError(res, null, session, 409, 'El ítem ya existe en esta orden');
         }
 
+        if (!(existingItem.price * cantidad === price)) {
+            await session.abortTransaction();
+            return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
+        }
+
         const newDetailOrder = new DetailOrder({ item, cantidad, price, order });
         await newDetailOrder.save({ session });
+
+        const updateOrder = await Order.findByIdAndUpdate(existingOrder._id, { consumptionAccount: existingOrder.consumptionAccount + price, total: existingOrder.total + price }, { new: true, session }).exec();
 
         // await saveAuditEntry({
         //     eventType: 'CREATE',
@@ -44,7 +57,7 @@ export const createDetailOrder = async (req, res) => {
         //   });
 
         await session.commitTransaction();
-        res.status(201).json({ data: newDetailOrder, message: "Detalle de orden creado con éxito" });
+        res.status(201).json({ data: { newDetailOrder, updateOrder }, message: "Detalle de orden creado con éxito" });
     } catch (error) {
         if (session && session.inTransaction()) {
             try {
@@ -102,27 +115,33 @@ export const getDetailOrder = async (req, res) => {
 export const updateDetailOrder = async (req, res) => {
     let session;
     try {
+
+        if (!validateDetailOrderData(req.body)) {
+            return res.status(400).json({ error: 'Datos del detalle de orden inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
         const { id } = req.params;
-        const { item, cantidad, price } = req.body;
+        const { cantidad, price } = req.body;
 
         const detailOrder = await DetailOrder.findById(id).exec();
+
         if (!detailOrder) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "El detalle de orden no existe");
         }
 
-        const updatedFields = { item, cantidad, price };
-        const existingDetailOrder = await DetailOrder.findOne({ order: detailOrder.order, item }).exec();
-        if (existingDetailOrder && !existingDetailOrder._id.equals(id)) {
+        const updatedFields = { cantidad, price };
+
+        if (!(detailOrder.item.price * cantidad === price)) {
             await session.abortTransaction();
-            return handleError(res, null, session, 409, 'El ítem ya existe en esta orden');
+            return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
         }
 
         const updatedDetailOrder = await DetailOrder.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
-
+        
         // await saveAuditEntry({
         //     eventType: 'UPDATE',
         //     documentId: updatedDetailOrder._id,
@@ -158,10 +177,15 @@ export const deleteDetailOrder = async (req, res) => {
 
         const { id } = req.params;
         const detailOrder = await DetailOrder.findById(id).exec();
+        const order = await Order.findById(detailOrder.order).exec();
         if (!detailOrder) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "Detalle de orden no encontrado");
         }
+
+        const totalEliminate = detailOrder.price*detailOrder.cantidad;
+
+        const updateOrder = await Order.findByIdAndUpdate(order._id, { consumptionAccount: order.consumptionAccount - totalEliminate, total: order.total - totalEliminate }, { new: true, session }).exec();
 
         await DetailOrder.findByIdAndDelete(id, { session });
 
@@ -174,7 +198,7 @@ export const deleteDetailOrder = async (req, res) => {
         //   });
 
         await session.commitTransaction();
-        res.status(200).json({ message: "Detalle de orden eliminado con éxito" });
+        res.status(200).json({ data: updateOrder, message: "Detalle de orden eliminado con éxito" });
     } catch (error) {
         if (session && session.inTransaction()) {
             try {

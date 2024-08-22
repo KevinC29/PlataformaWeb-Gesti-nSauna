@@ -6,11 +6,17 @@ import Credential from '../models/credentialModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 import { encryptPassword } from '../utils/helpers/handlePassword.js';
+import { validateUserData } from '../validators/userValidate.js';
 
-// Crear un nuevo usuario
+// Crear un nuevo Usuario
 export const createUser = async (req, res) => {
   let session;
   try {
+    
+    if (!validateUserData(req.body)) {
+      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -75,7 +81,7 @@ export const createUser = async (req, res) => {
   }
 };
 
-// Obtener todos los usuarios
+// Obtener todos los Usuarios
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -94,7 +100,7 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// Obtener un solo usuario
+// Obtener un solo Usuario
 export const getUser = async (req, res) => {
   try {
     const user = await User.find()
@@ -112,10 +118,15 @@ export const getUser = async (req, res) => {
   }
 };
 
-// Actualizar un usuario
+// Actualizar un Usuario
 export const updateUser = async (req, res) => {
   let session;
   try {
+        
+    if (!validateUserData(req.body)) {
+      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -183,9 +194,14 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Actualizar el estado de un usuario
+// Actualizar el estado de un Usuario
 export const updateUserStatus = async (req, res) => {
   try {
+        
+    if (!validateUserData(req.body)) {
+      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+    }
+
     const { _id, isActive } = req.body;
     const user = await User.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
@@ -200,7 +216,7 @@ export const updateUserStatus = async (req, res) => {
   }
 };
 
-// Eliminar usuario
+// Eliminar Usuario
 export const deleteUser = async (req, res) => {
   let session;
   try {

@@ -4,15 +4,21 @@ import DetailOrder from '../models/detailOrderModel.js';
 import Client from '../models/clientModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateOrderData } from '../validators/orderValidate.js';
 
 // Crear una nueva Orden
 export const createOrder = async (req, res) => {
     let session;
     try {
+
+        if (!validateOrderData(req.body)) {
+            return res.status(400).json({ error: 'Datos de la orden inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { dateOrder, numberOrder, consumptionAccount, balance, total, paymentState, client } = req.body;
+        const { dateOrder, numberOrder, client } = req.body;
 
         if (!await Client.exists({ _id: client })) {
             await session.abortTransaction();
@@ -22,9 +28,9 @@ export const createOrder = async (req, res) => {
         if (await Order.exists({ numberOrder })) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El numero de orden ya existe');
-          }
+        }
 
-        const newOrder = new Order({ dateOrder, numberOrder, consumptionAccount, balance, total, paymentState, client });
+        const newOrder = new Order({ dateOrder, numberOrder, client });
         await newOrder.save({ session });
 
         // await saveAuditEntry({
@@ -102,6 +108,7 @@ export const getOrder = async (req, res) => {
     }
 };
 
+// Obtener Órdenes por rango de fechas
 export const getOrdersByDate = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
@@ -140,6 +147,11 @@ export const getOrdersByDate = async (req, res) => {
 export const updateOrder = async (req, res) => {
     let session;
     try {
+
+        if (!validateOrderData(req.body)) {
+            return res.status(400).json({ error: 'Datos de la orden inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -150,6 +162,19 @@ export const updateOrder = async (req, res) => {
         if (!order) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "La orden no existe");
+        }
+
+        const detallesOrden = await DetailOrder.find({ order: id }).exec();
+        if (detallesOrden.length === 0) {
+            await session.abortTransaction();
+            return handleError(res, null, session, 404, "No se encontraron detalles de orden asociados a esta orden");
+        }
+
+        const totalSum = detallesOrden.reduce((total, detalle) => total + detalle.price, 0);
+
+        if (totalSum !== consumptionAccount || consumptionAccount !== total) {
+            await session.abortTransaction();
+            return res.status(409).json({ error: "Error en el total de la orden" }); // Código 409 es más apropiado para conflictos de estado
         }
 
         const updatedFields = { consumptionAccount, balance, total, paymentState };
@@ -165,6 +190,7 @@ export const updateOrder = async (req, res) => {
 
         await session.commitTransaction();
         res.status(200).json({ data: updatedOrder, message: "Orden actualizada con éxito" });
+
     } catch (error) {
         if (session && session.inTransaction()) {
             try {

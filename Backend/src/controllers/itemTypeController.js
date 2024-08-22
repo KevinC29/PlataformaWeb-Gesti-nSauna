@@ -4,11 +4,17 @@ import Section from '../models/sectionModel.js';
 import Item from '../models/itemModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateItemTypeData } from '../validators/itemTypeValidate.js';
 
 // Crear un nuevo ItemType
 export const createItemType = async (req, res) => {
     let session;
     try {
+
+        if (!validateItemTypeData(req.body)) {
+            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -93,6 +99,11 @@ export const getItemType = async (req, res) => {
 export const updateItemType = async (req, res) => {
     let session;
     try {
+
+        if (!validateItemTypeData(req.body)) {
+            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -149,6 +160,11 @@ export const updateItemType = async (req, res) => {
 // Actualizar el estado de un ItemType
 export const updateItemTypeStatus = async (req, res) => {
     try {
+                
+        if (!validateItemTypeData(req.body)) {
+            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+        }
+
         const { _id, isActive } = req.body;
 
         const updatedItemType = await ItemType.findByIdAndUpdate(

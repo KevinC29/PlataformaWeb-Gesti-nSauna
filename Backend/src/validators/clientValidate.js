@@ -1,16 +1,15 @@
 import mongoose from "mongoose";
 
 export const validateClientData = (data) => {
-  console.log(data);
-  // Si `data` es null o no es un objeto, retornar false
+  // Si `data` es null o no es un objeto, retornar el error correspondiente
   if (data === null || typeof data !== "object") {
-    return false;
+    return { isValid: false, message: "Datos inválidos: no es un objeto válido." };
   }
 
   // Validar `account` si está presente: debe ser un número válido
   if (data.hasOwnProperty("account")) {
     if (typeof data.account !== "number" || isNaN(data.account)) {
-      return false;
+      return { isValid: false, message: "El campo 'Cuenta' debe ser un número válido." };
     }
   }
 
@@ -21,16 +20,16 @@ export const validateClientData = (data) => {
       typeof data.accountState !== "string" ||
       !validStates.includes(data.accountState)
     ) {
-      return false;
+      return { isValid: false, message: "El campo 'Estado de Cuenta' debe ser 'Pagado' o 'Pendiente'." };
     }
   }
 
   // Validar `user` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty("user")) {
     if (!mongoose.Types.ObjectId.isValid(data.user)) {
-      return false;
+      return { isValid: false, message: "El campo 'Usuario' es inválido." };
     }
   }
 
-  return true;
+  return { isValid: true };
 };

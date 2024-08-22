@@ -1,11 +1,13 @@
 import express from 'express';
-import { updateCredentialPassword,
-    updateCredentialStatus } from '../controllers/credentialController.js';
-// const checkAuth = require("../utils/validators/authCheck")
-// const {validateCreateUser} = require('../utils/validators/user.validator')
+import {
+    updateCredentialPassword,
+    updateCredentialStatus
+} from '../controllers/credentialController.js';
+import checkAuth from "../utils/helpers/handleAuthCheck.js";
+
 const router = express.Router();
 
-router.put('/:id', updateCredentialPassword);
-router.post('/isActive', updateCredentialStatus);
+router.put('/:id', checkAuth(['ADMIN']), updateCredentialPassword);
+router.post('/isActive', checkAuth(['ADMIN']), updateCredentialStatus);
 
 export default router; 

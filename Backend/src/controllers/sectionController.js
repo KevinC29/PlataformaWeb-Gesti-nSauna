@@ -4,14 +4,12 @@ import ItemType from '../models/itemTypeModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 import { validateSectionData } from '../validators/sectionValidate.js';
-import { generateStrongPassword } from '../utils/helpers/handlePassword.js';
 
-// Crear una nueva sección
+// Crear una nueva Sección
 export const createSection = async (req, res) => {
   let session;
   try {
 
-    // Validar los datos de la sección
     if (!validateSectionData(req.body)) {
       return res.status(400).json({ error: 'Datos de la sección inválidos' });
     }
@@ -54,7 +52,7 @@ export const createSection = async (req, res) => {
   }
 };
 
-// Obtener todas las secciones
+// Obtener todas las Secciones
 export const getSections = async (req, res) => {
   try {
     const sections = await Section.find().select("_id name isActive").exec();
@@ -67,7 +65,7 @@ export const getSections = async (req, res) => {
   }
 };
 
-// Obtener una sola sección
+// Obtener una sola Sección
 export const getSection = async (req, res) => {
   try {
     const section = await Section.findById(req.params.id).select("_id name isActive").exec();
@@ -80,12 +78,11 @@ export const getSection = async (req, res) => {
   }
 };
 
-// Actualizar una sección
+// Actualizar una Sección
 export const updateSection = async (req, res) => {
   let session;
   try {
 
-    // Validar los datos de la sección
     if (!validateSectionData(req.body)) {
       return res.status(400).json({ error: 'Datos de la sección inválidos' });
     }
@@ -133,11 +130,10 @@ export const updateSection = async (req, res) => {
   }
 };
 
-// Actualizar el estado de una sección
+// Actualizar el estado de una Sección
 export const updateSectionStatus = async (req, res) => {
   try {
 
-    // Validar los datos de la sección
     if (!validateSectionData(req.body)) {
       return res.status(400).json({ error: 'Datos de la sección inválidos' });
     }
@@ -156,7 +152,7 @@ export const updateSectionStatus = async (req, res) => {
   }
 };
 
-// Eliminar sección
+// Eliminar Sección
 export const deleteSection = async (req, res) => {
   let session;
   try {

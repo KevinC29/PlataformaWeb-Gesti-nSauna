@@ -3,11 +3,17 @@ import Comment from '../models/commentModel.js';
 import Client from '../models/clientModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateCommentData } from '../validators/commentValidate.js';
 
 // Crear un nuevo Comentario
 export const createComment = async (req, res) => {
     let session;
     try {
+
+        if (!validateCommentData(req.body)) {
+            return res.status(400).json({ error: 'Datos del comentario inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -71,9 +77,14 @@ export const getComments = async (req, res) => {
     }
 };
 
-// Actualizar el estado de un comentario
+// Actualizar el estado de un Comentario
 export const updateCommentStatus = async (req, res) => {
     try {
+
+        if (!validateCommentData(req.body)) {
+            return res.status(400).json({ error: 'Datos del comentario inválidos' });
+        }
+
         const { _id, isActive } = req.body;
         const comment = await Comment.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
@@ -87,7 +98,6 @@ export const updateCommentStatus = async (req, res) => {
         handleError(res, error);
     }
 };
-
 
 // Eliminar un Comentario
 export const deleteComment = async (req, res) => {

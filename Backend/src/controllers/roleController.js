@@ -2,11 +2,17 @@ import mongoose from 'mongoose';
 import Role from '../models/roleModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateRoleData } from '../validators/roleValidate.js';
 
-// Crear un nuevo rol
+// Crear un nuevo Rol
 export const createRole = async (req, res) => {
   let session;
   try {
+
+    if (!validateRoleData(req.body)) {
+      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -46,7 +52,7 @@ export const createRole = async (req, res) => {
   }
 };
 
-// Obtener todos los roles
+// Obtener todos los Roles
 export const getRoles = async (req, res) => {
   try {
     const roles = await Role.find().select("_id name isActive").exec();
@@ -59,7 +65,7 @@ export const getRoles = async (req, res) => {
   }
 };
 
-// Obtener un solo rol
+// Obtener un solo Rol
 export const getRole = async (req, res) => {
   try {
     const role = await Role.findById(req.params.id).select("_id name isActive").exec();
@@ -72,10 +78,15 @@ export const getRole = async (req, res) => {
   }
 };
 
-// Actualizar un rol
+// Actualizar un Rol
 export const updateRole = async (req, res) => {
   let session;
   try {
+
+    if (!validateRoleData(req.body)) {
+      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -121,9 +132,14 @@ export const updateRole = async (req, res) => {
   }
 };
 
-// Actualizar el estado de un rol
+// Actualizar el estado de un Rol
 export const updateRoleStatus = async (req, res) => {
   try {
+
+    if (!validateRoleData(req.body)) {
+      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    }
+
     const { _id, isActive } = req.body;
     const role = await Role.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
@@ -138,7 +154,7 @@ export const updateRoleStatus = async (req, res) => {
   }
 };
 
-// Eliminar un rol
+// Eliminar un Rol
 export const deleteRole = async (req, res) => {
   let session;
   try {
@@ -162,7 +178,7 @@ export const deleteRole = async (req, res) => {
     //   userId: req.currentUser._id,
     //   changes: generateChanges(role.toObject(), null)
     // });
-    
+
     await session.commitTransaction();
     res.status(200).json({ message: "Rol eliminado con éxito" });
   } catch (error) {

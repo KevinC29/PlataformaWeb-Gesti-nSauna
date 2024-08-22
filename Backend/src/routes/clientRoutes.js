@@ -1,17 +1,19 @@
 import express from 'express';
-import { createClient,
+import {
+    createClient,
     getClients,
-    getClient, 
+    getClient,
     updateClient,
-    deleteClient } from '../controllers/ClientController.js';
-// const checkAuth = require("../utils/validators/authCheck")
-// const {validateCreateUser} = require('../utils/validators/user.validator')
+    deleteClient
+} from '../controllers/ClientController.js';
+import checkAuth from "../utils/helpers/handleAuthCheck.js";
+
 const router = express.Router();
 
-router.post('/', createClient);
-router.get('/', getClients);
-router.get('/:id', getClient);
-router.put('/:id', updateClient);
-router.delete('/:id', deleteClient);
+router.post('/', checkAuth(['ADMIN', 'CASHIER']), createClient);
+router.get('/', checkAuth(['ADMIN', 'CASHIER']), getClients);
+router.get('/:id', checkAuth(['ADMIN', 'CASHIER']), getClient);
+router.put('/:id', checkAuth(['ADMIN', 'CASHIER']), updateClient);
+router.delete('/:id', checkAuth(['ADMIN']), deleteClient);
 
 export default router; 

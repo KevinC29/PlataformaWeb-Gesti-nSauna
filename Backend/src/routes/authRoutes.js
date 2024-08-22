@@ -1,8 +1,9 @@
 import express from 'express';
-import { login,
-    resetPassword } from '../controllers/authController.js';
-// const checkAuth = require("../utils/validators/authCheck")
-// const {validateCreateUser} = require('../utils/validators/user.validator')
+import {
+    login,
+    resetPassword
+} from '../controllers/authController.js';
+
 const router = express.Router();
 
 router.post('/login', login);

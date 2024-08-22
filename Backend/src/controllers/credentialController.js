@@ -2,11 +2,17 @@ import mongoose from 'mongoose';
 import Credential from '../models/credentialModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { encryptPassword, verifyPassword } from '../utils/helpers/handlePassword.js';
+import { validateCredentialData } from '../validators/credentialValidate.js';
 
 // Actualizar una credencial
 export const updateCredentialPassword = async (req, res) => {
   let session;
   try {
+
+    if (!validateCredentialData(req.body)) {
+      return res.status(400).json({ error: 'Datos de la credencial inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -66,17 +72,22 @@ export const updateCredentialPassword = async (req, res) => {
 // Actualizar el estado de una credencial
 export const updateCredentialStatus = async (req, res) => {
   try {
-      const { _id, isActive } = req.body;
-      const credential = await Credential.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
-      if (!credential) {
-          return res.status(404).json({ error: "La credencial no se encuentra registrado" });
-      }
+    if (!validateCredentialData(req.body)) {
+      return res.status(400).json({ error: 'Datos de la credencial inválidos' });
+    }
 
-      const successMessage = isActive ? "Credencial activada con éxito" : "Credencial desactivada con éxito";
-      res.status(200).json({ message: successMessage, data: credential });
+    const { _id, isActive } = req.body;
+    const credential = await Credential.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
+
+    if (!credential) {
+      return res.status(404).json({ error: "La credencial no se encuentra registrado" });
+    }
+
+    const successMessage = isActive ? "Credencial activada con éxito" : "Credencial desactivada con éxito";
+    res.status(200).json({ message: successMessage, data: credential });
   } catch (error) {
-      handleError(res, error);
+    handleError(res, error);
   }
 };
 

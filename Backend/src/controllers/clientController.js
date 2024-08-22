@@ -4,11 +4,17 @@ import User from '../models/userModel.js';
 import Order from '../models/orderModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateClientData } from '../validators/clientValidate.js';
 
 // Crear un nuevo cliente
 export const createClient = async (req, res) => {
     let session;
     try {
+
+        if (!validateClientData(req.body)) {
+            return res.status(400).json({ error: 'Datos del cliente inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -88,6 +94,11 @@ export const getClient = async (req, res) => {
 export const updateClient = async (req, res) => {
     let session;
     try {
+
+        if (!validateClientData(req.body)) {
+            return res.status(400).json({ error: 'Datos del cliente inválidos' });
+        }
+
         session = await mongoose.startSession();
         session.startTransaction();
 
@@ -129,7 +140,7 @@ export const updateClient = async (req, res) => {
     }
 };
 
-// Eliminar un cliente
+// Eliminar un Cliente
 export const deleteClient = async (req, res) => {
     let session;
     try {

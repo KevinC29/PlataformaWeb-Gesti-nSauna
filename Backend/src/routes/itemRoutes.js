@@ -1,19 +1,21 @@
 import express from 'express';
-import { createItem, 
-    getItems, 
-    getItem, 
-    updateItem, 
-    deleteItem, 
-    updateItemStatus } from '../controllers/itemController.js';
-// const checkAuth = require("../utils/validators/authCheck")
-// const {validateCreateUser} = require('../utils/validators/user.validator')
+import {
+    createItem,
+    getItems,
+    getItem,
+    updateItem,
+    deleteItem,
+    updateItemStatus
+} from '../controllers/itemController.js';
+import checkAuth from "../utils/helpers/handleAuthCheck.js";
+
 const router = express.Router();
 
-router.post('/', createItem);
-router.get('/', getItems);
-router.get('/:id', getItem);
-router.put('/:id', updateItem);
-router.post('/isActive', updateItemStatus);
-router.delete('/:id', deleteItem);
+router.post('/', checkAuth(['ADMIN']), createItem);
+router.get('/', checkAuth(['ADMIN']), getItems);
+router.get('/:id', checkAuth(['ADMIN']), getItem);
+router.put('/:id', checkAuth(['ADMIN']), updateItem);
+router.post('/isActive', checkAuth(['ADMIN']), updateItemStatus);
+router.delete('/:id', checkAuth(['ADMIN']), deleteItem);
 
 export default router; 
