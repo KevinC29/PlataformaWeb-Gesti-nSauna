@@ -3,6 +3,7 @@ import ItemType from '../models/itemTypeModel.js';
 import Section from '../models/sectionModel.js';
 import Item from '../models/itemModel.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear un nuevo ItemType
 export const createItemType = async (req, res) => {
@@ -25,6 +26,14 @@ export const createItemType = async (req, res) => {
 
         const newItemType = new ItemType({ name, description, section });
         await newItemType.save({ session });
+
+        // await saveAuditEntry({
+        //     eventType: 'CREATE',
+        //     documentId: newItemType._id,
+        //     documentCollection: 'ItemType',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(null, newItemType.toObject(), true)
+        //   });
 
         await session.commitTransaction();
         res.status(201).json({ data: newItemType, message: "Tipo de ítem creado con éxito" });
@@ -111,6 +120,14 @@ export const updateItemType = async (req, res) => {
             { new: true, session }
         ).exec();
 
+        // await saveAuditEntry({
+        //     eventType: 'UPDATE',
+        //     documentId: updatedItemType._id,
+        //     documentCollection: 'ItemType',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(oldItemType.toObject(), updatedItemType.toObject())
+        //   });
+
         await session.commitTransaction();
         res.status(200).json({ data: updatedItemType, message: "Tipo de ítem actualizado con éxito" });
     } catch (error) {
@@ -162,8 +179,8 @@ export const deleteItemType = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-
-        if (!await ItemType.exists({ _id: id })) {
+        const itemType = await ItemType.findById(id).exec();
+        if (!itemType) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "Tipo de ítem no encontrado");
         }
@@ -174,6 +191,15 @@ export const deleteItemType = async (req, res) => {
         }
 
         await ItemType.findByIdAndDelete(id, { session }).exec();
+
+        // await saveAuditEntry({
+        //     eventType: 'DELETE',
+        //     documentId: id,
+        //     documentCollection: 'ItemType',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(itemType.toObject(), null)
+        //   });
+
         await session.commitTransaction();
         res.status(200).json({ message: "Tipo de ítem eliminado con éxito" });
     } catch (error) {

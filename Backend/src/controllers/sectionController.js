@@ -2,12 +2,20 @@ import mongoose from 'mongoose';
 import Section from '../models/sectionModel.js';
 import ItemType from '../models/itemTypeModel.js';
 import handleError from '../utils/helpers/handleError.js';
-import handleAudit from '../utils/helpers/handleAudit.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
+import { validateSectionData } from '../validators/sectionValidate.js';
+import { generateStrongPassword } from '../utils/helpers/handlePassword.js';
 
 // Crear una nueva sección
 export const createSection = async (req, res) => {
   let session;
   try {
+
+    // Validar los datos de la sección
+    if (!validateSectionData(req.body)) {
+      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -19,6 +27,14 @@ export const createSection = async (req, res) => {
 
     const newSection = new Section({ name });
     await newSection.save({ session });
+
+    // await saveAuditEntry({
+    //   eventType: 'CREATE',
+    //   documentId: newSection._id,
+    //   documentCollection: 'Section',
+    //   userId: req.currentUser,
+    //   changes: generateChanges(null, newSection.toObject(), true)
+    // });
 
     await session.commitTransaction();
     res.status(201).json({ data: newSection, message: "Sección creada con éxito" });
@@ -68,6 +84,12 @@ export const getSection = async (req, res) => {
 export const updateSection = async (req, res) => {
   let session;
   try {
+
+    // Validar los datos de la sección
+    if (!validateSectionData(req.body)) {
+      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    }
+
     session = await mongoose.startSession();
     session.startTransaction();
 
@@ -84,6 +106,14 @@ export const updateSection = async (req, res) => {
     }
 
     const updatedSection = await Section.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
+
+    // await saveAuditEntry({
+    //   eventType: 'UPDATE',
+    //   documentId: updatedSection._id,
+    //   documentCollection: 'Section',
+    //   userId: req.currentUser,
+    //   changes: generateChanges(section.toObject(), updatedSection.toObject())
+    // });
 
     await session.commitTransaction();
     res.status(200).json({ data: updatedSection, message: "Sección actualizada con éxito" });
@@ -106,6 +136,12 @@ export const updateSection = async (req, res) => {
 // Actualizar el estado de una sección
 export const updateSectionStatus = async (req, res) => {
   try {
+
+    // Validar los datos de la sección
+    if (!validateSectionData(req.body)) {
+      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    }
+
     const { _id, isActive } = req.body;
     const section = await Section.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
@@ -139,6 +175,15 @@ export const deleteSection = async (req, res) => {
     }
 
     await Section.findByIdAndDelete(id, { session }).exec();
+
+    // await saveAuditEntry({
+    //   eventType: 'DELETE',
+    //   documentId: section._id,
+    //   documentCollection: 'Section',
+    //   userId: req.currentUser,
+    //   changes: generateChanges(section.toObject(), null)
+    // });
+    
 
     await session.commitTransaction();
     res.status(200).json({ message: "Sección eliminada con éxito" });

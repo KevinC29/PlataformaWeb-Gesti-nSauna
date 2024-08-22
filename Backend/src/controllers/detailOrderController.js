@@ -3,6 +3,7 @@ import DetailOrder from '../models/detailOrderModel.js';
 import Item from '../models/itemModel.js';
 import Order from '../models/orderModel.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear un nuevo DetailOrder
 export const createDetailOrder = async (req, res) => {
@@ -33,6 +34,14 @@ export const createDetailOrder = async (req, res) => {
 
         const newDetailOrder = new DetailOrder({ item, cantidad, price, order });
         await newDetailOrder.save({ session });
+
+        // await saveAuditEntry({
+        //     eventType: 'CREATE',
+        //     documentId: newDetailOrder._id,
+        //     documentCollection: 'DetailOrder',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(null, newDetailOrder.toObject(), true)
+        //   });
 
         await session.commitTransaction();
         res.status(201).json({ data: newDetailOrder, message: "Detalle de orden creado con éxito" });
@@ -114,6 +123,14 @@ export const updateDetailOrder = async (req, res) => {
 
         const updatedDetailOrder = await DetailOrder.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
 
+        // await saveAuditEntry({
+        //     eventType: 'UPDATE',
+        //     documentId: updatedDetailOrder._id,
+        //     documentCollection: 'DetailOrder',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(oldDetailOrder, updatedDetailOrder.toObject())
+        //   });
+
         await session.commitTransaction();
         res.status(200).json({ data: updatedDetailOrder, message: "Detalle de orden actualizado con éxito" });
     } catch (error) {
@@ -147,6 +164,14 @@ export const deleteDetailOrder = async (req, res) => {
         }
 
         await DetailOrder.findByIdAndDelete(id, { session });
+
+        // await saveAuditEntry({
+        //     eventType: 'DELETE',
+        //     documentId: id,
+        //     documentCollection: 'DetailOrder',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(detailOrder.toObject(), null)
+        //   });
 
         await session.commitTransaction();
         res.status(200).json({ message: "Detalle de orden eliminado con éxito" });

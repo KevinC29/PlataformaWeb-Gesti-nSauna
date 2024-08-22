@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Comment from '../models/commentModel.js';
 import Client from '../models/clientModel.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear un nuevo Comentario
 export const createComment = async (req, res) => {
@@ -19,6 +20,14 @@ export const createComment = async (req, res) => {
 
         const newComment = new Comment({ date, message, client });
         await newComment.save({ session });
+
+        // await saveAuditEntry({
+        //     eventType: 'CREATE',
+        //     documentId: newComment._id,
+        //     documentCollection: 'Comment',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(null, newComment.toObject(), true)
+        // });
 
         await session.commitTransaction();
         res.status(201).json({ data: newComment, message: "Comentario creado con éxito" });
@@ -62,6 +71,24 @@ export const getComments = async (req, res) => {
     }
 };
 
+// Actualizar el estado de un comentario
+export const updateCommentStatus = async (req, res) => {
+    try {
+        const { _id, isActive } = req.body;
+        const comment = await Comment.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
+
+        if (!comment) {
+            return res.status(404).json({ error: "El comentario no se encuentra registrado" });
+        }
+
+        const successMessage = isActive ? "Comentario activado con éxito" : "Comentario desactivado con éxito";
+        res.status(200).json({ message: successMessage, data: comment });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+
 // Eliminar un Comentario
 export const deleteComment = async (req, res) => {
     let session;
@@ -77,6 +104,14 @@ export const deleteComment = async (req, res) => {
         }
 
         await Comment.findByIdAndDelete(id, { session });
+
+        // await saveAuditEntry({
+        //     eventType: 'DELETE',
+        //     documentId: id,
+        //     documentCollection: 'Comment',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(comment.toObject(), null)
+        // });
 
         await session.commitTransaction();
         res.status(200).json({ message: "Comentario eliminado con éxito" });

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Role from '../models/roleModel.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear un nuevo rol
 export const createRole = async (req, res) => {
@@ -18,6 +19,14 @@ export const createRole = async (req, res) => {
 
     const newRole = new Role({ name });
     await newRole.save({ session });
+
+    // await saveAuditEntry({
+    //   eventType: 'CREATE',
+    //   documentId: newRole._id,
+    //   documentCollection: 'Role',
+    //   userId: req.currentUser,
+    //   changes: generateChanges(null, newRole.toObject(), true)
+    // });
 
     await session.commitTransaction();
     res.status(201).json({ data: newRole, message: "Rol creado con éxito" });
@@ -86,6 +95,14 @@ export const updateRole = async (req, res) => {
 
     const updatedRole = await Role.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
 
+    // await saveAuditEntry({
+    //   eventType: 'UPDATE',
+    //   documentId: updatedRole._id,
+    //   documentCollection: 'Role',
+    //   userId: req.currentUser,
+    //   changes: generateChanges(role.toObject(), updatedRole.toObject())
+    // });
+
     await session.commitTransaction();
     res.status(200).json({ data: updatedRole, message: "Rol actualizado con éxito" });
   } catch (error) {
@@ -137,6 +154,14 @@ export const deleteRole = async (req, res) => {
     }
 
     await Role.findByIdAndDelete(id, { session }).exec();
+
+    // await saveAuditEntry({
+    //   eventType: 'DELETE',
+    //   documentId: role._id,
+    //   documentCollection: 'Role',
+    //   userId: req.currentUser._id,
+    //   changes: generateChanges(role.toObject(), null)
+    // });
     
     await session.commitTransaction();
     res.status(200).json({ message: "Rol eliminado con éxito" });

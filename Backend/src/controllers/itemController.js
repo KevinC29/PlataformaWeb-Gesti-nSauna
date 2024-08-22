@@ -4,6 +4,7 @@ import ItemType from '../models/itemTypeModel.js';
 import DetailOrder from '../models/detailOrderModel.js';
 import validateImageUrl from '../validators/validateImage.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear un nuevo Item
 export const createItem = async (req, res) => {
@@ -32,6 +33,14 @@ export const createItem = async (req, res) => {
 
         const newItem = new Item({ name, price, imageUrl, itemType });
         await newItem.save({ session });
+
+        // await saveAuditEntry({
+        //     eventType: 'CREATE',
+        //     documentId: newItem._id,
+        //     documentCollection: 'Item',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(null, newItem.toObject(), true)
+        //   });
 
         await session.commitTransaction();
         res.status(201).json({ data: newItem, message: "Ítem creado con éxito" });
@@ -116,6 +125,14 @@ export const updateItem = async (req, res) => {
 
         const updatedItem = await Item.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
 
+        // await saveAuditEntry({
+        //     eventType: 'UPDATE',
+        //     documentId: updatedItem._id,
+        //     documentCollection: 'Item',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(oldItem, updatedItem.toObject())
+        //   });
+
         await session.commitTransaction();
         res.status(200).json({ data: updatedItem, message: "Ítem actualizado con éxito" });
     } catch (error) {
@@ -160,8 +177,8 @@ export const deleteItem = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-
-        if (!await Item.exists({ _id: id })) {
+        const item = await Item.findById(id).exec();
+        if (!item) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "Ítem no encontrado");
         }
@@ -172,6 +189,15 @@ export const deleteItem = async (req, res) => {
         }
 
         await Item.findByIdAndDelete(id, { session }).exec();
+
+        // await saveAuditEntry({
+        //     eventType: 'DELETE',
+        //     documentId: id,
+        //     documentCollection: 'Item',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(item.toObject(), null)
+        //   });
+
         await session.commitTransaction();
         res.status(200).json({ message: "Ítem eliminado con éxito" });
     } catch (error) {

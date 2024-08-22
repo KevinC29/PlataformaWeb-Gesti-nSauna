@@ -3,6 +3,7 @@ import Order from '../models/orderModel.js';
 import DetailOrder from '../models/detailOrderModel.js';
 import Client from '../models/clientModel.js';
 import handleError from '../utils/helpers/handleError.js';
+import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 
 // Crear una nueva Orden
 export const createOrder = async (req, res) => {
@@ -13,14 +14,26 @@ export const createOrder = async (req, res) => {
 
         const { dateOrder, numberOrder, consumptionAccount, balance, total, paymentState, client } = req.body;
 
-        // Validaciones adicionales si son necesarias
         if (!await Client.exists({ _id: client })) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El cliente ingresado no existe');
         }
 
+        if (await Order.exists({ numberOrder })) {
+            await session.abortTransaction();
+            return handleError(res, null, session, 409, 'El numero de orden ya existe');
+          }
+
         const newOrder = new Order({ dateOrder, numberOrder, consumptionAccount, balance, total, paymentState, client });
         await newOrder.save({ session });
+
+        // await saveAuditEntry({
+        //     eventType: 'CREATE',
+        //     documentId: newOrder._id,
+        //     documentCollection: 'Order',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(null, newOrder.toObject(), true)
+        //   });
 
         await session.commitTransaction();
         res.status(201).json({ data: newOrder, message: "Orden creada con éxito" });
@@ -131,7 +144,7 @@ export const updateOrder = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-        const { dateOrder, numberOrder, consumptionAccount, balance, total, paymentState } = req.body;
+        const { consumptionAccount, balance, total, paymentState } = req.body;
 
         const order = await Order.findById(id).exec();
         if (!order) {
@@ -139,8 +152,16 @@ export const updateOrder = async (req, res) => {
             return handleError(res, null, session, 404, "La orden no existe");
         }
 
-        const updatedFields = { dateOrder, numberOrder, consumptionAccount, balance, total, paymentState };
+        const updatedFields = { consumptionAccount, balance, total, paymentState };
         const updatedOrder = await Order.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
+
+        // await saveAuditEntry({
+        //     eventType: 'UPDATE',
+        //     documentId: updatedOrder._id,
+        //     documentCollection: 'Order',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(order.toObject(), updatedOrder.toObject())
+        // });
 
         await session.commitTransaction();
         res.status(200).json({ data: updatedOrder, message: "Orden actualizada con éxito" });
@@ -181,6 +202,13 @@ export const deleteOrder = async (req, res) => {
 
         await Order.findByIdAndDelete(id, { session });
 
+        // await saveAuditEntry({
+        //     eventType: 'DELETE',
+        //     documentId: order._id,
+        //     documentCollection: 'Order',
+        //     userId: req.currentUser,
+        //     changes: generateChanges(order.toObject(), null)
+        //   });
 
         await session.commitTransaction();
         res.status(200).json({ message: "Orden eliminada con éxito" });

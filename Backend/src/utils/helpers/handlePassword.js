@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 
 export const generateStrongPassword = () => {
-    return crypto.randomBytes(16).toString('hex'); // Genera una contraseña hexadecimal de 32 caracteres
+    return crypto.randomBytes(32).toString('hex'); // Genera una contraseña hexadecimal de 32 caracteres
 };
 
 export const encryptPassword = async (password) => {
