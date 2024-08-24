@@ -15,7 +15,12 @@ export const validateItemData = (data) => {
 
   // Validar `price` si está presente: debe ser un número válido
   if (data.hasOwnProperty('price')) {
-    if (typeof data.price !== 'number' || isNaN(data.price) || data.price <= 0) {
+    if (
+      typeof data.price !== 'number' ||
+      isNaN(data.price) ||
+      data.price <= 0 ||
+      !/^\d+(\.\d{1,2})?$/.test(data.price.toString())
+    ) {
       return { isValid: false, message: "El campo 'Precio' debe ser un número válido y mayor a cero." };
     }
   }
@@ -36,14 +41,14 @@ export const validateItemData = (data) => {
 
   // Validar `itemType` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('itemType')) {
-    if (!mongoose.Types.ObjectId.isValid(data.itemType)) {
+    if (!mongoose.Types.ObjectId.isValid(data.itemType) || typeof data.itemType !== 'string') {
       return { isValid: false, message: "El campo 'Tipo de ítem' es inválido." };
     }
   }
 
   // Validar `_id` si está presente: debe ser un ID de MongoDB válido
   if (data.hasOwnProperty('_id')) {
-    if (!mongoose.Types.ObjectId.isValid(data._id)) {
+    if (!mongoose.Types.ObjectId.isValid(data._id) || typeof data._id !== 'string') {
       return { isValid: false, message: "El campo 'ID' es inválido." };
     }
   }

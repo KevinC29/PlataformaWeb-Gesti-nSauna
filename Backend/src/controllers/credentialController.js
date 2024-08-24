@@ -9,8 +9,10 @@ export const updateCredentialPassword = async (req, res) => {
   let session;
   try {
 
-    if (!validateCredentialData(req.body)) {
-      return res.status(400).json({ error: 'Datos de la credencial inválidos' });
+    const validationResult = validateCredentialData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -19,7 +21,8 @@ export const updateCredentialPassword = async (req, res) => {
     const { id } = req.params;
     const { password, newPassword, confirmPassword } = req.body;
 
-    const credential = await Credential.findById(id).exec();
+    const credential = await Credential.findOne({ user: id }).exec();
+
     if (!credential) {
       await session.abortTransaction();
       return handleError(res, null, session, 404, 'Credencial no encontrada');
@@ -41,7 +44,7 @@ export const updateCredentialPassword = async (req, res) => {
       updatedFields.password = await encryptPassword(newPassword);
     }
 
-    const updatedCredential = await Credential.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
+    const updatedCredential = await Credential.findByIdAndUpdate(credential._id, { $set: updatedFields }, { new: true, session }).exec();
 
     // await saveAuditEntry({
     //   eventType: 'UPDATE',
@@ -73,16 +76,21 @@ export const updateCredentialPassword = async (req, res) => {
 export const updateCredentialStatus = async (req, res) => {
   try {
 
-    if (!validateCredentialData(req.body)) {
-      return res.status(400).json({ error: 'Datos de la credencial inválidos' });
+    const validationResult = validateCredentialData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { _id, isActive } = req.body;
-    const credential = await Credential.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
+    
+    const credentialUser = await Credential.findOne({ user: _id }).exec();
 
-    if (!credential) {
-      return res.status(404).json({ error: "La credencial no se encuentra registrado" });
+    if (!credentialUser) {
+      return res.status(404).json({ error: "Credencial no encontrada" });
     }
+
+    const credential = await Credential.findByIdAndUpdate(credentialUser._id, { isActive }, { new: true }).exec();
 
     const successMessage = isActive ? "Credencial activada con éxito" : "Credencial desactivada con éxito";
     res.status(200).json({ message: successMessage, data: credential });

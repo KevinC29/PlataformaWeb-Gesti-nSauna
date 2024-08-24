@@ -10,21 +10,23 @@ export const createComment = async (req, res) => {
     let session;
     try {
 
-        if (!validateCommentData(req.body)) {
-            return res.status(400).json({ error: 'Datos del comentario inválidos' });
+        const validationResult = validateCommentData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { date, message, client } = req.body;
+        const { message, client } = req.body;
 
         if (client && !await Client.exists({ _id: client })) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El cliente ingresado no existe');
         }
 
-        const newComment = new Comment({ date, message, client });
+        const newComment = new Comment({ message, client });
         await newComment.save({ session });
 
         // await saveAuditEntry({
@@ -81,8 +83,10 @@ export const getComments = async (req, res) => {
 export const updateCommentStatus = async (req, res) => {
     try {
 
-        if (!validateCommentData(req.body)) {
-            return res.status(400).json({ error: 'Datos del comentario inválidos' });
+        const validationResult = validateCommentData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         const { _id, isActive } = req.body;

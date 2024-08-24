@@ -12,9 +12,11 @@ import { validateUserData } from '../validators/userValidate.js';
 export const createUser = async (req, res) => {
   let session;
   try {
-    
-    if (!validateUserData(req.body)) {
-      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+
+    const validationResult = validateUserData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -84,6 +86,7 @@ export const createUser = async (req, res) => {
 // Obtener todos los Usuarios
 export const getUsers = async (req, res) => {
   try {
+
     const users = await User.find()
       .select("_id name lastName dni email isActive role")
       .populate({
@@ -103,7 +106,7 @@ export const getUsers = async (req, res) => {
 // Obtener un solo Usuario
 export const getUser = async (req, res) => {
   try {
-    const user = await User.find()
+    const user = await User.findById(req.params.id)
       .select("_id name lastName dni email isActive role")
       .populate({
         path: 'role',
@@ -122,9 +125,11 @@ export const getUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   let session;
   try {
-        
-    if (!validateUserData(req.body)) {
-      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+
+    const validationResult = validateUserData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -197,9 +202,11 @@ export const updateUser = async (req, res) => {
 // Actualizar el estado de un Usuario
 export const updateUserStatus = async (req, res) => {
   try {
-        
-    if (!validateUserData(req.body)) {
-      return res.status(400).json({ error: 'Datos del usuario inválidos' });
+
+    const validationResult = validateUserData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { _id, isActive } = req.body;

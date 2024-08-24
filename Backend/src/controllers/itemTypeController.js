@@ -11,8 +11,10 @@ export const createItemType = async (req, res) => {
     let session;
     try {
 
-        if (!validateItemTypeData(req.body)) {
-            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+        const validationResult = validateItemTypeData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -100,8 +102,10 @@ export const updateItemType = async (req, res) => {
     let session;
     try {
 
-        if (!validateItemTypeData(req.body)) {
-            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+        const validationResult = validateItemTypeData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -160,9 +164,11 @@ export const updateItemType = async (req, res) => {
 // Actualizar el estado de un ItemType
 export const updateItemTypeStatus = async (req, res) => {
     try {
-                
-        if (!validateItemTypeData(req.body)) {
-            return res.status(400).json({ error: 'Datos del tipo de item inválidos' });
+
+        const validationResult = validateItemTypeData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         const { _id, isActive } = req.body;

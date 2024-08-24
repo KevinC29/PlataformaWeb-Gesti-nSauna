@@ -12,8 +12,10 @@ export const createItem = async (req, res) => {
     let session;
     try {
 
-        if (!validateItemData(req.body)) {
-            return res.status(400).json({ error: 'Datos del item inválidos' });
+        const validationResult = validateItemData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -108,8 +110,10 @@ export const updateItem = async (req, res) => {
     let session;
     try {
 
-        if (!validateItemData(req.body)) {
-            return res.status(400).json({ error: 'Datos del item inválidos' });
+        const validationResult = validateItemData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -166,8 +170,10 @@ export const updateItem = async (req, res) => {
 export const updateItemStatus = async (req, res) => {
     try {
 
-        if (!validateItemData(req.body)) {
-            return res.status(400).json({ error: 'Datos del item inválidos' });
+        const validationResult = validateItemData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         const { _id, isActive } = req.body;

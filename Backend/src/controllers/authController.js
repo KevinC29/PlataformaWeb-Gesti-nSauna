@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Credential from "../models/credentialModel.js";
+import Role from "../models/roleModel.js";
 import { encryptPassword, verifyPassword } from "../utils/helpers/handlePassword.js";
 import { generateToken } from "../utils/helpers/handleTokenJWT.js";
+import { validateCredentialData } from '../validators/credentialValidate.js';
 import handleError from "../utils/helpers/handleError.js";
 import dotenv from "dotenv";
 
@@ -10,27 +12,14 @@ dotenv.config();
 export const login = async (req, res) => {
   let session;
   try {
-    // Validar el cuerpo de la solicitud
-    if (typeof req.body !== 'object' || req.body === null) {
-      return res.status(400).json({ error: "El cuerpo de la solicitud debe ser un objeto" });
+    
+    const validationResult = validateCredentialData(req.body);
+
+    if (!validationResult.isValid) {
+        return res.status(400).json({ error: validationResult.message });
     }
 
     const { email, password } = req.body;
-
-    // Validar los campos requeridos
-    if (!email || typeof email !== 'string' || email.trim() === '') {
-      return res.status(400).json({ error: "El email es requerido y debe ser una cadena no vacía" });
-    }
-
-    if (!password || typeof password !== 'string' || password.trim() === '') {
-      return res.status(400).json({ error: "La contraseña es requerida y debe ser una cadena no vacía" });
-    }
-
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: "El email no tiene un formato válido" });
-    }
 
     session = await mongoose.startSession();
     session.startTransaction();
@@ -71,10 +60,13 @@ export const login = async (req, res) => {
     }
 
     const user = credential.user;
+
+    const role = await Role.findById(user.role).exec();
+
     const response = {
       id: user._id,
       name: `${user.name} ${user.lastName}`,
-      role: user.role.name,
+      role: role.name,
     };
 
     const token = generateToken(response);
@@ -155,44 +147,3 @@ export const resetPassword = async (req, res) => {
     }
   }
 };
-
-
-// export const changePassword = async (req, res) => {
-//     let session;
-//     try {
-//       const { email, password, newPassword, confirmPassword } = req.body;
-
-//       session = await mongoose.startSession();
-//       session.startTransaction();
-
-//       const credential = await User.findOne({ email }).exec();
-
-//       if (!user) {
-//         return handleError(res, null, session, 400, 'Correo no encontrado');
-//       }
-
-//       if (!user.isActive) {
-//         return handleError(res, null, session, 400, 'Usuario inactivo');
-//       }
-
-//       const newPass = await encryptPassword(newPassword);
-//       user.password = newPass;
-//       await user.save({ session });
-
-//       await session.commitTransaction();
-//       res.status(200).json({ message: 'Contraseña cambiada con éxito' });
-//     } catch (error) {
-//       if (session && session.inTransaction()) {
-//         try {
-//           await session.abortTransaction();
-//         } catch (abortError) {
-//           console.error('Error al abortar la transacción:', abortError);
-//         }
-//       }
-//       handleError(res, error, session, 500, 'Error al cambiar contraseña');
-//     } finally {
-//       if (session) {
-//         session.endSession();
-//       }
-//     }
-//   };

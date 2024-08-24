@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import bodyParser from 'body-parser';
 import router from './routes/index.js';
-//permite manejar las rutas
-import path from 'path';
 
 dotenv.config();
 

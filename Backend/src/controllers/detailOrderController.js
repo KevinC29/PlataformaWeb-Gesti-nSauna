@@ -11,8 +11,10 @@ export const createDetailOrder = async (req, res) => {
     let session;
     try {
 
-        if (!validateDetailOrderData(req.body)) {
-            return res.status(400).json({ error: 'Datos del detalle de orden inválidos' });
+        const validationResult = validateDetailOrderData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -116,8 +118,10 @@ export const updateDetailOrder = async (req, res) => {
     let session;
     try {
 
-        if (!validateDetailOrderData(req.body)) {
-            return res.status(400).json({ error: 'Datos del detalle de orden inválidos' });
+        const validationResult = validateDetailOrderData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();

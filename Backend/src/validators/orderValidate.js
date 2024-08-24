@@ -59,7 +59,7 @@ export const validateOrderData = (data) => {
 
   // Validar `client` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('client')) {
-    if (!mongoose.Types.ObjectId.isValid(data.client)) {
+    if (!mongoose.Types.ObjectId.isValid(data.client) || typeof data.client !== 'string') {
       return { isValid: false, message: "El campo 'Cliente' es inválido." };
     }
   }

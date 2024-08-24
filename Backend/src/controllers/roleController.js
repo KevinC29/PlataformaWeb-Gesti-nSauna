@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Role from '../models/roleModel.js';
+import User from "../models/userModel.js";
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 import { validateRoleData } from '../validators/roleValidate.js';
@@ -9,8 +10,10 @@ export const createRole = async (req, res) => {
   let session;
   try {
 
-    if (!validateRoleData(req.body)) {
-      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    const validationResult = validateRoleData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -83,8 +86,10 @@ export const updateRole = async (req, res) => {
   let session;
   try {
 
-    if (!validateRoleData(req.body)) {
-      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    const validationResult = validateRoleData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -136,8 +141,10 @@ export const updateRole = async (req, res) => {
 export const updateRoleStatus = async (req, res) => {
   try {
 
-    if (!validateRoleData(req.body)) {
-      return res.status(400).json({ error: 'Datos del rol inválidos' });
+    const validationResult = validateRoleData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { _id, isActive } = req.body;
@@ -167,6 +174,10 @@ export const deleteRole = async (req, res) => {
     if (!role) {
       await session.abortTransaction();
       return handleError(res, null, session, 404, "Rol no encontrado");
+    }
+
+    if (await User.exists({ role: id })) {
+      return handleError(res, null, session, 400, "Existen usuarios usando este rol");
     }
 
     await Role.findByIdAndDelete(id, { session }).exec();

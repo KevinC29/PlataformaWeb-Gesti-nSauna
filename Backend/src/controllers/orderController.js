@@ -11,14 +11,16 @@ export const createOrder = async (req, res) => {
     let session;
     try {
 
-        if (!validateOrderData(req.body)) {
-            return res.status(400).json({ error: 'Datos de la orden inválidos' });
+        const validationResult = validateOrderData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { dateOrder, numberOrder, client } = req.body;
+        const { numberOrder, client } = req.body;
 
         if (!await Client.exists({ _id: client })) {
             await session.abortTransaction();
@@ -30,7 +32,7 @@ export const createOrder = async (req, res) => {
             return handleError(res, null, session, 409, 'El numero de orden ya existe');
         }
 
-        const newOrder = new Order({ dateOrder, numberOrder, client });
+        const newOrder = new Order({ numberOrder, client });
         await newOrder.save({ session });
 
         // await saveAuditEntry({
@@ -148,8 +150,10 @@ export const updateOrder = async (req, res) => {
     let session;
     try {
 
-        if (!validateOrderData(req.body)) {
-            return res.status(400).json({ error: 'Datos de la orden inválidos' });
+        const validationResult = validateOrderData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
@@ -162,6 +166,11 @@ export const updateOrder = async (req, res) => {
         if (!order) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "La orden no existe");
+        }
+
+        if (paymentState === "paid") {
+            await session.abortTransaction();
+            return handleError(res, null, session, 404, "No se puede modificar la orden una vez pagada");
         }
 
         const detallesOrden = await DetailOrder.find({ order: id }).exec();

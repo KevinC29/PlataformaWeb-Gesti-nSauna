@@ -47,8 +47,15 @@ export const validateCredentialData = (data) => {
 
   // Validar `user` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('user')) {
-    if (!mongoose.Types.ObjectId.isValid(data.user)) {
+    if (!mongoose.Types.ObjectId.isValid(data.user) || typeof data.user !== 'string') {
       return { isValid: false, message: "El campo 'Usuario' es inválido." };
+    }
+  }
+
+  // Validar `_id` si está presente: debe ser un ID de MongoDB válido
+  if (data.hasOwnProperty('_id')) {
+    if (!mongoose.Types.ObjectId.isValid(data._id) || typeof data._id !== 'string') {
+      return { isValid: false, message: "El campo 'ID' es inválido." };
     }
   }
 

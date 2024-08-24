@@ -6,9 +6,14 @@ export const validateClientData = (data) => {
     return { isValid: false, message: "Datos inválidos: no es un objeto válido." };
   }
 
-  // Validar `account` si está presente: debe ser un número válido
+  // Validar `account` si está presente: debe ser un número válido con hasta dos decimales
   if (data.hasOwnProperty("account")) {
-    if (typeof data.account !== "number" || isNaN(data.account)) {
+    if (
+      typeof data.account !== "number" ||
+      isNaN(data.account) ||
+      data.account < 0 ||
+      !/^\d+(\.\d{1,2})?$/.test(data.account.toString())
+    ) {
       return { isValid: false, message: "El campo 'Cuenta' debe ser un número válido." };
     }
   }
@@ -26,7 +31,7 @@ export const validateClientData = (data) => {
 
   // Validar `user` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty("user")) {
-    if (!mongoose.Types.ObjectId.isValid(data.user)) {
+    if (!mongoose.Types.ObjectId.isValid(data.user) || typeof data.user !== 'string') {
       return { isValid: false, message: "El campo 'Usuario' es inválido." };
     }
   }

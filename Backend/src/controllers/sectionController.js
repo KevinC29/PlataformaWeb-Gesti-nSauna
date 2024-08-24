@@ -10,8 +10,10 @@ export const createSection = async (req, res) => {
   let session;
   try {
 
-    if (!validateSectionData(req.body)) {
-      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    const validationResult = validateSectionData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -83,8 +85,10 @@ export const updateSection = async (req, res) => {
   let session;
   try {
 
-    if (!validateSectionData(req.body)) {
-      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    const validationResult = validateSectionData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     session = await mongoose.startSession();
@@ -134,8 +138,10 @@ export const updateSection = async (req, res) => {
 export const updateSectionStatus = async (req, res) => {
   try {
 
-    if (!validateSectionData(req.body)) {
-      return res.status(400).json({ error: 'Datos de la sección inválidos' });
+    const validationResult = validateSectionData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { _id, isActive } = req.body;
@@ -179,7 +185,7 @@ export const deleteSection = async (req, res) => {
     //   userId: req.currentUser,
     //   changes: generateChanges(section.toObject(), null)
     // });
-    
+
 
     await session.commitTransaction();
     res.status(200).json({ message: "Sección eliminada con éxito" });

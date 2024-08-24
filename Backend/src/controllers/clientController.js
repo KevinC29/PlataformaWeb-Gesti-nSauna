@@ -11,21 +11,27 @@ export const createClient = async (req, res) => {
     let session;
     try {
 
-        if (!validateClientData(req.body)) {
-            return res.status(400).json({ error: 'Datos del cliente inválidos' });
+        const validationResult = validateClientData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { account, accountState, user } = req.body;
+        const { user } = req.body;
 
         if (!await User.exists({ _id: user })) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El usuario ingresado no existe');
         }
 
-        const newClient = new Client({ account, accountState, user });
+        if (await Client.exists({ user })) {
+            return handleError(res, null, session, 409, 'El usuario ya tiene una cuenta de cliente registrada');
+          }
+
+        const newClient = new Client({ user });
 
         await newClient.save({ session });
 
@@ -95,8 +101,10 @@ export const updateClient = async (req, res) => {
     let session;
     try {
 
-        if (!validateClientData(req.body)) {
-            return res.status(400).json({ error: 'Datos del cliente inválidos' });
+        const validationResult = validateClientData(req.body);
+
+        if (!validationResult.isValid) {
+            return res.status(400).json({ error: validationResult.message });
         }
 
         session = await mongoose.startSession();

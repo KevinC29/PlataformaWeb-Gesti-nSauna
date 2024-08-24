@@ -22,7 +22,7 @@ export const validateRoleData = (data) => {
 
   // Validar `_id` si está presente: debe ser un ID de MongoDB válido
   if (data.hasOwnProperty('_id')) {
-    if (!mongoose.Types.ObjectId.isValid(data._id)) {
+    if (!mongoose.Types.ObjectId.isValid(data._id) || typeof data._id !== 'string') {
       return { isValid: false, message: "El campo 'ID' es inválido" };
     }
   }

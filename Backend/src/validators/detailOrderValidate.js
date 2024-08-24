@@ -8,7 +8,7 @@ export const validateDetailOrderData = (data) => {
 
   // Validar `item` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('item')) {
-    if (!mongoose.Types.ObjectId.isValid(data.item)) {
+    if (!mongoose.Types.ObjectId.isValid(data.item) || typeof data.item !== 'string') {
       return { isValid: false, message: "El campo 'Item' es inválido." };
     }
   }
@@ -36,7 +36,7 @@ export const validateDetailOrderData = (data) => {
 
   // Validar `order` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('order')) {
-    if (!mongoose.Types.ObjectId.isValid(data.order)) {
+    if (!mongoose.Types.ObjectId.isValid(data.order) || typeof data.order !== 'string') {
       return { isValid: false, message: "El campo 'Orden' es inválido." };
     }
   }

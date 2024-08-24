@@ -30,14 +30,14 @@ export const validateCommentData = (data) => {
 
   // Validar `client` si está presente: debe ser un ObjectId válido
   if (data.hasOwnProperty('client')) {
-    if (!mongoose.Types.ObjectId.isValid(data.client)) {
+    if (!mongoose.Types.ObjectId.isValid(data.client) || typeof data.client !== 'string') {
       return { isValid: false, message: "El campo 'Cliente' es inválido." };
     }
   }
 
   // Validar `_id` si está presente: debe ser un ID de MongoDB válido
   if (data.hasOwnProperty('_id')) {
-    if (!mongoose.Types.ObjectId.isValid(data._id)) {
+    if (!mongoose.Types.ObjectId.isValid(data._id) || typeof data._id !== 'string') {
       return { isValid: false, message: "El campo 'ID' es inválido." };
     }
   }
