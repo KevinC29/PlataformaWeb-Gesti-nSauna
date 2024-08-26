@@ -79,7 +79,17 @@ export const getOrders = async (req, res) => {
             return res.status(404).json({ error: 'No existen órdenes' });
         }
 
-        res.status(200).json({ data: orders, message: "Órdenes extraídas con éxito" });
+        const ordersWithDetails = await Promise.all(
+            orders.map(async (order) => {
+                const detailOrders = await DetailOrder.find({ order: order._id }).exec();
+                return {
+                    ...order.toObject(),
+                    detailOrders
+                };
+            })
+        );
+
+        res.status(200).json({ data: ordersWithDetails, message: "Órdenes extraídas con éxito" });
     } catch (error) {
         handleError(res, error);
     }
@@ -104,11 +114,19 @@ export const getOrder = async (req, res) => {
             return res.status(404).json({ error: "Orden no encontrada" });
         }
 
-        res.status(200).json({ data: order, message: "Orden encontrada" });
+        const detailOrders = await DetailOrder.find({ order: order._id }).exec();
+
+        const orderWithDetails = {
+            ...order.toObject(),
+            detailOrders
+        };
+
+        res.status(200).json({ data: orderWithDetails, message: "Orden encontrada" });
     } catch (error) {
         handleError(res, error);
     }
 };
+
 
 // Obtener Órdenes por rango de fechas
 export const getOrdersByDate = async (req, res) => {
@@ -139,7 +157,17 @@ export const getOrdersByDate = async (req, res) => {
             return res.status(404).json({ error: 'No existen órdenes en el rango de fechas proporcionado' });
         }
 
-        res.status(200).json({ data: orders, message: "Órdenes extraídas con éxito" });
+        const ordersWithDetails = await Promise.all(
+            orders.map(async (order) => {
+                const detailOrders = await DetailOrder.find({ order: order._id }).exec();
+                return {
+                    ...order.toObject(),
+                    detailOrders
+                };
+            })
+        );
+
+        res.status(200).json({ data: ordersWithDetails, message: "Órdenes extraídas con éxito" });
     } catch (error) {
         handleError(res, error);
     }

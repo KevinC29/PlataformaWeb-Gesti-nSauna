@@ -137,12 +137,14 @@ export const updateDetailOrder = async (req, res) => {
             return handleError(res, null, session, 404, "El detalle de orden no existe");
         }
 
-        const updatedFields = { cantidad, price };
+        const existingItem = await Item.findById(detailOrder.item).exec();
 
-        if (!(detailOrder.item.price * cantidad === price)) {
+        if (!(existingItem.price * cantidad === price)) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
         }
+
+        const updatedFields = { cantidad, price };
 
         const updatedDetailOrder = await DetailOrder.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
         
@@ -182,12 +184,13 @@ export const deleteDetailOrder = async (req, res) => {
         const { id } = req.params;
         const detailOrder = await DetailOrder.findById(id).exec();
         const order = await Order.findById(detailOrder.order).exec();
+
         if (!detailOrder) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "Detalle de orden no encontrado");
         }
 
-        const totalEliminate = detailOrder.price*detailOrder.cantidad;
+        const totalEliminate = detailOrder.price;
 
         const updateOrder = await Order.findByIdAndUpdate(order._id, { consumptionAccount: order.consumptionAccount - totalEliminate, total: order.total - totalEliminate }, { new: true, session }).exec();
 
