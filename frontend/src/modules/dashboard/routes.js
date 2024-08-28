@@ -1,12 +1,7 @@
 export default [
     {
-      path: '/clients',
+      path: '/home',
       name: 'ClientList',
-      component: () => import('./views/ClientList.vue'),
-    },
-    {
-      path: '/clients/:id',
-      name: 'ClientDetail',
-      component: () => import('./views/ClientDetail.vue'),
+      component: () => import('./views/home.vue'),
     },
   ];

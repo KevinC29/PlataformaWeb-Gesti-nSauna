@@ -8,6 +8,4 @@ export default {
 };
 </script>
 
-<style>
-/* Agrega estilos globales aquí si es necesario */
-</style>
+<style></style>

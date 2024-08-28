@@ -10,7 +10,7 @@ import AuthRoutes from '../modules/auth/routes';
 // import ItemTypeRoutes from '../modules/itemType/routes';
 // import OrderRoutes from '../modules/order/routes';
 // import RoleRoutes from '../modules/role/routes';
-// import SectionRoutes from '../modules/section/routes';
+import SectionRoutes from '../modules/section/routes';
 // import UserRoutes from '../modules/user/routes';
 
 // Combina todas las rutas importadas
@@ -25,7 +25,7 @@ const routes = [
   // ...ItemTypeRoutes,
   // ...OrderRoutes,
   // ...RoleRoutes,
-  // ...SectionRoutes,
+  ...SectionRoutes,
   // ...UserRoutes,
   {
     path: '/:catchAll(.*)',

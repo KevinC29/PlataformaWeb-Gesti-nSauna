@@ -5,8 +5,8 @@ export default [
     name: 'ClientsList',
     component: () => import('./views/ClientsList.vue'),
     meta: {
-      requiresAuth: true, // Asegura que la ruta requiere autenticación
-      roles: ['ADMIN', 'CASHIER'] // Define qué roles pueden acceder a esta ruta
+      requiresAuth: true,
+      roles: ['ADMIN', 'CASHIER']
     }
   },
   {

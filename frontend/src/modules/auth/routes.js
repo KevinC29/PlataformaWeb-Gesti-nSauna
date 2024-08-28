@@ -1,4 +1,3 @@
-// modules/auth/routes.js
 export default [
   {
     path: '/login',
