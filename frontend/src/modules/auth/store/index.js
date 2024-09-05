@@ -15,17 +15,19 @@ export default {
     },
     REMOVE_TOKEN(state) {
       state.token = '';
-      localStorage.removeItem(process.env.VUE_APP_TOKEN_NAME);
+      localStorage.removeItem(process.env.VUE_APP_TOKEN_NAME); 
     }
   },
   actions: {
-    async login({ commit }, credentials) {
+    async login({ commit, dispatch}, credentials) {
       try {
         const response = await authLogin(credentials);
         commit('SET_TOKEN', response.token);
+        // Actualiza los ítems del sidebar después del login
+        await dispatch('dashboard/updateSidebarItems', null, { root: true });
       } catch (error) {
         handleError(error);
-        throw error;  // Re-lanzar para que el componente maneje el error
+        throw error;
       }
     },
     async resetPassword(_, email) {
@@ -36,11 +38,18 @@ export default {
         throw error;  // Re-lanzar para que el componente maneje el error
       }
     },
-    logout({ commit }) {
-      commit('REMOVE_TOKEN');
+    async logout({ commit, dispatch }) {
+      try {
+        commit('REMOVE_TOKEN');  // Remueve el token de Vuex y localStorage
+        // Limpia los ítems del sidebar
+        dispatch('dashboard/cleanSidebar', null, { root: true }); // Limpiar el sidebar
+      } catch (error) {
+        handleError(error);
+      }
     }
   },
   getters: {
-    token: state => state.token
+    token: state => state.token,
+    isAuthenticated: state => !!state.token
   }
 };

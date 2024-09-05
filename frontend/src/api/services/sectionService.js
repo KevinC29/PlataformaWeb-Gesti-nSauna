@@ -31,6 +31,21 @@ export const getSections = async () => {
   }
 };
 
+// Obtener todas las secciones con los items
+export const getSectionsWithItems = async () => {
+  try {
+    console.log(apiUrl)
+    const response = await http.get(`${apiUrl}/public`);
+    console.log("LLEGUE AQUI")
+    console.log(response)
+
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
 // Obtener una sección por ID
 export const getSection = async (id) => {
   try {

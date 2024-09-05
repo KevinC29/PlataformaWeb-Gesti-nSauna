@@ -12,7 +12,6 @@ export const login = async (credentials) => {
   try {
     
     const response = await http.post(`${apiUrl}/login`, credentials);
-    // console.log(response.data)
 
     // Guardar el token en localStorage si existe
     if (response.data && response.data.token) {

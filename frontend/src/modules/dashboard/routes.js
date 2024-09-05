@@ -1,7 +1,11 @@
 export default [
     {
-      path: '/home',
-      name: 'ClientList',
-      component: () => import('./views/home.vue'),
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('./views/DashboardPage.vue'),
+      meta: {
+        requiresAuth: true,
+        roles: ['ADMIN', 'CASHIER', 'MANAGER']
+      }
     },
   ];
