@@ -5,6 +5,11 @@ const itemSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+        required: true,
+        default:"EJEMPLO DE ITEM",
+    },
     price: {
         type: Number,
         required: true,

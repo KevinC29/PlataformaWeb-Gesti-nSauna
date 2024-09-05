@@ -21,7 +21,7 @@ export const createItem = async (req, res) => {
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { name, price, imageUrl, itemType } = req.body;
+        const { name, description, price, imageUrl, itemType } = req.body;
         const validationImage = await validateImageUrl(imageUrl);
 
         if (!validationImage.isValid) {
@@ -39,7 +39,7 @@ export const createItem = async (req, res) => {
             return handleError(res, null, session, 409, 'El tipo de ítem ingresado no existe');
         }
 
-        const newItem = new Item({ name, price, imageUrl, itemType });
+        const newItem = new Item({ name, description, price, imageUrl, itemType });
         await newItem.save({ session });
 
         // await saveAuditEntry({
@@ -72,7 +72,7 @@ export const createItem = async (req, res) => {
 export const getItems = async (req, res) => {
     try {
         const items = await Item.find()
-            .select("_id name price imageUrl isActive itemType")
+            .select("_id name description price imageUrl isActive itemType")
             .populate('itemType', 'name')
             .exec();
 
@@ -91,7 +91,7 @@ export const getItem = async (req, res) => {
     try {
         const { id } = req.params;
         const item = await Item.findById(id)
-            .select("_id name price imageUrl isActive itemType")
+            .select("_id name description price imageUrl isActive itemType")
             .populate('itemType', 'name')
             .exec();
 
@@ -120,7 +120,7 @@ export const updateItem = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-        const { name, price, imageUrl, itemType } = req.body;
+        const { name, description, price, imageUrl, itemType } = req.body;
         const updatedFields = { ...(name && { name }), ...(price && { price }), ...(imageUrl && { imageUrl }), ...(itemType && { itemType }) };
 
         if (!await Item.exists({ _id: id })) {

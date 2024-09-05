@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Section from '../models/sectionModel.js';
 import ItemType from '../models/itemTypeModel.js';
+import Item from  '../models/itemModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 import { validateSectionData } from '../validators/sectionValidate.js';
@@ -63,6 +64,48 @@ export const getSections = async (req, res) => {
     }
     res.status(200).json({ data: sections, message: "Secciones extraídas con éxito" });
   } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Obtener todas las Secciones con sus items
+export const getSectionsWithItems = async (req, res) => {
+  try {
+    const sections = await Section.find().select('_id name isActive').exec();
+
+    if (!sections.length) {
+      return res.status(404).json({ error: 'No existen secciones' });
+    }
+
+    const sectionPromises = sections.map(async (section) => {
+      const itemTypes = await ItemType.find({ section: section._id })
+        .select('_id name description isActive')
+        .exec();
+
+      const itemTypePromises = itemTypes.map(async (itemType) => {
+        const items = await Item.find({ itemType: itemType._id })
+          .select('_id name description price imageUrl isActive')
+          .exec();
+
+        return {
+          ...itemType.toObject(),
+          items,
+        };
+      });
+
+      const itemTypesWithItems = await Promise.all(itemTypePromises);
+
+      return {
+        ...section.toObject(),
+        itemTypes: itemTypesWithItems,
+      };
+    });
+
+    const sectionsWithItems = await Promise.all(sectionPromises);
+
+    res.status(200).json({ data: sectionsWithItems, message: "Secciones con items extraídas con éxito" });
+  } catch (error) {
+    console.log(error)
     handleError(res, error);
   }
 };
