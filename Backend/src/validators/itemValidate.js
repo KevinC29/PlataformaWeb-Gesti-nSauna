@@ -13,6 +13,13 @@ export const validateItemData = (data) => {
     }
   }
 
+  // Validar `description` si está presente: debe ser una cadena no vacía
+  if (data.hasOwnProperty('description')) {
+    if (typeof data.name !== 'string' ) {
+      return { isValid: false, message: "El campo 'Descripcion' es inválido." };
+    }
+  }
+
   // Validar `price` si está presente: debe ser un número válido
   if (data.hasOwnProperty('price')) {
     if (
