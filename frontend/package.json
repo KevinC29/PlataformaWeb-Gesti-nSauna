@@ -5,14 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve --open",
     "dev": "npm run serve",
-    "build": "cross-env CI=false vue-cli-service build",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "axios": "^1.7.5",
     "core-js": "^3.8.3",
-    "vue": "^3.2.13",
+    "vue": "^3.4.27",
     "vue-router": "^4.4.3",
     "vuetify": "^3.7.1",
     "vuex": "^4.1.0"

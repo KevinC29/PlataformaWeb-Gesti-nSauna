@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// Importa las rutas de cada módulo
+
 import AuthRoutes from '../modules/auth/routes';
 import DashboardRoutes from '../modules/dashboard/routes';
 // import ClientRoutes from '../modules/client/routes';
@@ -10,13 +10,12 @@ import DashboardRoutes from '../modules/dashboard/routes';
 // import ItemTypeRoutes from '../modules/itemType/routes';
 // import OrderRoutes from '../modules/order/routes';
 // import RoleRoutes from '../modules/role/routes';
-import SectionRoutes from '../modules/section/routes';
+// import SectionRoutes from '../modules/section/routes';
 // import UserRoutes from '../modules/user/routes';
 import HomeRoutes from '../modules/home/routes';
 
 import store from '../store/index'; 
 
-// Combina todas las rutas importadas
 const routes = [
   ...AuthRoutes,
   ...DashboardRoutes,
@@ -28,32 +27,31 @@ const routes = [
   // ...ItemTypeRoutes,
   // ...OrderRoutes,
   // ...RoleRoutes,
-  ...SectionRoutes,
+  // ...SectionRoutes,
   // ...UserRoutes,
   ...HomeRoutes,
   {
     path: '/:catchAll(.*)',
-    redirect: '/dashboard' // Redirige a la ruta que prefieras cuando no se encuentra la ruta
+    redirect: '/home'
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory(), // Usa el historial HTML5 para las rutas
+  history: createWebHistory(),
   routes
 });
 
-// Agrega la guardia de navegación
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters['auth/isAuthenticated']; // Ajusta según el nombre de tu módulo Vuex y tu getter
+  const isAuthenticated = store.getters['auth/isAuthenticated'];
   
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
-      next({ name: 'Login' });  // Redirige al login si el usuario no está autenticado
+      next({ name: 'Login' });
     } else {
-      next();  // Permite el acceso si el usuario está autenticado
+      next();
     }
   } else {
-    next();  // Permite el acceso si la ruta no requiere autenticación
+    next();
   }
 });
 

@@ -1,5 +1,5 @@
 <template>
-  <AppSidebar :items="sidebarItems" />
+  <AppSidebar :items="filteredSidebarItems" />
 </template>
 
 <script>
@@ -13,9 +13,6 @@ export default {
   },
   computed: {
     ...mapGetters('dashboard', ['filteredSidebarItems']),
-    sidebarItems() {
-      return this.filteredSidebarItems; 
-    },
-  }  
+  },
 };
 </script>

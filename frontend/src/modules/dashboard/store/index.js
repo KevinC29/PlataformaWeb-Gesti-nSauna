@@ -65,7 +65,7 @@ export default {
                     icon: 'mdi-folder',
                     text: 'Secciones',
                     value: 'seccion',
-                    href: '/Secciones',
+                    href: '/dashboard/sections',
                     roles: ['ADMIN'],
                 },
                 {
@@ -77,7 +77,7 @@ export default {
                 }
             ],
             filteredItems: [],
-            userRole: null // Agregamos una propiedad para el rol del usuario
+            userRole: null 
         };
     },
     mutations: {
@@ -86,23 +86,15 @@ export default {
         },
         CLEAR_SIDEBAR(state) {
             state.filteredItems = [];
-            state.userRole = null; // Limpiamos el rol
+            state.userRole = null; 
         },
         SET_USER_ROLE(state, role) {
-            state.userRole = role; // Configuramos el rol del usuario
+            state.userRole = role; 
         }
     },
     getters: {
-        userRole() {
-            try {
-                const token = localStorage.getItem(process.env.VUE_APP_TOKEN_NAME);
-                if (!token) return null;
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return payload.role;
-            } catch (error) {
-                handleError(error);
-                return null;
-            }
+        userRole(state) {
+            return state.userRole; 
         },
         sidebarItems(state) {
             return state.sidebarItems;
@@ -114,29 +106,28 @@ export default {
     actions: {
         updateSidebarItems({ commit, getters }) {
             try {
-                const role = getters.userRole;
-                console.log('Role:', role); // Verifica el rol
-                if (!role) {
+                const token = localStorage.getItem(process.env.VUE_APP_TOKEN_NAME);
+                if (!token) {
                     commit('SET_FILTERED_ITEMS', []);
                     return;
                 }
+
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const role = payload.role;
+                commit('SET_USER_ROLE', role);
+
                 const filteredItems = getters.sidebarItems.filter(item => item.roles.includes(role));
-                console.log('Filtered Items:', filteredItems); // Verifica los ítems filtrados
                 commit('SET_FILTERED_ITEMS', filteredItems);
             } catch (error) {
                 handleError(error);
             }
         },
-        cleanSidebar({ commit, state }) {
+        cleanSidebar({ commit }) {
             try {
-                commit('CLEAR_SIDEBAR'); // Limpiar el sidebar y el rol
-                // Mostrar el estado después de limpiar
-                console.log('Sidebar Cleaned:');
-                console.log('Filtered Items:', state.filteredItems);
-                console.log('User Role:', state.userRole);
+                commit('CLEAR_SIDEBAR');
             } catch (error) {
                 handleError(error);
             }
         }
-    },
+    }
 };
