@@ -5,7 +5,6 @@ import {
     getItem,
     updateItem,
     deleteItem,
-    updateItemStatus
 } from '../controllers/itemController.js';
 import checkAuth from "../utils/helpers/handleAuthCheck.js";
 
@@ -15,7 +14,6 @@ router.post('/', checkAuth(['ADMIN']), createItem);
 router.get('/', checkAuth(['ADMIN', 'CASHIER']), getItems);
 router.get('/:id', checkAuth(['ADMIN', 'CASHIER']), getItem);
 router.put('/:id', checkAuth(['ADMIN']), updateItem);
-router.post('/isActive', checkAuth(['ADMIN']), updateItemStatus);
 router.delete('/:id', checkAuth(['ADMIN']), deleteItem);
 
 export default router; 

@@ -21,7 +21,7 @@ export const createItem = async (req, res) => {
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { name, description, price, imageUrl, itemType } = req.body;
+        const { name, description, price, imageUrl, itemType, isActive } = req.body;
         const validationImage = await validateImageUrl(imageUrl);
 
         if (!validationImage.isValid) {
@@ -39,7 +39,7 @@ export const createItem = async (req, res) => {
             return handleError(res, null, session, 409, 'El tipo de ítem ingresado no existe');
         }
 
-        const newItem = new Item({ name, description, price, imageUrl, itemType });
+        const newItem = new Item({ name, description, price, imageUrl, itemType, isActive });
         await newItem.save({ session });
 
         // await saveAuditEntry({
@@ -120,8 +120,8 @@ export const updateItem = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-        const { name, description, price, imageUrl, itemType } = req.body;
-        const updatedFields = { ...(name && { name }), ...(price && { price }), ...(imageUrl && { imageUrl }), ...(itemType && { itemType }) };
+        const { name, description, price, imageUrl, itemType, isActive } = req.body;
+        const updatedFields = { ...(name && { name }), ...(description && { description }), ...(price && { price }), ...(imageUrl && { imageUrl }), ...(itemType && { itemType }), ...(isActive && { isActive }) };
 
         if (!await Item.exists({ _id: id })) {
             await session.abortTransaction();
@@ -163,31 +163,6 @@ export const updateItem = async (req, res) => {
         if (session) {
             session.endSession();
         }
-    }
-};
-
-// Actualizar el estado de un Item
-export const updateItemStatus = async (req, res) => {
-    try {
-
-        const validationResult = validateItemData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
-        const { _id, isActive } = req.body;
-
-        const updatedItem = await Item.findByIdAndUpdate(_id, { isActive }, { new: true }).lean();
-
-        if (!updatedItem) {
-            return res.status(404).json({ error: "El ítem no se encuentra registrado" });
-        }
-
-        const successMessage = isActive ? "Ítem activado con éxito" : "Ítem desactivado con éxito";
-        res.status(200).json({ message: successMessage, data: updatedItem });
-    } catch (error) {
-        handleError(res, error);
     }
 };
 
