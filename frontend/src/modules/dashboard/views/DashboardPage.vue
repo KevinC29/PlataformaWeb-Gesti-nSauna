@@ -15,6 +15,9 @@ import SidebarContainer from '@/modules/dashboard/components/SidebarContainer.vu
 
 export default {
   name: 'DashboardPage',
+  mounted() {
+    this.updateSidebarItems(); // Actualiza los ítems del sidebar cuando la página se monta
+  },
   components: {
     AppHeader,
     SidebarContainer,
@@ -31,6 +34,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions('dashboard', ['updateSidebarItems']),
     ...mapActions('auth', ['logout']),
     async handleLogout() {
       this.errorMessage = '';

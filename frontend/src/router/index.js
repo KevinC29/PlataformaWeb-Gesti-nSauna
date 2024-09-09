@@ -32,7 +32,7 @@ const routes = [
   ...HomeRoutes,
   {
     path: '/:catchAll(.*)',
-    redirect: '/home'
+    redirect: '/login'
   }
 ];
 

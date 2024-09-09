@@ -1,4 +1,5 @@
 import sectionRoutes from '@/modules/section/routes';
+import itemTypeRoutes from '@/modules/itemType/routes';
 
 export default [
   {
@@ -12,9 +13,14 @@ export default [
     children: [
       ...sectionRoutes.map(route => ({
         ...route,
-        path: `sections${route.path}`, // Prefijar con "sections"
-        name: `${route.name}`, // Mantener el nombre de la ruta
-      }))
+        path: `sections${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...itemTypeRoutes.map(route => ({
+        ...route,
+        path: `itemTypes${route.path}`,
+        name: `${route.name}`,
+      })),
     ]
   }
 ];

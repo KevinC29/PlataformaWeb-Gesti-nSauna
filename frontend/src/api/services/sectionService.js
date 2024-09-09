@@ -68,17 +68,6 @@ export const updateSection = async (id, sectionData) => {
   }
 };
 
-// Actualizar el estado de una sección
-export const updateSectionStatus = async (statusData) => {
-  try {
-    const response = await http.post(`${apiUrl}/isActive`, statusData);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-};
-
 // Eliminar una sección
 export const deleteSection = async (id) => {
   try {

@@ -21,6 +21,7 @@ export const createItemType = async (itemTypeData) => {
 export const getItemTypes = async () => {
   try {
     const response = await http.get(apiUrl);
+    console.log(response)
     return response.data;
   } catch (error) {
     handleError(error);
@@ -43,17 +44,6 @@ export const getItemType = async (id) => {
 export const updateItemType = async (id, itemTypeData) => {
   try {
     const response = await http.put(`${apiUrl}/${id}`, itemTypeData);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-};
-
-// Actualizar el estado de un tipo de ítem
-export const updateItemTypeStatus = async (statusData) => {
-  try {
-    const response = await http.post(`${apiUrl}/isActive`, statusData);
     return response.data;
   } catch (error) {
     handleError(error);

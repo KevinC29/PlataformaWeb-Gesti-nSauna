@@ -44,7 +44,7 @@ export default {
                     icon: 'mdi-folder',
                     text: 'Tipos de Item',
                     value: 'tipoItem',
-                    href: '/TiposItem',
+                    href: '/dashboard/itemTypes',
                     roles: ['ADMIN'],
                 },
                 {

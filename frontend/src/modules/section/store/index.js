@@ -3,7 +3,6 @@ import {
   getSections,
   getSection,
   updateSection,
-  updateSectionStatus,
   deleteSection
 } from '@/api/services/sectionService';
 
@@ -80,17 +79,6 @@ export default {
         const errorMsg = error.response?.data?.error || 'Failed to update section';
         commit('SET_ERROR', errorMsg);
         return errorMsg; 
-      }
-    },
-    async updateSectionStatus({ commit }, statusData) {
-      try {
-        const response = await updateSectionStatus(statusData);
-        commit('UPDATE_SECTION', response.data);
-        return null;
-      } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to update section status';
-        commit('SET_ERROR', errorMsg);
-        return errorMsg;
       }
     },
     async deleteSection({ commit }, id) {
