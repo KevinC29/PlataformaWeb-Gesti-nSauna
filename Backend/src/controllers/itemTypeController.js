@@ -20,7 +20,7 @@ export const createItemType = async (req, res) => {
         session = await mongoose.startSession();
         session.startTransaction();
 
-        const { name, description, section } = req.body;
+        const { name, description, section, isActive } = req.body;
 
         if (await ItemType.exists({ name })) {
             await session.abortTransaction();
@@ -32,7 +32,7 @@ export const createItemType = async (req, res) => {
             return handleError(res, null, session, 409, 'La sección ingresada no existe');
         }
 
-        const newItemType = new ItemType({ name, description, section });
+        const newItemType = new ItemType({ name, description, section, isActive });
         await newItemType.save({ session });
 
         // await saveAuditEntry({
@@ -112,7 +112,7 @@ export const updateItemType = async (req, res) => {
         session.startTransaction();
 
         const { id } = req.params;
-        const { name, description, section } = req.body;
+        const { name, description, section, isActive } = req.body;
 
         if (!await ItemType.exists({ _id: id })) {
             await session.abortTransaction();
@@ -131,7 +131,7 @@ export const updateItemType = async (req, res) => {
 
         const updatedItemType = await ItemType.findByIdAndUpdate(
             id,
-            { name, description, section },
+            { name, description, section, isActive },
             { new: true, session }
         ).exec();
 
@@ -158,38 +158,6 @@ export const updateItemType = async (req, res) => {
         if (session) {
             session.endSession();
         }
-    }
-};
-
-// Actualizar el estado de un ItemType
-export const updateItemTypeStatus = async (req, res) => {
-    try {
-
-        const validationResult = validateItemTypeData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
-        const { _id, isActive } = req.body;
-
-        const updatedItemType = await ItemType.findByIdAndUpdate(
-            _id,
-            { isActive },
-            { new: true }
-        ).exec();
-
-        if (!updatedItemType) {
-            return res.status(404).json({ error: "El tipo de ítem no se encuentra registrado" });
-        }
-
-        const successMessage = isActive
-            ? "Tipo de ítem activado con éxito"
-            : "Tipo de ítem desactivado con éxito";
-
-        res.status(200).json({ message: successMessage, data: updatedItemType });
-    } catch (error) {
-        handleError(res, error);
     }
 };
 

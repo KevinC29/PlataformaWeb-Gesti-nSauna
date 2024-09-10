@@ -19,14 +19,14 @@ export const createRole = async (req, res) => {
     session = await mongoose.startSession();
     session.startTransaction();
 
-    const { name } = req.body;
+    const { name, isActive } = req.body;
 
     if (await Role.exists({ name })) {
       await session.abortTransaction();
       return handleError(res, null, session, 409, 'El rol ya existe');
     }
 
-    const newRole = new Role({ name });
+    const newRole = new Role({ name, isActive });
     await newRole.save({ session });
 
     // await saveAuditEntry({
@@ -96,7 +96,7 @@ export const updateRole = async (req, res) => {
     session.startTransaction();
 
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, isActive } = req.body;
 
     const role = await Role.findById(id).exec();
     if (!role) {
@@ -109,7 +109,7 @@ export const updateRole = async (req, res) => {
       return handleError(res, null, session, 400, "No puede repetir el nombre de otro rol creado");
     }
 
-    const updatedRole = await Role.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
+    const updatedRole = await Role.findByIdAndUpdate(id, { name, isActive }, { new: true, session }).exec();
 
     // await saveAuditEntry({
     //   eventType: 'UPDATE',
@@ -134,30 +134,6 @@ export const updateRole = async (req, res) => {
     if (session) {
       session.endSession();
     }
-  }
-};
-
-// Actualizar el estado de un Rol
-export const updateRoleStatus = async (req, res) => {
-  try {
-
-    const validationResult = validateRoleData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
-    const { _id, isActive } = req.body;
-    const role = await Role.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
-
-    if (!role) {
-      return res.status(404).json({ error: "El rol no se encuentra registrado" });
-    }
-
-    const successMessage = isActive ? "Rol activado con éxito" : "Rol desactivado con éxito";
-    res.status(200).json({ message: successMessage, data: role });
-  } catch (error) {
-    handleError(res, error);
   }
 };
 

@@ -22,7 +22,7 @@ export const createUser = async (req, res) => {
     session = await mongoose.startSession();
     session.startTransaction();
 
-    const { name, lastName, dni, email, role, password, confirmPassword } = req.body;
+    const { name, lastName, dni, email, role, password, confirmPassword, isActive } = req.body;
 
     if (await User.exists({ dni })) {
       return handleError(res, null, session, 409, 'El DNI ya está registrado');
@@ -41,12 +41,12 @@ export const createUser = async (req, res) => {
       return handleError(res, null, session, 400, 'Las contraseñas no coinciden');
     }
 
-    const newUser = new User({ name, lastName, dni, email, role });
+    const newUser = new User({ name, lastName, dni, email, role, isActive });
     await newUser.save({ session });
 
     const passwordHash = await encryptPassword(password);
 
-    const newCredential = new Credential({ email: newUser.email, password: passwordHash, user: newUser._id })
+    const newCredential = new Credential({ email: newUser.email, password: passwordHash, user: newUser._id})
     await newCredential.save({ session });
 
     // await saveAuditEntry({
@@ -136,7 +136,7 @@ export const updateUser = async (req, res) => {
     session.startTransaction();
 
     const { id } = req.params;
-    const { name, lastName, dni, email, role } = req.body;
+    const { name, lastName, dni, email, role, isActive } = req.body;
 
     const user = await User.findById(id).exec();
     const credential = await Credential.findOne({ user: user._id }).exec();
@@ -162,7 +162,7 @@ export const updateUser = async (req, res) => {
       return handleError(res, null, session, 404, 'Credencial no encontrada');
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, dni, email, role }, { new: true, session }).exec();
+    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, dni, email, role, isActive }, { new: true, session }).exec();
     const updateCredential = await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();
 
     // await saveAuditEntry({
@@ -196,30 +196,6 @@ export const updateUser = async (req, res) => {
     if (session) {
       session.endSession();
     }
-  }
-};
-
-// Actualizar el estado de un Usuario
-export const updateUserStatus = async (req, res) => {
-  try {
-
-    const validationResult = validateUserData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
-    const { _id, isActive } = req.body;
-    const user = await User.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
-
-    if (!user) {
-      return res.status(404).json({ error: "El usuario no se encuentra registrado" });
-    }
-
-    const successMessage = isActive ? "Usuario activado con éxito" : "Usuario desactivado con éxito";
-    res.status(200).json({ message: successMessage, data: user });
-  } catch (error) {
-    handleError(res, error);
   }
 };
 

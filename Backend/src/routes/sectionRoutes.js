@@ -6,7 +6,6 @@ import {
     getSection,
     updateSection,
     deleteSection,
-    updateSectionStatus
 } from '../controllers/sectionController.js';
 import checkAuth from "../utils/helpers/handleAuthCheck.js";
 
@@ -17,7 +16,6 @@ router.get('/', checkAuth(['ADMIN']), getSections);
 router.get('/public', getSectionsWithItems);
 router.get('/:id', checkAuth(['ADMIN']), getSection);
 router.put('/:id', checkAuth(['ADMIN']), updateSection);
-router.post('/isActive', checkAuth(['ADMIN']), updateSectionStatus);
 router.delete('/:id', checkAuth(['ADMIN']), deleteSection);
 
 

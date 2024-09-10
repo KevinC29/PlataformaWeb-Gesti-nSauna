@@ -20,13 +20,13 @@ export const createSection = async (req, res) => {
     session = await mongoose.startSession();
     session.startTransaction();
 
-    const { name } = req.body;
+    const { name, isActive } = req.body;
 
     if (await Section.exists({ name })) {
       return handleError(res, null, session, 409, 'La sección ya existe');
     }
 
-    const newSection = new Section({ name });
+    const newSection = new Section({ name, isActive });
     await newSection.save({ session });
 
     // await saveAuditEntry({
@@ -138,7 +138,7 @@ export const updateSection = async (req, res) => {
     session.startTransaction();
 
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, isActive } = req.body;
 
     const section = await Section.findById(id).exec();
     if (!section) {
@@ -149,7 +149,7 @@ export const updateSection = async (req, res) => {
       return handleError(res, null, session, 400, "No puede repetir el nombre de otra sección creada");
     }
 
-    const updatedSection = await Section.findByIdAndUpdate(id, { name }, { new: true, session }).exec();
+    const updatedSection = await Section.findByIdAndUpdate(id, { name, isActive }, { new: true, session }).exec();
 
     // await saveAuditEntry({
     //   eventType: 'UPDATE',
@@ -174,30 +174,6 @@ export const updateSection = async (req, res) => {
     if (session) {
       session.endSession();
     }
-  }
-};
-
-// Actualizar el estado de una Sección
-export const updateSectionStatus = async (req, res) => {
-  try {
-
-    const validationResult = validateSectionData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
-    const { _id, isActive } = req.body;
-    const section = await Section.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
-
-    if (!section) {
-      return res.status(404).json({ error: "La sección no se encuentra registrada" });
-    }
-
-    const successMessage = isActive ? "Sección activada con éxito" : "Sección desactivada con éxito";
-    res.status(200).json({ message: successMessage, data: section });
-  } catch (error) {
-    handleError(res, error);
   }
 };
 
