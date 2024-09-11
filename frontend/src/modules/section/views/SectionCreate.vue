@@ -1,13 +1,13 @@
 <template>
-    <FormCreate/>
+    <FormCreateSection/>
   </template>
   <script>
-  import FormCreate from '@/modules/section/components/FormCreate.vue';
+  import FormCreateSection from '@/modules/section/components/FormCreateSection.vue';
 
   export default {
     name: 'SectionCreate',
     components: {
-        FormCreate,
+      FormCreateSection,
     }
   };
   </script>

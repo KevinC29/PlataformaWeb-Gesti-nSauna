@@ -1,13 +1,13 @@
 <template>
-    <FormEdit/>
+    <FormEditSection/>
   </template>
   <script>
-  import FormEdit from '@/modules/section/components/FormEdit.vue';
+  import FormEditSection from '@/modules/section/components/FormEditSection.vue';
 
   export default {
     name: 'SectionEdit',
     components: {
-        FormEdit,
+      FormEditSection,
     }
   };
   </script>
