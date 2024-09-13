@@ -21,7 +21,7 @@ export const createRole = async (req, res) => {
 
     const { name, isActive } = req.body;
 
-    if (await Role.exists({ name })) {
+    if (await Role.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') } })) {
       await session.abortTransaction();
       return handleError(res, null, session, 409, 'El rol ya existe');
     }
@@ -104,7 +104,7 @@ export const updateRole = async (req, res) => {
       return handleError(res, null, session, 404, "El rol no existe");
     }
 
-    if (name && await Role.exists({ name, _id: { $ne: id } })) {
+    if (name && await Role.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') }, _id: { $ne: id } })) {
       await session.abortTransaction();
       return handleError(res, null, session, 400, "No puede repetir el nombre de otro rol creado");
     }

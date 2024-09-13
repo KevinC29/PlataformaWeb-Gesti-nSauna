@@ -121,8 +121,7 @@ export const updateItem = async (req, res) => {
 
         const { id } = req.params;
         const { name, description, price, imageUrl, itemType, isActive } = req.body;
-        const updatedFields = { ...(name && { name }), ...(description && { description }), ...(price && { price }), ...(imageUrl && { imageUrl }), ...(itemType && { itemType }), ...(isActive && { isActive }) };
-
+        
         if (!await Item.exists({ _id: id })) {
             await session.abortTransaction();
             return handleError(res, null, session, 404, "El ítem no existe");
@@ -138,7 +137,7 @@ export const updateItem = async (req, res) => {
             return handleError(res, null, session, 409, 'El tipo de ítem ingresado no existe');
         }
 
-        const updatedItem = await Item.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
+        const updatedItem = await Item.findByIdAndUpdate(id, { name, description, price, imageUrl, itemType, isActive }, { new: true, session }).exec();
 
         // await saveAuditEntry({
         //     eventType: 'UPDATE',

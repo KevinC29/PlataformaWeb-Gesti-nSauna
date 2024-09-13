@@ -32,13 +32,14 @@ export const validateUserData = (data) => {
     }
   }
 
-  // Validar `email` si está presente y no está vacío: debe ser una cadena de texto y tener formato de email
-  if (data.hasOwnProperty('email') && data.email.trim().length > 0) {
-    if (typeof data.email !== 'string' || !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(data.email)) {
+  // Validar `email` si está presente y no está vacío
+  if (data.hasOwnProperty('email') && typeof data.email === 'string' && data.email.trim().length > 0) {
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(data.email)) {
       return { isValid: false, message: "El campo 'Email' debe tener un formato de email válido." };
     }
   }
-  
+
+
   // Validar `isActive` si está presente: debe ser un booleano
   if (data.hasOwnProperty('isActive')) {
     if (typeof data.isActive !== 'boolean') {
