@@ -112,7 +112,7 @@ export default {
           this.errorMessage = '';
 
           setTimeout(() => {
-            this.$router.push({ name: 'ItemTypesList' });
+            this.$router.push({ name: 'ItemTypeList' });
           }, 2000);
         }
       } catch (error) {
@@ -122,7 +122,7 @@ export default {
     },
 
     cancel() {
-      this.$router.push({ name: 'ItemTypesList' });
+      this.$router.push({ name: 'ItemTypeList' });
     },
   },
   validations() {

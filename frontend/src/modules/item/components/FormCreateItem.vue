@@ -20,19 +20,44 @@
       @input="v$.state.description.$touch"
     ></v-textarea>
 
-    <!-- Campo Sección (Selector) -->
+    <!-- Campo Precio -->
+    <v-text-field
+      v-model="state.price"
+      :error-messages="v$.state.price.$errors.map(e => e.$message)"
+      label="Precio"
+      type="number"
+      required
+      min="0"
+      step="0.01"
+      @blur="v$.state.price.$touch"
+      @input="v$.state.price.$touch"
+      @change="formatPrice"
+      prepend-icon="mdi-currency-usd"
+    ></v-text-field>
+
+    <!-- Campo URL de Imagen -->
+    <v-text-field
+      v-model="state.imageUrl"
+      :error-messages="v$.state.imageUrl.$errors.map(e => e.$message)"
+      label="URL de Imagen"
+      required
+      @blur="v$.state.imageUrl.$touch"
+      @input="v$.state.imageUrl.$touch"
+    ></v-text-field>
+
+    <!-- Campo Tipo de Ítem (Selector) -->
     <v-select
-      v-model="state.section"
-      :items="sectionsList"
+      v-model="state.itemType"
+      :items="itemTypesList"
       item-value="_id"
       item-title="name"
       clearable
       dense
-      :error-messages="v$.state.section.$errors.map(e => e.$message)"
-      label="Sección"
+      :error-messages="v$.state.itemType.$errors.map(e => e.$message)"
+      label="Tipo de Ítem"
       required
-      @change="v$.state.section.$touch"
-      @blur="v$.state.section.$touch"
+      @change="v$.state.itemType.$touch"
+      @blur="v$.state.itemType.$touch"
     ></v-select>
 
     <!-- Campo Estado (Checkbox para 'isActive') -->
@@ -66,7 +91,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { required, minValue } from '@vuelidate/validators';
 
 export default {
   data() {
@@ -74,44 +99,56 @@ export default {
       state: {
         name: '',
         description: '',
+        price: null,
+        imageUrl: '',
         isActive: true,
-        section: null, // Inicializar como null
+        itemType: null, // Inicializar como null
       },
-      sectionsList: [],
+      itemTypesList: [],
       errorMessage: '',
       successMessage: '',
     };
   },
   computed: {
-    ...mapGetters('itemType', ['sections', 'error']),
+    ...mapGetters('item', ['itemTypes', 'error']),
   },
   methods: {
-    ...mapActions('itemType', ['createItemType', 'fetchAndSetSections']),
+    ...mapActions('item', ['createItem', 'fetchAndSetItemTypes']),
+
+    formatPrice() {
+      if (this.state.price !== null && this.state.price !== '') {
+        this.state.price = parseFloat(this.state.price).toFixed(2);
+      }
+    },
 
     async submitForm() {
       this.v$.$touch();
 
       if (this.v$.$invalid) return;
 
-      const itemTypeData = {
+      this.formatPrice();
+
+      const itemData = {
         name: this.state.name,
         description: this.state.description,
+        price: Number(this.state.price),
+        imageUrl: this.state.imageUrl,
         isActive: this.state.isActive,
-        section: this.state.section,
+        itemType: this.state.itemType,
       };
 
       try {
-        const errorMsg = await this.createItemType(itemTypeData);
+        const errorMsg = await this.createItem(itemData);
 
         if (errorMsg) {
           this.errorMessage = errorMsg;
           this.successMessage = '';
         } else {
-          this.successMessage = 'Tipo de ítem creado con éxito';
+          this.successMessage = 'Ítem creado con éxito';
           this.errorMessage = '';
 
           setTimeout(() => {
-            this.$router.push({ name: 'ItemTypeList' });
+            this.$router.push({ name: 'ItemList' });
           }, 2000);
         }
       } catch (error) {
@@ -121,7 +158,7 @@ export default {
     },
 
     cancel() {
-      this.$router.push({ name: 'ItemTypeList' });
+      this.$router.push({ name: 'ItemList' });
     },
   },
   validations() {
@@ -129,8 +166,10 @@ export default {
       state: {
         name: { required },
         description: { required },
+        price: { required, minValue: minValue(0) },
+        imageUrl: { required },
         isActive: { required },
-        section: { required },
+        itemType: { required },
       },
     };
   },
@@ -140,15 +179,15 @@ export default {
   },
   async created() {
     try {
-      await this.fetchAndSetSections(); // Carga las secciones
-      this.sectionsList = this.sections
-        .filter(section => section.isActive) // Filtra las secciones activas
-        .map(section => ({
-          _id: section._id,
-          name: section.name,
+      await this.fetchAndSetItemTypes(); // Carga los tipos de ítem
+      this.itemTypesList = this.itemTypes
+        .filter(itemType => itemType.isActive) // Filtra los tipos de ítem activos
+        .map(itemType => ({
+          _id: itemType._id,
+          name: itemType.name,
         }));
     } catch (error) {
-      this.errorMessage = 'Error al cargar las secciones: ' + (error.message || 'Desconocido');
+      this.errorMessage = 'Error al cargar los tipos de ítem: ' + (error.message || 'Desconocido');
     }
   }
 };

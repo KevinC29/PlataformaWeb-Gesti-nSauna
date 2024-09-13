@@ -2,7 +2,7 @@
 export default [
     {
       path: '',
-      name: 'ItemTypesList',
+      name: 'ItemTypeList',
       component: () => import('./views/ItemTypePage.vue'),
       meta: {
         requiresAuth: true,

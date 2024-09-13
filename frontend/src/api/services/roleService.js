@@ -50,17 +50,6 @@ export const updateRole = async (id, roleData) => {
   }
 };
 
-// Actualizar el estado de un rol
-export const updateRoleStatus = async (statusData) => {
-  try {
-    const response = await http.post(`${apiUrl}/isActive`, statusData);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-};
-
 // Eliminar un rol
 export const deleteRole = async (id) => {
   try {

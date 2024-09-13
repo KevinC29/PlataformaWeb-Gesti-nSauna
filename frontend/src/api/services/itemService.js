@@ -50,17 +50,6 @@ export const updateItem = async (id, itemData) => {
   }
 };
 
-// Actualizar el estado de un ítem
-export const updateItemStatus = async (statusData) => {
-  try {
-    const response = await http.post(`${apiUrl}/isActive`, statusData);
-    return response.data;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-};
-
 // Eliminar un ítem
 export const deleteItem = async (id) => {
   try {
