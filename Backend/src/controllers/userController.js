@@ -28,25 +28,38 @@ export const createUser = async (req, res) => {
       return handleError(res, null, session, 409, 'El DNI ya está registrado');
     }
 
-    if (await User.exists({ email })) {
-      return handleError(res, null, session, 409, 'El correo electrónico ya está registrado');
-    }
+    // Si el correo es null o está vacío, asigna el DNI al campo email
+    let userEmail = email && email.trim() !== '' ? email : dni;
 
-    if (!await Role.exists({ _id: role })) {
+    // Verifica si el correo ya está registrado, excepto si el email es una cadena vacía
+    if (userEmail) {
+      const emailExists = await User.exists({ email: userEmail });
+      if (emailExists) {
+        return handleError(res, null, session, 409, 'El correo electrónico ya está registrado');
+      }
+    } 
+
+    const roleDoc = await Role.findById(role);
+
+    if (!roleDoc) {
       return handleError(res, null, session, 400, 'El rol no existe');
     }
 
-    if (password && password !== confirmPassword) {
-      await session.abortTransaction();
-      return handleError(res, null, session, 400, 'Las contraseñas no coinciden');
+    let passwordHash;
+    if (roleDoc.name === "CLIENT" || roleDoc.name === "MANAGER") {
+      passwordHash = await encryptPassword(dni);
+    } else {
+      if (password && password !== confirmPassword) {
+        await session.abortTransaction();
+        return handleError(res, null, session, 400, 'Las contraseñas no coinciden');
+      }
+      passwordHash = await encryptPassword(password);
     }
 
     const newUser = new User({ name, lastName, dni, email, role, isActive });
     await newUser.save({ session });
 
-    const passwordHash = await encryptPassword(password);
-
-    const newCredential = new Credential({ email: newUser.email, password: passwordHash, user: newUser._id})
+    const newCredential = new Credential({ email: userEmail, password: passwordHash, user: newUser._id });
     await newCredential.save({ session });
 
     // await saveAuditEntry({
@@ -75,6 +88,7 @@ export const createUser = async (req, res) => {
         console.error('Error al abortar la transacción:', abortError);
       }
     }
+    console.log(error)
     handleError(res, error, session, 500, "Error al crear el usuario");
   } finally {
     if (session) {
@@ -125,7 +139,6 @@ export const getUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   let session;
   try {
-
     const validationResult = validateUserData(req.body);
 
     if (!validationResult.isValid) {
@@ -149,7 +162,7 @@ export const updateUser = async (req, res) => {
       return handleError(res, null, session, 400, "No puede repetir el DNI de otro usuario registrado");
     }
 
-    if (email && await User.exists({ email, _id: { $ne: id } })) {
+    if (email && email.trim() !== '' && await User.exists({ email, _id: { $ne: id } })) {
       return handleError(res, null, session, 400, "No puede repetir el correo electrónico de otro usuario registrado");
     }
 
@@ -162,8 +175,13 @@ export const updateUser = async (req, res) => {
       return handleError(res, null, session, 404, 'Credencial no encontrada');
     }
 
+    // Actualiza el usuario
     const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, dni, email, role, isActive }, { new: true, session }).exec();
-    const updateCredential = await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();
+
+    // Solo actualiza la credencial si el email no es una cadena vacía
+    if (email && email.trim() !== '') {
+      await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();
+    }
 
     // await saveAuditEntry({
     //   eventType: 'UPDATE',
@@ -173,17 +191,20 @@ export const updateUser = async (req, res) => {
     //   changes: generateChanges(user.toObject(), updatedUser.toObject())
     // });
 
-    // await saveAuditEntry({
-    //   eventType: 'UPDATE',
-    //   documentId: updatedCredential._id,
-    //   documentCollection: 'Credential',
-    //   userId: req.currentUser,
-    //   changes: generateChanges(credential.toObject(), updateCredential.toObject())
-    // });
+    // if (email && email.trim() !== '') {
+    //   await saveAuditEntry({
+    //     eventType: 'UPDATE',
+    //     documentId: updatedCredential._id,
+    //     documentCollection: 'Credential',
+    //     userId: req.currentUser,
+    //     changes: generateChanges(credential.toObject(), updatedCredential.toObject())
+    //   });
+    // }
 
     await session.commitTransaction();
-    res.status(200).json({ data: { updatedUser, updateCredential }, message: "Usuario y credencial actualizado con éxito" });
+    res.status(200).json({ data: { updatedUser }, message: "Usuario actualizado con éxito" });
   } catch (error) {
+    console.log(error);
     if (session && session.inTransaction()) {
       try {
         await session.abortTransaction();
@@ -198,6 +219,8 @@ export const updateUser = async (req, res) => {
     }
   }
 };
+
+
 
 // Eliminar Usuario
 export const deleteUser = async (req, res) => {
@@ -218,7 +241,7 @@ export const deleteUser = async (req, res) => {
     if (await Client.exists({ user: id })) {
       await session.abortTransaction();
       return res.status(409).json({ error: "Existe un cliente asociados a este usuario" });
-  }
+    }
 
     // await saveAuditEntry({
     //   eventType: 'DELETE',

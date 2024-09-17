@@ -22,7 +22,7 @@ export const createSection = async (req, res) => {
 
     const { name, isActive } = req.body;
 
-    if (await Section.exists({ name })) {
+    if (await Section.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') } })) {
       return handleError(res, null, session, 409, 'La sección ya existe');
     }
 
@@ -145,7 +145,7 @@ export const updateSection = async (req, res) => {
       return handleError(res, null, session, 404, "La sección no existe");
     }
 
-    if (name && await Section.exists({ name, _id: { $ne: id } })) {
+    if (name && await Section.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') }, _id: { $ne: id } })) {
       return handleError(res, null, session, 400, "No puede repetir el nombre de otra sección creada");
     }
 

@@ -22,7 +22,7 @@ export const createItemType = async (req, res) => {
 
         const { name, description, section, isActive } = req.body;
 
-        if (await ItemType.exists({ name })) {
+        if (await ItemType.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') } })) {
             await session.abortTransaction();
             return handleError(res, null, session, 409, 'El tipo de ítem ya existe');
         }
@@ -119,7 +119,7 @@ export const updateItemType = async (req, res) => {
             return handleError(res, null, session, 404, "El tipo de ítem no existe");
         }
 
-        if (name && await ItemType.exists({ name, _id: { $ne: id } })) {
+        if (name && await ItemType.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') }, _id: { $ne: id } })) {
             await session.abortTransaction();
             return handleError(res, null, session, 400, "No puede repetir el nombre de otro tipo de ítem creado");
         }

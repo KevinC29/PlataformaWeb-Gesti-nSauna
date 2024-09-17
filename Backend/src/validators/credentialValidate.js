@@ -8,10 +8,8 @@ export const validateCredentialData = (data) => {
 
   // Validar `email` si está presente: debe ser una cadena de texto no vacía y tener formato de email
   if (data.hasOwnProperty('email')) {
-    if (
-      typeof data.email !== 'string' ||
-      data.email.trim().length === 0 ||
-      !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(data.email)
+    if ( typeof data.email !== 'string' ||
+      data.email.trim().length === 0
     ) {
       return { isValid: false, message: "El campo 'Email' debe ser una cadena no vacía con formato de email válido." };
     }
