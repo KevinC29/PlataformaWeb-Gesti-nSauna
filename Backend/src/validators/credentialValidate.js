@@ -11,7 +11,7 @@ export const validateCredentialData = (data) => {
     if ( typeof data.email !== 'string' ||
       data.email.trim().length === 0
     ) {
-      return { isValid: false, message: "El campo 'Email' debe ser una cadena no vacía con formato de email válido." };
+      return { isValid: false, message: "El campo 'Email' no puede estar vacío." };
     }
   }
 

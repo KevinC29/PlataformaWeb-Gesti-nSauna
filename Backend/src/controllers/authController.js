@@ -12,11 +12,11 @@ dotenv.config();
 export const login = async (req, res) => {
   let session;
   try {
-    
+
     const validationResult = validateCredentialData(req.body);
 
     if (!validationResult.isValid) {
-        return res.status(400).json({ error: validationResult.message });
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { email, password } = req.body;
@@ -34,31 +34,23 @@ export const login = async (req, res) => {
     }
 
     if (!credential.isActive) {
-      return handleError(res, null, session, 400, "Usuario inactivo");
+      return handleError(res, null, session, 400, "La cuenta de usuario esta desactivada");
     }
 
     const passwordTemp = process.env.PASSWORD_TEMP;
 
-    let isPasswordValid;
-    let isPasswordTemp = false;
-
-    if (password === passwordTemp) {
-      isPasswordTemp = true;
-    } else {
-      isPasswordValid = await verifyPassword(password, credential.password);
-    }
+    let isPasswordValid = await verifyPassword(password, credential.password);
+    let isPasswordTemp = await verifyPassword(passwordTemp, credential.password);
 
     if (isPasswordTemp) {
       const newPass = await encryptPassword(password);
-      await Credential.findByIdAndUpdate(
-        credential._id,
-        { $set: { password: newPass } },
-        { new: true, session }
-      ).exec();
+      credential.password = newPass;
+      await credential.save({ session });
     } else if (!isPasswordValid) {
+      await session.abortTransaction();
       return handleError(res, null, session, 400, "Contraseña inválida");
     }
-
+    
     const user = credential.user;
 
     const role = await Role.findById(user.role).exec();
@@ -92,23 +84,13 @@ export const login = async (req, res) => {
 export const resetPassword = async (req, res) => {
   let session;
   try {
-    // Validar el cuerpo de la solicitud
-    if (typeof req.body !== 'object' || req.body === null) {
-      return res.status(400).json({ error: "El cuerpo de la solicitud debe ser un objeto" });
+    const validationResult = validateCredentialData(req.body);
+
+    if (!validationResult.isValid) {
+      return res.status(400).json({ error: validationResult.message });
     }
 
     const { email } = req.body;
-
-    // Validar el campo email
-    if (!email || typeof email !== 'string' || email.trim() === '') {
-      return res.status(400).json({ error: "El email es requerido y debe ser una cadena no vacía" });
-    }
-
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: "El email no tiene un formato válido" });
-    }
 
     session = await mongoose.startSession();
     session.startTransaction();
@@ -120,7 +102,7 @@ export const resetPassword = async (req, res) => {
     }
 
     if (!credential.isActive) {
-      return handleError(res, null, session, 400, "Usuario inactivo");
+      return handleError(res, null, session, 400, "La credencial del Usuario esta inactiva");
     }
 
     const passwordTemp = process.env.PASSWORD_TEMP;
