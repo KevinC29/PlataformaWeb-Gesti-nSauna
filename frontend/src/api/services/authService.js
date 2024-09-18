@@ -4,7 +4,6 @@ import http from '../http';
 import { handleError } from '../../middleware/errorHandler';
 import apiConfig from '../apiConfig';
 
-// Definir la URL base para las rutas de autenticación
 const apiUrl = `${apiConfig.baseURL}/auth`;
 
 // Iniciar sesión
@@ -13,7 +12,6 @@ export const login = async (credentials) => {
     
     const response = await http.post(`${apiUrl}/login`, credentials);
 
-    // Guardar el token en localStorage si existe
     if (response.data && response.data.token) {
       localStorage.setItem(process.env.VUE_APP_TOKEN_NAME, response.data.token);
     }
@@ -29,8 +27,6 @@ export const login = async (credentials) => {
 export const resetPassword = async (data) => {
   try {
     const response = await http.post(`${apiUrl}/reset`, data);
-    console.log(response.data)
-    // Aquí podrías manejar la respuesta, como mostrar un mensaje al usuario
     return response.data;
   } catch (error) {
     handleError(error);
@@ -40,7 +36,6 @@ export const resetPassword = async (data) => {
 
 // Cerrar sesión
 export const logout = () => {
-  // Eliminar el token de localStorage
   localStorage.removeItem(process.env.VUE_APP_TOKEN_NAME);
 };
 

@@ -7,6 +7,7 @@ import itemType from '@/modules/itemType/store/index';
 import role from '@/modules/role/store/index';
 import item from '@/modules/item/store/index';
 import user from '@/modules/user/store/index';
+import client from '@/modules/client/store/index';
 
 const store = createStore({
   modules: {
@@ -17,7 +18,8 @@ const store = createStore({
     itemType,
     role,
     item,
-    user
+    user,
+    client
   }
 });
 

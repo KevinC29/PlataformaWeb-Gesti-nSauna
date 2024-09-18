@@ -1,15 +1,14 @@
 <template>
-    <div>
-      <h1>Create Client</h1>
-      <ClientForm />
-    </div>
+    <FormCreateClient/>
   </template>
-  
   <script>
-  import ClientForm from '@/components/ClientForm.vue';
-  
+  import FormCreateClient from '@/modules/client/components/FormCreateClient.vue';
+
   export default {
-    components: { ClientForm }
+    name: 'ClientCreate',
+    components: {
+        FormCreateClient,
+    }
   };
   </script>
   

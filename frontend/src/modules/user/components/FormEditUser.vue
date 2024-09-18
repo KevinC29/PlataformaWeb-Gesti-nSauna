@@ -156,7 +156,6 @@ export default {
       };
 
       try {
-        console.log(userData);
         const errorMsg = await this.updateUser({ id: this.$route.params.id, userData });
 
         if (errorMsg) {

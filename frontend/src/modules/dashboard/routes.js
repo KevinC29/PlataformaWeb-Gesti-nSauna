@@ -3,6 +3,7 @@ import itemTypeRoutes from '@/modules/itemType/routes';
 import roleRoutes  from '@/modules/role/routes';
 import item from '@/modules/item/routes';
 import user from '@/modules/user/routes';
+import client from '@/modules/client/routes';
 
 export default [
   {
@@ -37,6 +38,11 @@ export default [
       ...user.map(route => ({
         ...route,
         path: `users${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...client.map(route => ({
+        ...route,
+        path: `clients${route.path}`,
         name: `${route.name}`,
       })),
     ]

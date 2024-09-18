@@ -1,7 +1,7 @@
 // modules/credential/routes.js
 export default [
     {
-      path: '/credentials/:id/edit-password',
+      path: '/:id',
       name: 'CredentialEditPassword',
       component: () => import('./views/CredentialEditPassword.vue'),
       meta: {
@@ -10,7 +10,7 @@ export default [
       }
     },
     {
-      path: '/credentials/:id/edit-status',
+      path: '/edit-status',
       name: 'CredentialEditStatus',
       component: () => import('./views/CredentialEditStatus.vue'),
       meta: {

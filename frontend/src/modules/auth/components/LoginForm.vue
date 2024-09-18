@@ -54,11 +54,9 @@ export default {
     async handleLogin() {
       this.errorMessage = ''; // Clear previous error message
       try {
-        console.log("Attempting to login with:", { email: this.email, password: this.password });
         await this.login({ email: this.email, password: this.password });
         this.$router.push({ name: 'Dashboard' });
       } catch (error) {
-        console.error("Login failed:", error); // Añade un log para errores
         this.errorMessage = 'Login failed. Please check your credentials.';
       }
     }

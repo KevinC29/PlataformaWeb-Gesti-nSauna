@@ -5,13 +5,15 @@ import {
     updateUser,
     deleteUser
 } from '@/api/services/userService';
+import { updateCredentialStatus } from '@/api/services/credentialService';
+import { resetPassword } from '@/api/services/authService'; 
 
 export default {
     namespaced: true,
     state: {
         users: [],
         user: null,
-        roles: [], // Estado para los roles
+        roles: [],
         error: ''
     },
     mutations: {
@@ -98,7 +100,7 @@ export default {
         },
         async fetchAndSetRoles({ dispatch, commit }) {
             try {
-                await dispatch('role/fetchRoles', null, { root: true }); // Asegúrate de que el módulo 'role' exista y tenga 'fetchRoles'
+                await dispatch('role/fetchRoles', null, { root: true });
                 const roles = this.getters['role/roles'];
                 commit('SET_ROLES', roles);
                 return null;
@@ -106,6 +108,27 @@ export default {
                 const errorMsg = error.response?.data?.error || 'Failed to fetch roles';
                 commit('SET_ERROR', errorMsg);
                 return errorMsg;
+            }
+        },
+        async updateCredentialStatus({ commit }, statusData) {
+            try {
+                const response = await updateCredentialStatus(statusData);
+                return response.message;
+            } catch (error) {
+                const errorMsg = error.response?.data?.error || 'Failed to update credential status';
+                commit('SET_ERROR', errorMsg);
+                throw error;
+            }
+        },
+        // Nuevo método para resetear contraseñas
+        async resetPasswordCredential({ commit }, email) {
+            try {
+                const response = await resetPassword(email);
+                return response.message;
+            } catch (error) {
+                const errorMsg = error.response?.data?.error || 'Failed to reset password';
+                commit('SET_ERROR', errorMsg);
+                throw error;
             }
         }
     },
