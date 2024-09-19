@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         required: true,
-        default: false,
+        default: true,
     },
     client: {
         type: mongoose.Schema.Types.ObjectId,

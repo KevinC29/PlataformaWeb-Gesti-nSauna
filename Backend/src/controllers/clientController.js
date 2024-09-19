@@ -96,6 +96,22 @@ export const getClient = async (req, res) => {
     }
 };
 
+// Obtener un solo Cliente por id de usuario
+export const getClientByAuthenticatedUser = async (req, res) => {
+    try {
+        const userId = req.currentUser._id;
+        const client = await Client.findOne({ user: userId });
+
+        if (!client) {
+            return res.status(404).json({ error: "Cuenta de Cliente no encontrada" });
+        }
+
+        res.status(200).json({ data: client, message: "Cliente encontrado" });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
 // Actualizar un Cliente
 export const updateClient = async (req, res) => {
     let session;
