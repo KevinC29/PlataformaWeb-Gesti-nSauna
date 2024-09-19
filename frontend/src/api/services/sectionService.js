@@ -10,7 +10,6 @@ const apiUrl = `${apiConfig.baseURL}/section`;
 export const createSection = async (sectionData) => {
   try {
     const response = await http.post(apiUrl, sectionData);
-    console.log(response.data)
     return response.data;
   } catch (error) {
     handleError(error);

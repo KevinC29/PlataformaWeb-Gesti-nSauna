@@ -4,6 +4,7 @@ import roleRoutes  from '@/modules/role/routes';
 import item from '@/modules/item/routes';
 import user from '@/modules/user/routes';
 import client from '@/modules/client/routes';
+import comment from '@/modules/comment/routes';
 
 export default [
   {
@@ -43,6 +44,11 @@ export default [
       ...client.map(route => ({
         ...route,
         path: `clients${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...comment.map(route => ({
+        ...route,
+        path: `comments${route.path}`,
         name: `${route.name}`,
       })),
     ]

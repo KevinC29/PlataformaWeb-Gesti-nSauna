@@ -79,9 +79,9 @@
       </v-alert>
   
       <!-- Botones -->
-      <v-btn class="me-4" color="primary" @click="submitForm">
-        Guardar
-      </v-btn>
+      <v-btn class="me-4" color="primary" type="submit">
+      Guardar
+    </v-btn>
       <v-btn color="secondary" @click="cancel">
         Cancelar
       </v-btn>

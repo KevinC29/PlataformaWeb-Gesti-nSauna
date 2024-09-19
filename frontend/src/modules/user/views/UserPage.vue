@@ -44,7 +44,7 @@
 
     <!-- Columna de Correo Electrónico -->
     <template v-slot:[`item.email`]="{ item }">
-      {{ item.email }}
+      {{ item.email ? item.email : 'N/A'}}
     </template>
 
     <!-- Columna de Rol -->

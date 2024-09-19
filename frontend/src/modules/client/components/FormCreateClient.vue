@@ -2,19 +2,16 @@
   <form @submit.prevent="submitForm">
     <!-- Buscador de Usuario -->
     <v-autocomplete
-      v-model:search-input="searchTerm"
       v-model="state.user"
       :items="filteredUsersList"
       item-value="_id"
       item-title="fullName"
-      :error-messages="v$.state.user.$errors.map(e => e.$message)"
+      v-model:search-input="searchTerm"
       label="Buscar y Seleccionar Usuario"
       clearable
       dense
       :items-per-page="5"
       @update:search-input="filterUsers"
-      @change="onUserSelected"
-      @blur="v$.state.user.$touch"
     ></v-autocomplete>
 
     <!-- Alerta de errores -->
@@ -28,7 +25,7 @@
     </v-alert>
 
     <!-- Botones -->
-    <v-btn class="me-4" color="primary" @click="submitForm">
+    <v-btn class="me-4" color="primary" type="submit">
       Guardar
     </v-btn>
     <v-btn color="secondary" @click="cancel">
@@ -46,11 +43,11 @@ export default {
   data() {
     return {
       state: {
-        user: null,
+        user: null, // Mantén la referencia del usuario seleccionado
       },
-      usersList: [],
-      filteredUsersList: [],
-      searchTerm: '',
+      usersList: [], // Lista completa de usuarios
+      filteredUsersList: [], // Lista filtrada por búsqueda
+      searchTerm: '', // Búsqueda activa
       errorMessage: '',
       successMessage: '',
     };
@@ -60,7 +57,7 @@ export default {
   },
   methods: {
     ...mapActions('client', ['createClient', 'fetchAndSetUsers']),
-    
+
     async fetchData() {
       try {
         await this.fetchAndSetUsers();
@@ -70,21 +67,17 @@ export default {
             _id: user._id,
             fullName: `${user.name} ${user.lastName} (${user.dni})`,
           }));
-        this.filteredUsersList = this.usersList; // Initialize with all users
+        this.filteredUsersList = this.usersList; // Inicializar con todos los usuarios
       } catch (error) {
         this.errorMessage = 'Error al cargar los usuarios: ' + (error.message || 'Desconocido');
       }
     },
-    
+
     filterUsers(search) {
       const searchTerm = search.toLowerCase();
       this.filteredUsersList = this.usersList.filter(user =>
         user.fullName.toLowerCase().includes(searchTerm)
       );
-    },
-
-    onUserSelected(user) {
-      this.state.user = user ? user._id : null;
     },
 
     async submitForm() {

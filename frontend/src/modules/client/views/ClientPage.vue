@@ -29,12 +29,12 @@
   
       <!-- Columna de Usuario -->
       <template v-slot:[`item.user`]="{ item }">
-        {{ item.user.name }} {{ item.user.lastName }} <!-- Mostrar nombre y apellido del usuario asociado -->
+        {{ item.user.name }} {{ item.user.lastName }}
       </template>
   
       <!-- Columna de Cuenta -->
       <template v-slot:[`item.account`]="{ item }">
-        {{ item.account.toFixed(2) }} <!-- Mostrar cuenta con 2 decimales -->
+        {{ item.account.toFixed(2) }} 
       </template>
   
       <!-- Columna de Estado de Cuenta -->

@@ -39,6 +39,18 @@ export const getClient = async (id) => {
   }
 };
 
+// Obtener un cliente por ID de persona autenticada
+export const getClientByAuthenticatedUser = async () => {
+  try {
+    const response = await http.get(`${apiUrl}/by-user`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
+
 // Actualizar un cliente
 export const updateClient = async (id, clientData) => {
   try {

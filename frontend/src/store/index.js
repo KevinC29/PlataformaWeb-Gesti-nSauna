@@ -8,6 +8,7 @@ import role from '@/modules/role/store/index';
 import item from '@/modules/item/store/index';
 import user from '@/modules/user/store/index';
 import client from '@/modules/client/store/index';
+import comment from '@/modules/comment/store/index';
 
 const store = createStore({
   modules: {
@@ -19,7 +20,8 @@ const store = createStore({
     role,
     item,
     user,
-    client
+    client,
+    comment
   }
 });
 
