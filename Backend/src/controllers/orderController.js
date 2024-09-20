@@ -10,25 +10,21 @@ import { validateOrderData } from '../validators/orderValidate.js';
 export const createOrder = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateOrderData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateOrderData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { numberOrder, client } = req.body;
 
         if (!await Client.exists({ _id: client })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El cliente ingresado no existe');
         }
 
         if (await Order.exists({ numberOrder })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El numero de orden ya existe');
         }
 
@@ -76,7 +72,7 @@ export const getOrders = async (req, res) => {
             .exec();
 
         if (!orders.length) {
-            return res.status(404).json({ error: 'No existen órdenes' });
+            return handleError(res, null, 404, 'No existen órdenes');
         }
 
         const ordersWithDetails = await Promise.all(
@@ -111,7 +107,7 @@ export const getOrder = async (req, res) => {
             .exec();
 
         if (!order) {
-            return res.status(404).json({ error: "Orden no encontrada" });
+            return handleError(res, null, 404, 'Orden no encontrada');
         }
 
         const detailOrders = await DetailOrder.find({ order: order._id }).exec();
@@ -127,7 +123,6 @@ export const getOrder = async (req, res) => {
     }
 };
 
-
 // Obtener Órdenes por rango de fechas
 export const getOrdersByDate = async (req, res) => {
     try {
@@ -137,7 +132,7 @@ export const getOrdersByDate = async (req, res) => {
         const end = new Date(endDate);
 
         if (start > end) {
-            return res.status(400).json({ error: "La fecha de inicio no puede ser posterior a la fecha de fin" });
+            return handleError(res, null, 400, 'La fecha de inicio no puede ser posterior a la fecha de fin');
         }
 
         const orders = await Order.find({
@@ -154,7 +149,7 @@ export const getOrdersByDate = async (req, res) => {
             .exec();
 
         if (!orders.length) {
-            return res.status(404).json({ error: 'No existen órdenes en el rango de fechas proporcionado' });
+            return handleError(res, null, 400, 'No existen órdenes en el rango de fechas proporcionado');
         }
 
         const ordersWithDetails = await Promise.all(
@@ -177,40 +172,34 @@ export const getOrdersByDate = async (req, res) => {
 export const updateOrder = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateOrderData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateOrderData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { id } = req.params;
         const { consumptionAccount, balance, total, paymentState } = req.body;
 
         const order = await Order.findById(id).exec();
         if (!order) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "La orden no existe");
         }
 
         if (paymentState === "paid") {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "No se puede modificar la orden una vez pagada");
         }
 
         const detallesOrden = await DetailOrder.find({ order: id }).exec();
         if (detallesOrden.length === 0) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "No se encontraron detalles de orden asociados a esta orden");
         }
 
         const totalSum = detallesOrden.reduce((total, detalle) => total + detalle.price, 0);
 
         if (totalSum !== consumptionAccount || consumptionAccount !== total) {
-            await session.abortTransaction();
             return res.status(409).json({ error: "Error en el total de la orden" }); // Código 409 es más apropiado para conflictos de estado
         }
 
@@ -254,13 +243,11 @@ export const deleteOrder = async (req, res) => {
         const { id } = req.params;
         const order = await Order.findById(id).exec();
         if (!order) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "Orden no encontrada");
         }
 
         if (await DetailOrder.exists({ order: id })) {
-            await session.abortTransaction();
-            return res.status(409).json({ error: "Existen detalles de orden asociados a esta orden" });
+            return handleError(res, null, session, 409, "Existen detalles de orden asociados a esta orden");
         }
 
         await Order.findByIdAndDelete(id, { session });

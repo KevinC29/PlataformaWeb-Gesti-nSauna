@@ -10,15 +10,13 @@ import { validateDetailOrderData } from '../validators/detailOrderValidate.js';
 export const createDetailOrder = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateDetailOrderData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateDetailOrderData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { item, cantidad, price, order } = req.body;
         const existingItem = await Item.findById(item).exec();
@@ -26,22 +24,18 @@ export const createDetailOrder = async (req, res) => {
         const existingDetailOrder = await DetailOrder.findOne({ order, item }).exec();
 
         if (!existingItem) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, 'El ítem no existe');
         }
 
         if (!existingOrder) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, 'La orden no existe');
         }
 
         if (existingDetailOrder) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El ítem ya existe en esta orden');
         }
 
         if (!(existingItem.price * cantidad === price)) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
         }
 
@@ -85,7 +79,7 @@ export const getDetailOrders = async (req, res) => {
             .exec();
 
         if (!detailOrders.length) {
-            return res.status(404).json({ error: 'No existen detalles de órdenes' });
+            return handleError(res, null, 404, 'No existen detalles de órdenes');
         }
 
         res.status(200).json({ data: detailOrders, message: "Detalles de órdenes extraídos con éxito" });
@@ -104,7 +98,7 @@ export const getDetailOrder = async (req, res) => {
             .exec();
 
         if (!detailOrder) {
-            return res.status(404).json({ error: "Detalle de orden no encontrado" });
+            return handleError(res, null, 404, 'Detalle de orden no encontrado');
         }
 
         res.status(200).json({ data: detailOrder, message: "Detalle de orden encontrado" });
@@ -117,35 +111,28 @@ export const getDetailOrder = async (req, res) => {
 export const updateDetailOrder = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateDetailOrderData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateDetailOrderData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { id } = req.params;
         const { cantidad, price } = req.body;
 
         const detailOrder = await DetailOrder.findById(id).exec();
-
         if (!detailOrder) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "El detalle de orden no existe");
         }
 
         const existingItem = await Item.findById(detailOrder.item).exec();
-
         if (!(existingItem.price * cantidad === price)) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
         }
 
         const updatedFields = { cantidad, price };
-
         const updatedDetailOrder = await DetailOrder.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
         
         // await saveAuditEntry({
@@ -186,12 +173,10 @@ export const deleteDetailOrder = async (req, res) => {
         const order = await Order.findById(detailOrder.order).exec();
 
         if (!detailOrder) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "Detalle de orden no encontrado");
         }
 
         const totalEliminate = detailOrder.price;
-
         const updateOrder = await Order.findByIdAndUpdate(order._id, { consumptionAccount: order.consumptionAccount - totalEliminate, total: order.total - totalEliminate }, { new: true, session }).exec();
 
         await DetailOrder.findByIdAndDelete(id, { session });

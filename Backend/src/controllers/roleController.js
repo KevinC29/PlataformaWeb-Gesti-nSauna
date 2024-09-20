@@ -9,20 +9,18 @@ import { validateRoleData } from '../validators/roleValidate.js';
 export const createRole = async (req, res) => {
   let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const validationResult = validateRoleData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, session, 400, validationResult.message);
     }
-
-    session = await mongoose.startSession();
-    session.startTransaction();
 
     const { name, isActive } = req.body;
 
     if (await Role.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') } })) {
-      await session.abortTransaction();
       return handleError(res, null, session, 409, 'El rol ya existe');
     }
 
@@ -60,7 +58,7 @@ export const getRoles = async (req, res) => {
   try {
     const roles = await Role.find().select("_id name isActive").exec();
     if (!roles.length) {
-      return res.status(404).json({ error: 'No existen roles' });
+      return handleError(res, null, 404, 'No existen roles');
     }
     res.status(200).json({ data: roles, message: "Roles extraídos con éxito" });
   } catch (error) {
@@ -73,7 +71,7 @@ export const getRole = async (req, res) => {
   try {
     const role = await Role.findById(req.params.id).select("_id name isActive").exec();
     if (!role) {
-      return res.status(404).json({ error: "Rol no encontrado" });
+      return handleError(res, null, 404, 'Rol no encontrado');
     }
     res.status(200).json({ data: role, message: "Rol encontrado" });
   } catch (error) {
@@ -85,27 +83,24 @@ export const getRole = async (req, res) => {
 export const updateRole = async (req, res) => {
   let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const validationResult = validateRoleData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, session, 400, validationResult.message);
     }
-
-    session = await mongoose.startSession();
-    session.startTransaction();
 
     const { id } = req.params;
     const { name, isActive } = req.body;
 
     const role = await Role.findById(id).exec();
     if (!role) {
-      await session.abortTransaction();
       return handleError(res, null, session, 404, "El rol no existe");
     }
 
     if (name && await Role.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') }, _id: { $ne: id } })) {
-      await session.abortTransaction();
       return handleError(res, null, session, 400, "No puede repetir el nombre de otro rol creado");
     }
 
@@ -148,7 +143,6 @@ export const deleteRole = async (req, res) => {
 
     const role = await Role.findById(id).exec();
     if (!role) {
-      await session.abortTransaction();
       return handleError(res, null, session, 404, "Rol no encontrado");
     }
 

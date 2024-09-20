@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Section from '../models/sectionModel.js';
 import ItemType from '../models/itemTypeModel.js';
-import Item from  '../models/itemModel.js';
+import Item from '../models/itemModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { saveAuditEntry, generateChanges } from '../utils/helpers/handleAudit.js';
 import { validateSectionData } from '../validators/sectionValidate.js';
@@ -10,15 +10,14 @@ import { validateSectionData } from '../validators/sectionValidate.js';
 export const createSection = async (req, res) => {
   let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const validationResult = validateSectionData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, session, 400, validationResult.message);
     }
-
-    session = await mongoose.startSession();
-    session.startTransaction();
 
     const { name, isActive } = req.body;
 
@@ -60,7 +59,7 @@ export const getSections = async (req, res) => {
   try {
     const sections = await Section.find().select("_id name isActive").exec();
     if (!sections.length) {
-      return res.status(404).json({ error: 'No existen secciones' });
+      return handleError(res, null, 404, 'No existen secciones');
     }
     res.status(200).json({ data: sections, message: "Secciones extraídas con éxito" });
   } catch (error) {
@@ -74,7 +73,7 @@ export const getSectionsWithItems = async (req, res) => {
     const sections = await Section.find().select('_id name isActive').exec();
 
     if (!sections.length) {
-      return res.status(404).json({ error: 'No existen secciones' });
+      return handleError(res, null, 404, 'No existen secciones');
     }
 
     const sectionPromises = sections.map(async (section) => {
@@ -115,7 +114,7 @@ export const getSection = async (req, res) => {
   try {
     const section = await Section.findById(req.params.id).select("_id name isActive").exec();
     if (!section) {
-      return res.status(404).json({ error: "Sección no encontrada" });
+      return handleError(res, null, 404, 'Sección no encontrada');
     }
     res.status(200).json({ data: section, message: "Sección encontrada" });
   } catch (error) {
@@ -127,15 +126,14 @@ export const getSection = async (req, res) => {
 export const updateSection = async (req, res) => {
   let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
 
     const validationResult = validateSectionData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, session, 400, validationResult.message);
     }
-
-    session = await mongoose.startSession();
-    session.startTransaction();
 
     const { id } = req.params;
     const { name, isActive } = req.body;
