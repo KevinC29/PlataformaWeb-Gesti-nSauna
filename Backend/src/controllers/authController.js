@@ -13,18 +13,17 @@ export const login = async (req, res) => {
   let session;
   try {
 
+    session = await mongoose.startSession();
+    session.startTransaction();
+
     const validationResult = validateCredentialData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, session, 400, validationResult.message);
     }
 
     const { email, password } = req.body;
 
-    session = await mongoose.startSession();
-    session.startTransaction();
-
-    // Buscar la credencial con el email proporcionado
     const credential = await Credential.findOne({ email })
       .populate("user", "name lastName role isActive")
       .exec();
@@ -47,12 +46,10 @@ export const login = async (req, res) => {
       credential.password = newPass;
       await credential.save({ session });
     } else if (!isPasswordValid) {
-      await session.abortTransaction();
       return handleError(res, null, session, 400, "Contraseña inválida");
     }
     
     const user = credential.user;
-
     const role = await Role.findById(user.role).exec();
 
     const response = {
@@ -84,16 +81,17 @@ export const login = async (req, res) => {
 export const resetPassword = async (req, res) => {
   let session;
   try {
-    const validationResult = validateCredentialData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
-    const { email } = req.body;
 
     session = await mongoose.startSession();
     session.startTransaction();
+
+    const validationResult = validateCredentialData(req.body);
+
+    if (!validationResult.isValid) {
+      return handleError(res, null, session, 400, validationResult.message);
+    }
+
+    const { email } = req.body;
 
     const credential = await Credential.findOne({ email }).exec();
 

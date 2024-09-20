@@ -10,20 +10,18 @@ import { validateClientData } from '../validators/clientValidate.js';
 export const createClient = async (req, res) => {
     let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
 
         const validationResult = validateClientData(req.body);
 
         if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
-        session = await mongoose.startSession();
-        session.startTransaction();
-
+            return handleError(res, null, session, 400, validationResult.message);
+          }
+        
         const { user } = req.body;
 
         if (!await User.exists({ _id: user })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El usuario ingresado no existe');
         }
 
@@ -69,7 +67,7 @@ export const getClients = async (req, res) => {
             .exec();
 
         if (!clients.length) {
-            return res.status(404).json({ error: 'No existen clientes' });
+            return handleError(res, null, 404, 'No existen clientes');
         }
 
         res.status(200).json({ data: clients, message: "Clientes extraídos con éxito" });
@@ -87,7 +85,7 @@ export const getClient = async (req, res) => {
             .exec();
 
         if (!client) {
-            return res.status(404).json({ error: "Cliente no encontrado" });
+            return handleError(res, null, 404, 'Cliente no encontrado');
         }
 
         res.status(200).json({ data: client, message: "Cliente encontrado" });
@@ -96,14 +94,14 @@ export const getClient = async (req, res) => {
     }
 };
 
-// Obtener un solo Cliente por id de usuario
+// Obtener un solo Cliente por id de usuario autenticado
 export const getClientByAuthenticatedUser = async (req, res) => {
     try {
         const userId = req.currentUser._id;
         const client = await Client.findOne({ user: userId });
 
         if (!client) {
-            return res.status(404).json({ error: "Cuenta de Cliente no encontrada" });
+            return handleError(res, null, 404, 'Cuenta de Cliente no encontrada');
         }
 
         res.status(200).json({ data: client, message: "Cliente encontrado" });
@@ -116,22 +114,20 @@ export const getClientByAuthenticatedUser = async (req, res) => {
 export const updateClient = async (req, res) => {
     let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
 
         const validationResult = validateClientData(req.body);
 
         if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
+            return handleError(res, null, session, 400, validationResult.message);
         }
-
-        session = await mongoose.startSession();
-        session.startTransaction();
 
         const { id } = req.params;
         const { account, accountState } = req.body;
 
         const client = await Client.findById(id).exec();
         if (!client) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "El cliente no existe");
         }
 
@@ -179,8 +175,7 @@ export const deleteClient = async (req, res) => {
         }
 
         if (await Order.exists({ client: id })) {
-            await session.abortTransaction();
-            return res.status(409).json({ error: "Existen ordenes asociados a este cliente" });
+            return handleError(res, null, session, 409, 'Existen ordenes asociados a este cliente');
         }
 
         await Client.findByIdAndDelete(id, { session }).exec();

@@ -195,7 +195,6 @@ export const updateUser = async (req, res) => {
     if (email && email.trim() !== '') {
       await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();
     }
-
     // await saveAuditEntry({
     //   eventType: 'UPDATE',
     //   documentId: updatedUser._id,
@@ -217,7 +216,6 @@ export const updateUser = async (req, res) => {
     await session.commitTransaction();
     res.status(200).json({ data: { updatedUser }, message: "Usuario actualizado con éxito" });
   } catch (error) {
-    console.log(error);
     if (session && session.inTransaction()) {
       try {
         await session.abortTransaction();

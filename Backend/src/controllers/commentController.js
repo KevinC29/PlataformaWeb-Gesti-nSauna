@@ -9,20 +9,18 @@ import { validateCommentData } from '../validators/commentValidate.js';
 export const createComment = async (req, res) => {
     let session;
     try {
+        session = await mongoose.startSession();
+        session.startTransaction();
 
         const validationResult = validateCommentData(req.body);
 
         if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
+            return handleError(res, null, session, 400, validationResult.message);
         }
-
-        session = await mongoose.startSession();
-        session.startTransaction();
 
         const { message, client } = req.body;
 
         if (client && !await Client.exists({ _id: client })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El cliente ingresado no existe');
         }
 
@@ -70,7 +68,7 @@ export const getComments = async (req, res) => {
             .exec();
 
         if (!comments.length) {
-            return res.status(404).json({ error: 'No existen comentarios' });
+            return handleError(res, null, 404, 'No existen comentarios');
         }
 
         res.status(200).json({ data: comments, message: "Comentarios extraídos con éxito" });
@@ -82,18 +80,17 @@ export const getComments = async (req, res) => {
 // Actualizar el estado de un Comentario
 export const updateCommentStatus = async (req, res) => {
     try {
-
         const validationResult = validateCommentData(req.body);
 
         if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
+            return handleError(res, null, session, 400, validationResult.message);
         }
 
         const { _id, isActive } = req.body;
         const comment = await Comment.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
         if (!comment) {
-            return res.status(404).json({ error: "El comentario no se encuentra registrado" });
+            return handleError(res, null, 404, 'El comentario no se encuentra registrado');
         }
 
         const successMessage = isActive ? "Comentario activado con éxito" : "Comentario desactivado con éxito";
@@ -112,8 +109,8 @@ export const deleteComment = async (req, res) => {
 
         const { id } = req.params;
         const comment = await Comment.findById(id).exec();
+
         if (!comment) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "Comentario no encontrado");
         }
 

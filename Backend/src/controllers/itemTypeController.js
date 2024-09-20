@@ -10,25 +10,21 @@ import { validateItemTypeData } from '../validators/itemTypeValidate.js';
 export const createItemType = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateItemTypeData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateItemTypeData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { name, description, section, isActive } = req.body;
 
         if (await ItemType.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') } })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'El tipo de ítem ya existe');
         }
 
         if (!await Section.exists({ _id: section })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'La sección ingresada no existe');
         }
 
@@ -70,7 +66,7 @@ export const getItemTypes = async (req, res) => {
             .exec();
 
         if (itemTypes.length === 0) {
-            return res.status(404).json({ error: 'No existen tipos de ítem' });
+            return handleError(res, null, session, 404, 'No existen tipos de ítem');
         }
 
         res.status(200).json({ data: itemTypes, message: "Tipos de ítem extraídos con éxito" });
@@ -88,7 +84,7 @@ export const getItemType = async (req, res) => {
             .exec();
 
         if (!itemType) {
-            return res.status(404).json({ error: "Tipo de ítem no encontrado" });
+            return handleError(res, null, session, 404, 'Tipo de ítem no encontrado');
         }
 
         res.status(200).json({ data: itemType, message: "Tipo de ítem encontrado" });
@@ -101,31 +97,26 @@ export const getItemType = async (req, res) => {
 export const updateItemType = async (req, res) => {
     let session;
     try {
-
-        const validationResult = validateItemTypeData(req.body);
-
-        if (!validationResult.isValid) {
-            return res.status(400).json({ error: validationResult.message });
-        }
-
         session = await mongoose.startSession();
         session.startTransaction();
+
+        const validationResult = validateItemTypeData(req.body);
+        if (!validationResult.isValid) {
+            return handleError(res, null, session, 400, validationResult.message);
+        }
 
         const { id } = req.params;
         const { name, description, section, isActive } = req.body;
 
         if (!await ItemType.exists({ _id: id })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "El tipo de ítem no existe");
         }
 
         if (name && await ItemType.exists({ name: { $regex: new RegExp(`^${name}$`, 'i') }, _id: { $ne: id } })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 400, "No puede repetir el nombre de otro tipo de ítem creado");
         }
 
         if (section && !await Section.exists({ _id: section })) {
-            await session.abortTransaction();
             return handleError(res, null, session, 409, 'La sección ingresada no existe');
         }
 
@@ -171,13 +162,11 @@ export const deleteItemType = async (req, res) => {
         const { id } = req.params;
         const itemType = await ItemType.findById(id).exec();
         if (!itemType) {
-            await session.abortTransaction();
             return handleError(res, null, session, 404, "Tipo de ítem no encontrado");
         }
 
         if (await Item.exists({ itemType: id })) {
-            await session.abortTransaction();
-            return res.status(409).json({ error: "Existen ítems asociados a este tipo de ítem" });
+            return handleError(res, null, session, 409, "Existen ítems asociados a este tipo de ítem");
         }
 
         await ItemType.findByIdAndDelete(id, { session }).exec();

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Credential from '../models/credentialModel.js';
+import User from '../models/userModel.js';
 import handleError from '../utils/helpers/handleError.js';
 import { encryptPassword, verifyPassword } from '../utils/helpers/handlePassword.js';
 import { validateCredentialData } from '../validators/credentialValidate.js';
@@ -8,33 +9,28 @@ import { validateCredentialData } from '../validators/credentialValidate.js';
 export const updateCredentialPassword = async (req, res) => {
   let session;
   try {
-
-    const validationResult = validateCredentialData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
     session = await mongoose.startSession();
     session.startTransaction();
+
+    const validationResult = validateCredentialData(req.body);
+    if (!validationResult.isValid) {
+      return handleError(res, null, session, 400, validationResult.message);
+    }
 
     const { id } = req.params;
     const { password, newPassword, confirmPassword } = req.body;
 
-    const credential = await Credential.findOne({ user: id }).exec();
+    const credential = await Credential.findById(id).exec();
 
     if (!credential) {
-      await session.abortTransaction();
       return handleError(res, null, session, 404, 'Credencial no encontrada');
     }
 
     if (password && !(await verifyPassword(password, credential.password))) {
-      await session.abortTransaction();
       return handleError(res, null, session, 400, 'La contraseña actual es incorrecta');
     }
 
     if (newPassword && newPassword !== confirmPassword) {
-      await session.abortTransaction();
       return handleError(res, null, session, 400, 'Las nuevas contraseñas no coinciden');
     }
 
@@ -79,21 +75,51 @@ export const updateCredentialStatus = async (req, res) => {
     const validationResult = validateCredentialData(req.body);
 
     if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
+      return handleError(res, null, 400, validationResult.message);
     }
 
     const { _id, isActive } = req.body;
-    
+
     const credentialUser = await Credential.findOne({ user: _id }).exec();
 
     if (!credentialUser) {
-      return res.status(404).json({ error: "Credencial no encontrada" });
+      return handleError(res, null, 404, "Credencial no encontrada");
     }
 
     const credential = await Credential.findByIdAndUpdate(credentialUser._id, { isActive }, { new: true }).exec();
 
     const successMessage = isActive ? "Credencial activada con éxito" : "Credencial desactivada con éxito";
     res.status(200).json({ message: successMessage, data: credential });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Obtener un solo usuario por id de usuario
+export const getUserWithCredential = async (req, res) => {
+  try {
+    const userId = req.currentUser._id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return handleError(res, null, 404, 'Cuenta de usuario no encontrada');
+    }
+
+    const credential = await Credential.findOne({ user: userId }).exec();
+
+    if (!credential) {
+      return handleError(res, null, 404, 'Credenciales no encontradas');
+    }
+
+    const userWithCredentialId = {
+      ...user.toObject(),
+      credentialId: credential._id
+    };
+
+    res.status(200).json({
+      data: userWithCredentialId,
+      message: "Usuario y credencial encontrados"
+    });
   } catch (error) {
     handleError(res, error);
   }
