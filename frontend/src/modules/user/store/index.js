@@ -6,7 +6,9 @@ import {
     deleteUser
 } from '@/api/services/userService';
 import { updateCredentialStatus } from '@/api/services/credentialService';
-import { resetPassword } from '@/api/services/authService'; 
+import { resetPassword } from '@/api/services/authService';
+import { handleError } from '@/middleware/errorHandler';
+// import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
     namespaced: true,
@@ -49,9 +51,9 @@ export default {
                 commit('SET_USERS', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to fetch users';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async fetchUser({ commit }, id) {
@@ -60,9 +62,9 @@ export default {
                 commit('SET_USER', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to fetch user';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async createUser({ commit }, userData) {
@@ -71,9 +73,9 @@ export default {
                 commit('ADD_USER', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to create user';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async updateUser({ commit }, { id, userData }) {
@@ -82,9 +84,9 @@ export default {
                 commit('UPDATE_USER', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to update user';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async deleteUser({ commit }, id) {
@@ -93,9 +95,9 @@ export default {
                 commit('DELETE_USER', id);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to delete user';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async fetchAndSetRoles({ dispatch, commit }) {
@@ -105,9 +107,9 @@ export default {
                 commit('SET_ROLES', roles);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to fetch roles';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async updateCredentialStatus({ commit }, statusData) {
@@ -115,7 +117,7 @@ export default {
                 const response = await updateCredentialStatus(statusData);
                 return response.message;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to update credential status';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
                 throw error;
             }
@@ -126,7 +128,7 @@ export default {
                 const response = await resetPassword(email);
                 return response.message;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to reset password';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
                 throw error;
             }

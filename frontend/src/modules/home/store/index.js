@@ -1,6 +1,5 @@
-// src/modules/home/store/index.js
-
 import { getSectionsWithItems } from '@/api/services/sectionService';
+import { handleError } from '@/middleware/errorHandler';
 
 export default {
   namespaced: true,
@@ -16,11 +15,11 @@ export default {
     async fetchSections({ commit }) {
       try {
         const data = await getSectionsWithItems();
-        console.log("llegue aqui 2")
-        console.log(data)
         commit('SET_SECTIONS', data.data);
       } catch (error) {
         console.error('Failed to fetch sections with items:', error);
+        handleError(error);
+        throw error;
       }
     }
   },

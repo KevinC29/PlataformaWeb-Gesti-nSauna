@@ -27,3 +27,15 @@ export const updateCredentialStatus = async (statusData) => {
     throw error;
   }
 };
+
+// Obtener un usuario por ID de persona autenticada
+export const getUserByAuthenticatedUser = async () => {
+  try {
+    const response = await http.get(`${apiUrl}/user-profile`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+

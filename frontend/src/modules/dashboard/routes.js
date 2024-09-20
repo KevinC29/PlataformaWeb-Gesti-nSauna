@@ -5,6 +5,7 @@ import item from '@/modules/item/routes';
 import user from '@/modules/user/routes';
 import client from '@/modules/client/routes';
 import comment from '@/modules/comment/routes';
+import credential from '@/modules/credential/routes';
 
 export default [
   {
@@ -49,6 +50,11 @@ export default [
       ...comment.map(route => ({
         ...route,
         path: `comments${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...credential.map(route => ({
+        ...route,
+        path: `credentials${route.path}`,
         name: `${route.name}`,
       })),
     ]

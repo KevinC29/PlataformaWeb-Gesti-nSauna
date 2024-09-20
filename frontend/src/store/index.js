@@ -9,6 +9,7 @@ import item from '@/modules/item/store/index';
 import user from '@/modules/user/store/index';
 import client from '@/modules/client/store/index';
 import comment from '@/modules/comment/store/index';
+import credential from '@/modules/credential/store/index';
 
 const store = createStore({
   modules: {
@@ -21,7 +22,8 @@ const store = createStore({
     item,
     user,
     client,
-    comment
+    comment,
+    credential
   }
 });
 

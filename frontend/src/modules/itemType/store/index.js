@@ -5,6 +5,8 @@ import {
   updateItemType,
   deleteItemType
 } from '@/api/services/itemTypeService';
+import { handleError } from '@/middleware/errorHandler';
+// import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
   namespaced: true,
@@ -47,9 +49,9 @@ export default {
         commit('SET_ITEMTYPES', response.data);
         return null; 
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to fetch itemTypes';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     },
     async fetchItemType({ commit }, id) {
@@ -58,9 +60,9 @@ export default {
         commit('SET_ITEMTYPE', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to fetch itemType';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     },
     async createItemType({ commit }, itemTypeData) {
@@ -69,9 +71,9 @@ export default {
         commit('ADD_ITEMTYPE', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to create itemType';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg; 
+        throw error;
       }
     },
     async updateItemType({ commit }, { id, itemTypeData }) {
@@ -80,9 +82,9 @@ export default {
         commit('UPDATE_ITEMTYPE', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to update itemType';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg; 
+        throw error;
       }
     },
     async deleteItemType({ commit }, id) {
@@ -91,9 +93,9 @@ export default {
         commit('DELETE_ITEMTYPE', id);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to delete itemType';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     },
     async fetchAndSetSections({ dispatch, commit }) {
@@ -103,9 +105,9 @@ export default {
         commit('SET_SECTIONS', sections);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to fetch sections';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     }
   },

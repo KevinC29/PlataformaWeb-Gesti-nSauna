@@ -53,7 +53,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('client', ['users', 'error']),
+    ...mapGetters('client', ['users', 'error', 'success']),
   },
   methods: {
     ...mapActions('client', ['createClient', 'fetchAndSetUsers']),
@@ -67,9 +67,9 @@ export default {
             _id: user._id,
             fullName: `${user.name} ${user.lastName} (${user.dni})`,
           }));
-        this.filteredUsersList = this.usersList; // Inicializar con todos los usuarios
+        this.filteredUsersList = this.usersList;
       } catch (error) {
-        this.errorMessage = 'Error al cargar los usuarios: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
       }
     },
 
@@ -93,10 +93,10 @@ export default {
         const errorMsg = await this.createClient(clientData);
 
         if (errorMsg) {
-          this.errorMessage = errorMsg;
+          this.errorMessage = this.error;
           this.successMessage = '';
         } else {
-          this.successMessage = 'Cliente creado con éxito';
+          this.successMessage = this.success;
           this.errorMessage = '';
 
           setTimeout(() => {
@@ -104,7 +104,7 @@ export default {
           }, 2000);
         }
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },

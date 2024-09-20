@@ -68,7 +68,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('client', ['client', 'error']),
+    ...mapGetters('client', ['client', 'error', 'success']),
   },
   methods: {
     ...mapActions('client', ['updateClient', 'fetchClient']),
@@ -77,7 +77,7 @@ export default {
       try {
         const errorMsg = await this.fetchClient(this.$route.params.id);
         if (errorMsg) {
-          this.errorMessage = errorMsg;
+          this.errorMessage = this.error;
         } else {
           const client = this.client;
           this.state = {
@@ -86,7 +86,7 @@ export default {
           };
         }
       } catch (error) {
-        this.errorMessage = 'Error al cargar los datos: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
       }
     },
  
@@ -110,12 +110,11 @@ export default {
 
       try {
         const errorMsg = await this.updateClient({ id: this.$route.params.id, clientData });
-
         if (errorMsg) {
-          this.errorMessage = errorMsg;
+          this.errorMessage = this.error;
           this.successMessage = '';
         } else {
-          this.successMessage = 'Cliente actualizado con éxito';
+          this.successMessage = this.success;
           this.errorMessage = '';
 
           setTimeout(() => {
@@ -123,7 +122,7 @@ export default {
           }, 2000);
         }
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },

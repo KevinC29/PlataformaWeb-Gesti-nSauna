@@ -120,6 +120,7 @@ export default {
                 commit('SET_FILTERED_ITEMS', filteredItems);
             } catch (error) {
                 handleError(error);
+                throw error;
             }
         },
         cleanSidebar({ commit }) {
@@ -127,6 +128,7 @@ export default {
                 commit('CLEAR_SIDEBAR');
             } catch (error) {
                 handleError(error);
+                throw error;
             }
         }
     }

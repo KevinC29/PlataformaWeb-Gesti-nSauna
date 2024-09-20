@@ -5,6 +5,8 @@ import {
     deleteComment,
 } from '@/api/services/commentService';
 import { getClientByAuthenticatedUser } from '@/api/services/clientService';
+import { handleError } from '@/middleware/errorHandler';
+// import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
     namespaced: true,
@@ -47,9 +49,9 @@ export default {
                 commit('SET_COMMENTS', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to fetch comments';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async createComment({ commit }, commentData) {
@@ -58,9 +60,9 @@ export default {
                 commit('ADD_COMMENT', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to create comment';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async updateCommentStatus({ commit }, statusData) {
@@ -69,7 +71,7 @@ export default {
                 commit('UPDATE_COMMENT', response.data);
                 return response.message;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to update comment status';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
                 throw error;
             }
@@ -80,9 +82,9 @@ export default {
                 commit('DELETE_COMMENT', id);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to delete comment';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
         async fetchAndSetClient({ commit }) {
@@ -91,9 +93,9 @@ export default {
                 commit('SET_CLIENT', response.data);
                 return null;
             } catch (error) {
-                const errorMsg = error.response?.data?.error || 'Failed to fetch client';
+                const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
-                return errorMsg;
+                throw error;
             }
         },
     },

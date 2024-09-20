@@ -5,6 +5,8 @@ import {
   updateSection,
   deleteSection
 } from '@/api/services/sectionService';
+import { handleError } from '@/middleware/errorHandler';
+// import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
   namespaced: true,
@@ -43,9 +45,9 @@ export default {
         commit('SET_SECTIONS', response.data);
         return null; 
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to fetch sections';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     },
     async fetchSection({ commit }, id) {
@@ -54,9 +56,9 @@ export default {
         commit('SET_SECTION', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to fetch section';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     },
     async createSection({ commit }, sectionData) {
@@ -65,9 +67,9 @@ export default {
         commit('ADD_SECTION', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to create section';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg; 
+        throw error;
       }
     },
     async updateSection({ commit }, { id, sectionData }) {
@@ -76,9 +78,9 @@ export default {
         commit('UPDATE_SECTION', response.data);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to update section';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg; 
+        throw error;
       }
     },
     async deleteSection({ commit }, id) {
@@ -87,9 +89,9 @@ export default {
         commit('DELETE_SECTION', id);
         return null;
       } catch (error) {
-        const errorMsg = error.response?.data?.error || 'Failed to delete section';
+        const errorMsg = handleError(error);
         commit('SET_ERROR', errorMsg);
-        return errorMsg;
+        throw error;
       }
     }
   },
