@@ -1,25 +1,12 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="filteredItems"
-    :sort-by="[{ value: 'name', order: 'desc' }] "
-    :items-per-page="10"
-  >
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>USUARIOS</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-text-field
-          v-model="search"
-          density="compact"
-          label="Buscar"
-          prepend-inner-icon="mdi-magnify"
-          variant="solo-filled"
-          flat
-          hide-details
-          single-line
-        ></v-text-field>
+        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+          variant="solo-filled" flat hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
         <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
           Crear Usuario
@@ -44,7 +31,7 @@
 
     <!-- Columna de Correo Electrónico -->
     <template v-slot:[`item.email`]="{ item }">
-      {{ item.email ? item.email : 'N/A'}}
+      {{ item.email ? item.email : 'N/A' }}
     </template>
 
     <!-- Columna de Rol -->
@@ -61,7 +48,8 @@
 
     <!-- Columna de Estado de Credencial -->
     <template v-slot:[`item.credentialStatus`]="{ item }">
-      <v-btn @click="toggleCredentialStatus(item)" :color="item.credentialStatus ? 'green' : 'red'" class="text-uppercase" small>
+      <v-btn @click="toggleCredentialStatus(item)" :color="item.credentialStatus ? 'green' : 'red'"
+        class="text-uppercase" small>
         {{ item.credentialStatus ? 'Activo' : 'Inactivo' }}
       </v-btn>
     </template>
@@ -97,8 +85,11 @@
       <v-card-title class="text-h5">
         ¿Estás seguro de querer eliminar este usuario?
       </v-card-title>
-      <v-alert v-if="showErrorAlert" type="error" class="mt-3">
+      <v-alert v-if="errorMessage" type="error" class="mt-3">
         {{ errorMessage }}
+      </v-alert>
+      <v-alert v-if="successMessage" type="success" class="mt-3">
+        {{ successMessage }}
       </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -116,9 +107,9 @@
   <v-dialog v-model="dialogStatusUpdate" max-width="500px">
     <v-card>
       <v-card-title class="text-h5">
-        {{ statusUpdateMessage }}
+        {{ statusUpdateSuccessMessage }}
       </v-card-title>
-      <v-alert v-if="showStatusUpdateError" type="error" class="mt-3">
+      <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3">
         {{ statusUpdateErrorMessage }}
       </v-alert>
       <v-card-actions>
@@ -134,9 +125,9 @@
   <v-dialog v-model="dialogResetPassword" max-width="500px">
     <v-card>
       <v-card-title class="text-h5">
-        {{ passwordResetMessage }}
+        {{ passwordResetSuccessMessage }}
       </v-card-title>
-      <v-alert v-if="showPasswordResetError" type="error" class="mt-3">
+      <v-alert v-if="passwordResetErrorMessage" type="error" class="mt-3">
         {{ passwordResetErrorMessage }}
       </v-alert>
       <v-card-actions>
@@ -155,32 +146,31 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {
+      sortBy: [{ key: 'name', order: 'asc' }],
       search: '',
       dialogDelete: false,
       dialogStatusUpdate: false,
       dialogResetPassword: false,
       editedItem: null,
-      showErrorAlert: false,
       errorMessage: '',
-      showStatusUpdateError: false,
-      statusUpdateMessage: '',
+      successMessage: '',
+      statusUpdateSuccessMessage: '',
       statusUpdateErrorMessage: '',
-      showPasswordResetError: false,
-      passwordResetMessage: '',
+      passwordResetSuccessMessage: '',
       passwordResetErrorMessage: '',
     };
   },
   computed: {
-    ...mapGetters('user', ['users', 'error']),
+    ...mapGetters('user', ['users', 'error', 'success']),
     headers() {
       return [
-        { title: 'Nombre', value: 'name', align: 'start' },
-        { title: 'Apellido', value: 'lastName' },
-        { title: 'DNI', value: 'dni' },
-        { title: 'Correo Electrónico', value: 'email' },
-        { title: 'Rol', value: 'role.name' },
-        { title: 'Estado Usuario', value: 'isActive' },
-        { title: 'Estado Credencial', value: 'credentialStatus' },
+        { title: 'Nombre', key: 'name', align: 'start' },
+        { title: 'Apellido', key: 'lastName' },
+        { title: 'DNI', key: 'dni' },
+        { title: 'Correo Electrónico', key: 'email' },
+        { title: 'Rol', key: 'role.name' },
+        { title: 'Estado Usuario', key: 'isActive' },
+        { title: 'Estado Credencial', key: 'credentialStatus' },
         { title: 'Resetear Contraseña', value: 'resetPassword', sortable: false },
         { title: 'Acciones', value: 'actions', sortable: false }
       ];
@@ -198,7 +188,7 @@ export default {
   },
   methods: {
     ...mapActions('user', ['fetchUsers', 'deleteUser', 'updateCredentialStatus', 'resetPasswordCredential']),
-    
+
     navigateToCreate() {
       this.$router.push({ name: 'UserCreate' });
     },
@@ -211,54 +201,59 @@ export default {
     },
     async deleteItemConfirm() {
       if (this.editedItem) {
-        const errorMsg = await this.deleteUser(this.editedItem._id);
-        if (errorMsg) {
-          this.showErrorAlert = true;
-          this.errorMessage = errorMsg;
-        } else {
-          this.dialogDelete = false;
+        try {
+          await this.deleteUser(this.editedItem._id);
+          this.successMessage = this.success;
+          this.errorMessage = '';
+          setTimeout(() => {
+            this.dialogDelete = false;
+          }, 2000);
           this.fetchUsers();
+        } catch (error) {
+          this.errorMessage = this.error || 'Error desconocido';
+          this.successMessage = '';
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.showErrorAlert = false;
+      this.successMessage = '';
+      this.errorMessage = '';
     },
     async toggleCredentialStatus(user) {
       try {
         const newStatus = !user.credentialStatus;
-        const successMessage = await this.updateCredentialStatus({ _id: user._id, isActive: newStatus });
-        this.statusUpdateMessage = successMessage;
+        await this.updateCredentialStatus({ _id: user._id, isActive: newStatus });
         this.dialogStatusUpdate = true;
+        this.statusUpdateSuccessMessage = this.success;
         user.credentialStatus = newStatus;
       } catch (error) {
-        this.statusUpdateErrorMessage = error.response?.data?.error || 'Failed to update credential status';
+        this.statusUpdateErrorMessage = this.error || 'Error al modificar el status';
         this.dialogStatusUpdate = true;
-        this.showStatusUpdateError = true;
       }
     },
     closeStatusUpdate() {
       this.dialogStatusUpdate = false;
-      this.showStatusUpdateError = false;
+      this.statusUpdateErrorMessage = '';
+      this.statusUpdateSuccessMessage = '';
+
     },
     async resetPassword(user) {
-    try {
-      const email = user.email || user.dni;
-      const successMessage = await this.resetPasswordCredential({ email });
-      this.passwordResetMessage = successMessage;
-      this.dialogResetPassword = true;
-      this.showPasswordResetError = false;
-    } catch (error) {
-      this.passwordResetErrorMessage = error.response?.data?.error || 'Failed to reset password';
-      this.dialogResetPassword = true;
-      this.showPasswordResetError = true;
+      try {
+        const email = user.email || user.dni;
+        await this.resetPasswordCredential({ email });
+        this.dialogResetPassword = true;
+        this.passwordResetSuccessMessage = this.success;
+      } catch (error) {
+        this.passwordResetErrorMessage = this.error || 'Error al resetear la contraseña';
+        this.dialogResetPassword = true;
+      }
+    },
+    closePasswordReset() {
+      this.dialogResetPassword = false;
+      this.passwordResetErrorMessage = '';
+      this.passwordResetSuccessMessage = '';
     }
-  },
-  closePasswordReset() {
-    this.dialogResetPassword = false;
-    this.showPasswordResetError = false;
-  }
   },
   created() {
     this.fetchUsers();

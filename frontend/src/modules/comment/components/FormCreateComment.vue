@@ -41,23 +41,20 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('comment', ['client', 'error']),
+    ...mapGetters('comment', ['client', 'error', 'success']),
   },
   methods: {
     ...mapActions('comment', ['createComment', 'fetchAndSetClient']),
 
     async fetchData() {
       try {
-        const errorMsgClient = await this.fetchAndSetClient();
-        if (errorMsgClient) {
-          this.errorMessage = errorMsgClient;
-          this.successMessage = '';
-        } else {
-          this.state.client = this.client._id;
-          this.errorMessage = '';
-        }
+        await this.fetchAndSetClient();
+        this.state.client = this.client._id;
+        this.successMessage = this.success;
+        this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = (error.message || 'Desconocido');
+        this.errorMessage = this.error || 'Usted aún no esta registrado como cliente';
+        this.successMessage = '';
       }
     },
     async submitForm() {
@@ -71,21 +68,14 @@ export default {
       };
 
       try {
-        const errorMsg = await this.createComment(commentData);
-
-        if (errorMsg) {
-          this.errorMessage = errorMsg;
-          this.successMessage = '';
-        } else {
-          this.successMessage = 'Comentario creado con éxito';
-          this.errorMessage = '';
-
-          setTimeout(() => {
-            this.$router.push({ name: 'CommentList' });
-          }, 2000);
-        }
+        await this.createComment(commentData);
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'CommentList' });
+        }, 2000);
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error || 'Error al enviar el formulario';
         this.successMessage = '';
       }
     },

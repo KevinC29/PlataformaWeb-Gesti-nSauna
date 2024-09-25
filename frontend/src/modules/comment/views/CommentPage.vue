@@ -1,6 +1,5 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItems" :sort-by="[{ value: 'date', order: 'desc' }]"
-    :items-per-page="10">
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>COMENTARIOS</v-toolbar-title>
@@ -58,8 +57,11 @@
       <v-card-title class="text-h5">
         ¿Estás seguro de querer eliminar este comentario?
       </v-card-title>
-      <v-alert v-if="showErrorAlert" type="error" class="mt-3">
+      <v-alert v-if="errorMessage" type="error" class="mt-3">
         {{ errorMessage }}
+      </v-alert>
+      <v-alert v-if="successMessage" type="success" class="mt-3">
+        {{ successMessage }}
       </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -77,9 +79,9 @@
   <v-dialog v-model="dialogStatusUpdate" max-width="500px">
     <v-card>
       <v-card-title class="text-h5">
-        {{ statusUpdateMessage }}
+        {{ statusUpdateSuccessMessage }}
       </v-card-title>
-      <v-alert v-if="showStatusUpdateError" type="error" class="mt-3">
+      <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3">
         {{ statusUpdateErrorMessage }}
       </v-alert>
       <v-card-actions>
@@ -98,14 +100,14 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {
+      sortBy:[{ key: 'date', order: 'desc' }],
       search: '',
       dialogDelete: false,
       dialogStatusUpdate: false,
       editedItem: null,
-      showErrorAlert: false,
       errorMessage: '',
-      showStatusUpdateError: false,
-      statusUpdateMessage: '',
+      successMessage: '',
+      statusUpdateSuccessMessage: '',
       statusUpdateErrorMessage: '',
     };
   },
@@ -113,10 +115,10 @@ export default {
     ...mapGetters('comment', ['comments', 'error']),
     headers() {
       return [
-        { title: 'Fecha', value: 'date', align: 'start' },
-        { title: 'Cliente', value: 'client' },
-        { title: 'Mensaje', value: 'message' },
-        { title: 'Estado', value: 'isActive' },
+        { title: 'Fecha', key: 'date', align: 'start' },
+        { title: 'Cliente', key: 'client' },
+        { title: 'Mensaje', key: 'message' },
+        { title: 'Estado', key: 'isActive' },
         { title: 'Acciones', value: 'actions', sortable: false }
       ];
     },
@@ -141,37 +143,42 @@ export default {
     },
     async deleteItemConfirm() {
       if (this.editedItem) {
-        const errorMsg = await this.deleteComment(this.editedItem._id);
-        if (errorMsg) {
-          this.showErrorAlert = true;
-          this.errorMessage = errorMsg;
-        } else {
-          this.dialogDelete = false;
+        try {
+          await this.deleteComment(this.editedItem._id);
+          this.successMessage = this.success;
+          this.errorMessage = '';
+          setTimeout(() => {
+            this.dialogDelete = false;
+          }, 2000);
           this.fetchComments();
+        } catch (error) {
+          this.errorMessage = this.error || 'Error desconocido';
+          this.successMessage = '';
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.showErrorAlert = false;
+      this.successMessage = '';
+      this.errorMessage = '';
     },
     async confirmStatusToggle(comment) {
       try {
         const newStatus = !comment.isActive;
-        const successMessage = await this.updateCommentStatus({ _id: comment._id, isActive: newStatus });
+        await this.updateCommentStatus({ _id: comment._id, isActive: newStatus });
         this.dialogStatusUpdate = true;
-        this.statusUpdateMessage = successMessage;
+        this.statusUpdateSuccessMessage = this.success;
         comment.isActive = newStatus;
         await this.fetchComments();
       } catch (error) {
-        this.statusUpdateErrorMessage = error.response?.data?.error || 'Failed to update comment status';
+        this.statusUpdateErrorMessage = this.error || 'Error al modificar el status';
         this.dialogStatusUpdate = true;
-        this.showStatusUpdateError = true;
       }
     },
     closeStatusUpdate() {
       this.dialogStatusUpdate = false;
-      this.showStatusUpdateError = false;
+      this.statusUpdateErrorMessage = '';
+      this.statusUpdateSuccessMessage = '';
     }
   },
   created() {

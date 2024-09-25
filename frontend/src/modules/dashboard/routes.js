@@ -6,6 +6,7 @@ import user from '@/modules/user/routes';
 import client from '@/modules/client/routes';
 import comment from '@/modules/comment/routes';
 import credential from '@/modules/credential/routes';
+import order from '@/modules/order/routes';
 
 export default [
   {
@@ -55,6 +56,11 @@ export default [
       ...credential.map(route => ({
         ...route,
         path: `credentials${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...order.map(route => ({
+        ...route,
+        path: `orders${route.path}`,
         name: `${route.name}`,
       })),
     ]

@@ -77,16 +77,16 @@ export default {
         confirmPassword: '',
         isActive: true,
       },
-      rolesList: [], // Lista de roles
+      rolesList: [],
       errorMessage: '',
       successMessage: '',
-      showPasswordFields: false, // Flag para mostrar campos de contraseña
-      passwordFieldType: 'password', // Tipo de campo de contraseña
-      confirmPasswordFieldType: 'password' // Tipo de campo de confirmar contraseña
+      showPasswordFields: false,
+      passwordFieldType: 'password',
+      confirmPasswordFieldType: 'password',
     };
   },
   computed: {
-    ...mapGetters('user', ['roles', 'error']),
+    ...mapGetters('user', ['roles', 'error', 'success']),
   },
   methods: {
     ...mapActions('user', ['fetchAndSetRoles', 'createUser']),
@@ -100,8 +100,11 @@ export default {
             _id: role._id,
             name: role.name,
           }));
+        this.successMessage = this.success;
+        this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = 'Error al cargar los roles: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
+        this.successMessage = '';
       }
     },
 
@@ -139,21 +142,14 @@ export default {
       }
 
       try {
-        const errorMsg = await this.createUser(userData);
-
-        if (errorMsg) {
-          this.errorMessage = errorMsg;
-          this.successMessage = '';
-        } else {
-          this.successMessage = 'Usuario creado con éxito';
-          this.errorMessage = '';
-
-          setTimeout(() => {
-            this.$router.push({ name: 'UserList' });
-          }, 2000);
-        }
+        await this.createUser(userData);
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'UserList' });
+        }, 2000);
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },
@@ -168,7 +164,7 @@ export default {
         name: { required },
         lastName: { required },
         dni: { required },
-        email: { emailValidator }, // Validación de email si no está vacío
+        email: { emailValidator },
         role: { required },
         password: {
           required: this.showPasswordFields,

@@ -1,25 +1,12 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="filteredItems"
-    :sort-by="[{ value: 'name', order: 'desc' }] "
-    :items-per-page="10"
-  >
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>ÍTEMS</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
-        <v-text-field
-          v-model="search"
-          density="compact"
-          label="Buscar"
-          prepend-inner-icon="mdi-magnify"
-          variant="solo-filled"
-          flat
-          hide-details
-          single-line
-        ></v-text-field>
+        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+          variant="solo-filled" flat hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
         <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
           Crear Ítem
@@ -29,14 +16,8 @@
 
     <!-- Columna de Imagen -->
     <template v-slot:[`item.imageUrl`]="{ item }">
-      <v-img
-        :src="item.imageUrl"
-        max-width="100px"
-        max-height="100px"
-        contain
-        @click="openImageModal(item.imageUrl)"
-        style="cursor: pointer;"
-      ></v-img>
+      <v-img :src="item.imageUrl" max-width="100px" max-height="100px" contain @click="openImageModal(item.imageUrl)"
+        style="cursor: pointer;"></v-img>
     </template>
 
     <!-- Columna de Precio con símbolo de dólar -->
@@ -75,9 +56,13 @@
       <v-card-title class="text-h5">
         ¿Estás seguro de querer eliminar este ítem?
       </v-card-title>
-      <v-alert v-if="showErrorAlert" type="error" class="mt-3">
+      <v-alert v-if="errorMessage" type="error" class="mt-3">
         {{ errorMessage }}
       </v-alert>
+      <v-alert v-if="successMessage" type="success" dismissible>
+        {{ successMessage }}
+      </v-alert>
+      <v-card-actions></v-card-actions>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue-darken-1" variant="text" @click="closeDelete">
@@ -113,25 +98,26 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {
+      sortBy: [{ key: 'name', order: 'asc' }],
       search: '',
       dialogDelete: false,
       imageDialog: false,
       selectedImage: '',
       editedItem: null,
-      showErrorAlert: false,
       errorMessage: '',
+      successMessage: '',
     };
   },
   computed: {
-    ...mapGetters('item', ['items', 'error']),
+    ...mapGetters('item', ['items', 'error', 'success']),
     headers() {
       return [
-        { title: 'Nombre', value: 'name', align: 'start' },
-        { title: 'Descripción', value: 'description' },
-        { title: 'Precio', value: 'price' },
-        { title: 'Tipo de Ítem', value: 'itemType.name' },
+        { title: 'Nombre', key: 'name', align: 'start' },
+        { title: 'Descripción', key: 'description' },
+        { title: 'Precio', key: 'price' },
+        { title: 'Tipo de Ítem', key: 'itemType.name' },
         { title: 'Imagen', value: 'imageUrl' },
-        { title: 'Estado', value: 'isActive' },
+        { title: 'Estado', key: 'isActive' },
         { title: 'Acciones', value: 'actions', sortable: false }
       ];
     },
@@ -158,19 +144,24 @@ export default {
     },
     async deleteItemConfirm() {
       if (this.editedItem) {
-        const errorMsg = await this.deleteItem(this.editedItem._id);
-        if (errorMsg) {
-          this.showErrorAlert = true;
-          this.errorMessage = errorMsg;
-        } else {
-          this.dialogDelete = false;
+        try {
+          await this.deleteItem(this.editedItem._id);
+          this.successMessage = this.success;
+          this.errorMessage = '';
+          setTimeout(() => {
+            this.dialogDelete = false;
+          }, 2000);
           this.fetchItems();
+        } catch (error) {
+          this.errorMessage = this.error || 'Error desconocido';
+          this.successMessage = '';
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.showErrorAlert = false;
+      this.successMessage = '';
+      this.errorMessage = '';
     },
     openImageModal(imageUrl) {
       this.selectedImage = imageUrl;

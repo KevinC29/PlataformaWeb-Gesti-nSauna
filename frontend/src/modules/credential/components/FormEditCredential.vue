@@ -134,28 +134,27 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('credential', ['user', 'error']),
+    ...mapGetters('credential', ['user', 'error', 'success']),
   },
   methods: {
     ...mapActions('credential', ['updateUser', 'fetchAndSetUser', 'updatePasswordCredential']),
 
     async fetchData() {
       try {
-        const errorMsg = await this.fetchAndSetUser();
-        if (errorMsg) {
-          this.errorMessage = errorMsg;
-        } else {
-          const user = this.user;
-          this.state = {
-            name: user.name,
-            lastName: user.lastName,
-            dni: user.dni,
-            email: user.email,
-          };
-          this.userID = user._id;
-        }
+        await this.fetchAndSetUser();
+        const user = this.user;
+        this.state = {
+          name: user.name,
+          lastName: user.lastName,
+          dni: user.dni,
+          email: user.email,
+        };
+        this.userID = user._id;
+        this.successMessage = this.success;
+        this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = 'Error al cargar los datos: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
+        this.successMessage = '';
       }
     },
 
@@ -171,19 +170,14 @@ export default {
       };
 
       try {
-        const errorMsg = await this.updateUser({ id: this.userID, userData });
-        if (errorMsg) {
-          this.errorMessage = errorMsg;
-          this.successMessage = '';
-        } else {
-          this.successMessage = 'Usuario actualizado con éxito';
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.$router.push({ name: 'CredentialUser' });
-          }, 2000);
-        }
+        await this.updateUser({ id: this.userID, userData });
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'CredentialUser' });
+        }, 2000);
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },
@@ -228,23 +222,18 @@ export default {
       };
 
       try {
-        const errorMsgPassword = await this.updatePasswordCredential({ id: this.$route.params.id, credentialData: credentialData });
-        if (errorMsgPassword) {
-          this.passwordErrorMessage = this.error;
-          this.passwordSuccessMessage = '';
-        } else {
-          this.passwordSuccessMessage = 'Contraseña actualizada con éxito';
-          this.passwordErrorMessage = '';
-          setTimeout(() => {
-            this.closePasswordModal();
-          }, 2000);
-        }
+        await this.updatePasswordCredential({ id: this.$route.params.id, credentialData: credentialData });
+        this.passwordSuccessMessage = this.success;
+        this.passwordErrorMessage = '';
+        setTimeout(() => {
+          this.closePasswordModal();
+        }, 2000);
       } catch (error) {
-        this.passwordErrorMessage = (this.error || 'Desconocido');
+        this.passwordErrorMessage = this.error;
+        this.passwordSuccessMessage = '';
       }
     },
 
-    // Métodos para alternar la visibilidad de las contraseñas
     toggleCurrentPasswordVisibility() {
       this.showCurrentPassword = !this.showCurrentPassword;
     },

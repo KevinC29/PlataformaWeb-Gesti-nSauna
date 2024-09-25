@@ -1,22 +1,12 @@
 <template>
   <form @submit.prevent="submitForm">
     <!-- Campo Nombre -->
-    <v-text-field
-      v-model="state.name"
-      :error-messages="v$.state.name.$errors.map(e => e.$message)"
-      label="Nombre"
-      required
-      @blur="v$.state.name.$touch"
-      @input="v$.state.name.$touch"
-    ></v-text-field>
+    <v-text-field v-model="state.name" :error-messages="v$.state.name.$errors.map(e => e.$message)" label="Nombre"
+      required @blur="v$.state.name.$touch" @input="v$.state.name.$touch"></v-text-field>
 
     <!-- Campo Estado (Checkbox para 'isActive') -->
-    <v-checkbox
-      v-model="state.isActive"
-      :error-messages="v$.state.isActive.$errors.map(e => e.$message)"
-      label="Activo"
-      @change="v$.state.isActive.$touch"
-    ></v-checkbox>
+    <v-checkbox v-model="state.isActive" :error-messages="v$.state.isActive.$errors.map(e => e.$message)" label="Activo"
+      @change="v$.state.isActive.$touch"></v-checkbox>
 
     <!-- Alerta de errores -->
     <v-alert v-if="errorMessage" type="error" dismissible>
@@ -50,8 +40,8 @@ export default {
         name: '',
         isActive: true,
       },
-      errorMessage: '', // Para almacenar el mensaje de error
-      successMessage: '', // Para almacenar el mensaje de éxito
+      errorMessage: '',
+      successMessage: '',
     };
   },
   computed: {
@@ -60,10 +50,25 @@ export default {
   methods: {
     ...mapActions('section', ['fetchSection', 'updateSection']),
 
+    async fetchData() {
+      try {
+        await this.fetchSection(this.$route.params.id);
+        const section = this.section;
+        this.state = {
+          name: section.name,
+          isActive: section.isActive,
+        };
+        this.successMessage = this.success;
+        this.errorMessage = '';
+      } catch (error) {
+        this.errorMessage = this.error;
+        this.successMessage = '';
+      }
+    },
     async submitForm() {
-      this.v$.$touch(); // Marca los campos como "tocados" para activar las validaciones
+      this.v$.$touch();
 
-      if (this.v$.$invalid) return; // No enviar si hay errores de validación
+      if (this.v$.$invalid) return;
 
       const sectionData = {
         name: this.state.name,
@@ -71,38 +76,20 @@ export default {
       };
 
       try {
-        const errorMsg = await this.updateSection({ id: this.$route.params.id, sectionData });
-
-        if (errorMsg) {
-          this.errorMessage = errorMsg; // Mostrar el mensaje de error
-          this.successMessage = ''; // Asegurarse de que no se muestre el mensaje de éxito
-        } else {
-          this.successMessage = 'Sección actualizada con éxito'; // Mensaje de éxito
-          this.errorMessage = ''; // Asegurarse de que no se muestre el mensaje de error
-          
-          // Redirigir después de 2 segundos
-          setTimeout(() => {
-            this.$router.push({ name: 'SectionList' });
-          }, 2000);
-        }
+        await this.updateSection({ id: this.$route.params.id, sectionData });
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'SectionList' });
+        }, 2000);
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + error.message;
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },
 
     cancel() {
       this.$router.push({ name: 'SectionList' });
-    },
-
-    async loadSection() {
-      const errorMsg = await this.fetchSection(this.$route.params.id);
-      if (errorMsg) {
-        this.errorMessage = errorMsg;
-      } else if (this.section) {
-        this.state.name = this.section.name;
-        this.state.isActive = this.section.isActive;
-      }
     },
   },
   validations() {
@@ -113,8 +100,8 @@ export default {
       },
     };
   },
-  created() {
-    this.loadSection(); // Cargar los datos de la sección al montar el componente
+  async created() {
+    await this.fetchData();
   },
   setup() {
     const v$ = useVuelidate();

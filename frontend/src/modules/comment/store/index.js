@@ -6,7 +6,7 @@ import {
 } from '@/api/services/commentService';
 import { getClientByAuthenticatedUser } from '@/api/services/clientService';
 import { handleError } from '@/middleware/errorHandler';
-// import { handleSuccess } from '@/middleware/successHandler';
+import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
     namespaced: true,
@@ -14,6 +14,7 @@ export default {
         comments: [],
         comment: null,
         error: '',
+        success: '',
         client: null,
     },
     mutations: {
@@ -40,6 +41,9 @@ export default {
         },
         SET_ERROR(state, error) {
             state.error = error;
+        },
+        SET_SUCCESS(state, success) {
+            state.success = success;
         }
     },
     actions: {
@@ -47,6 +51,8 @@ export default {
             try {
                 const response = await getComments();
                 commit('SET_COMMENTS', response.data);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -58,6 +64,8 @@ export default {
             try {
                 const response = await createComment(commentData);
                 commit('ADD_COMMENT', response.data);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -69,7 +77,9 @@ export default {
             try {
                 const response = await updateCommentStatus(statusData);
                 commit('UPDATE_COMMENT', response.data);
-                return response.message;
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
+                return null;
             } catch (error) {
                 const errorMsg = handleError(error);
                 commit('SET_ERROR', errorMsg);
@@ -78,8 +88,10 @@ export default {
         },
         async deleteComment({ commit }, id) {
             try {
-                await deleteComment(id);
+                const response = await deleteComment(id);
                 commit('DELETE_COMMENT', id);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -91,6 +103,8 @@ export default {
             try { 
                 const response = await getClientByAuthenticatedUser();
                 commit('SET_CLIENT', response.data);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -103,6 +117,7 @@ export default {
         comments: state => state.comments,
         comment: state => state.comment,
         error: state => state.error,
+        success: state => state.success,
         client: state => state.client,
     }
 };

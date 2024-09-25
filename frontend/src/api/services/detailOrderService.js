@@ -39,6 +39,17 @@ export const getDetailOrder = async (id) => {
   }
 };
 
+// Obtener detalles de orden por ID de Orden
+export const getDetailsOrderByOrder = async (id) => {
+  try {
+    const response = await http.get(`${apiUrl}/by-order/${id}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
 // Actualizar un detalle de orden
 export const updateDetailOrder = async (id, detailOrderData) => {
   try {

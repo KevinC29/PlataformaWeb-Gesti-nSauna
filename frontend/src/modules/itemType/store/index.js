@@ -6,7 +6,7 @@ import {
   deleteItemType
 } from '@/api/services/itemTypeService';
 import { handleError } from '@/middleware/errorHandler';
-// import { handleSuccess } from '@/middleware/successHandler';
+import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
   namespaced: true,
@@ -14,6 +14,7 @@ export default {
     itemTypes: [],
     itemType: null,
     error: '',
+    success: '',
     sections: []
   },
   mutations: {
@@ -40,6 +41,9 @@ export default {
     },
     SET_SECTIONS(state, sections) {
       state.sections = sections;
+    },
+    SET_SUCCESS(state, success) {
+      state.success = success;
     }
   },
   actions: {
@@ -47,6 +51,8 @@ export default {
       try {
         const response = await getItemTypes();
         commit('SET_ITEMTYPES', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null; 
       } catch (error) {
         const errorMsg = handleError(error);
@@ -58,6 +64,8 @@ export default {
       try {
         const response = await getItemType(id);
         commit('SET_ITEMTYPE', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -69,6 +77,8 @@ export default {
       try {
         const response = await createItemType(itemTypeData);
         commit('ADD_ITEMTYPE', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -80,6 +90,8 @@ export default {
       try {
         const response = await updateItemType(id, itemTypeData);
         commit('UPDATE_ITEMTYPE', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -89,8 +101,10 @@ export default {
     },
     async deleteItemType({ commit }, id) {
       try {
-        await deleteItemType(id);
+        const response = await deleteItemType(id);
         commit('DELETE_ITEMTYPE', id);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -100,9 +114,11 @@ export default {
     },
     async fetchAndSetSections({ dispatch, commit }) {
       try {
-        await dispatch('section/fetchSections', null, { root: true });
+        const response = await dispatch('section/fetchSections', null, { root: true });
         const sections = this.getters['section/sections'];
         commit('SET_SECTIONS', sections);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -115,6 +131,7 @@ export default {
     itemTypes: state => state.itemTypes,
     itemType: state => state.itemType,
     error: state => state.error,
+    success: state => state.success,
     sections: state => state.sections
   }
 };

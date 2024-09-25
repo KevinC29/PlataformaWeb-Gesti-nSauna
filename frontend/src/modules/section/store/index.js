@@ -6,14 +6,15 @@ import {
   deleteSection
 } from '@/api/services/sectionService';
 import { handleError } from '@/middleware/errorHandler';
-// import { handleSuccess } from '@/middleware/successHandler';
+import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
   namespaced: true,
   state: {
     sections: [],
     section: null,
-    error: ''  
+    error: '',
+    success: '',
   },
   mutations: {
     SET_SECTIONS(state, sections) {
@@ -36,6 +37,9 @@ export default {
     },
     SET_ERROR(state, error) { 
       state.error = error;
+    },
+    SET_SUCCESS(state, success) {
+      state.success = success;
     }
   },
   actions: {
@@ -43,6 +47,8 @@ export default {
       try {
         const response = await getSections();
         commit('SET_SECTIONS', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null; 
       } catch (error) {
         const errorMsg = handleError(error);
@@ -54,6 +60,8 @@ export default {
       try {
         const response = await getSection(id);
         commit('SET_SECTION', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -65,6 +73,8 @@ export default {
       try {
         const response = await createSection(sectionData);
         commit('ADD_SECTION', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -76,6 +86,8 @@ export default {
       try {
         const response = await updateSection(id, sectionData);
         commit('UPDATE_SECTION', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -85,8 +97,10 @@ export default {
     },
     async deleteSection({ commit }, id) {
       try {
-        await deleteSection(id);
+        const response = await deleteSection(id);
         commit('DELETE_SECTION', id);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
         return null;
       } catch (error) {
         const errorMsg = handleError(error);
@@ -98,6 +112,7 @@ export default {
   getters: {
     sections: state => state.sections,
     section: state => state.section,
-    error: state => state.error 
+    error: state => state.error,
+    success: state => state.success,
   }
 };

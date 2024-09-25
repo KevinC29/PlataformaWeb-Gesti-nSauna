@@ -1,31 +1,14 @@
 <template>
   <form @submit.prevent="submitForm">
     <!-- Campo Cuenta -->
-    <v-text-field
-      v-model="state.account"
-      :error-messages="v$.state.account.$errors.map(e => e.$message)"
-      label="Cuenta"
-      type="number"
-      required
-      min="0"
-      step="0.01"
-      @blur="v$.state.account.$touch"
-      @input="v$.state.account.$touch"
-      @change="formatAccount"
-      prepend-icon="mdi-currency-usd"
-    ></v-text-field>
+    <v-text-field v-model="state.account" :error-messages="v$.state.account.$errors.map(e => e.$message)" label="Cuenta"
+      type="number" required min="0" step="0.01" @blur="v$.state.account.$touch" @input="v$.state.account.$touch"
+      @change="formatAccount" prepend-icon="mdi-currency-usd"></v-text-field>
 
     <!-- Campo Estado de Cuenta -->
-    <v-select
-      v-model="state.accountState"
-      :items="accountStateOptions"
-      item-value="value"
-      item-title="text"
-      :error-messages="v$.state.accountState.$errors.map(e => e.$message)"
-      label="Estado de la Cuenta"
-      required
-      @blur="v$.state.accountState.$touch"
-    ></v-select>
+    <v-select v-model="state.accountState" :items="accountStateOptions" item-value="value" item-title="text"
+      :error-messages="v$.state.accountState.$errors.map(e => e.$message)" label="Estado de la Cuenta" required
+      @blur="v$.state.accountState.$touch"></v-select>
 
     <!-- Alerta de errores -->
     <v-alert v-if="errorMessage" type="error" dismissible>
@@ -75,21 +58,20 @@ export default {
 
     async fetchData() {
       try {
-        const errorMsg = await this.fetchClient(this.$route.params.id);
-        if (errorMsg) {
-          this.errorMessage = this.error;
-        } else {
-          const client = this.client;
-          this.state = {
-            account: client.account,
-            accountState: client.accountState,
-          };
-        }
+        await this.fetchClient(this.$route.params.id);
+        const client = this.client;
+        this.state = {
+          account: client.account,
+          accountState: client.accountState,
+        };
+        this.successMessage = this.success;
+        this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
+        this.successMessage = '';
       }
     },
- 
+
     formatAccount() {
       if (this.state.account !== null && this.state.account !== '') {
         this.state.account = parseFloat(this.state.account).toFixed(2);
@@ -109,18 +91,12 @@ export default {
       };
 
       try {
-        const errorMsg = await this.updateClient({ id: this.$route.params.id, clientData });
-        if (errorMsg) {
-          this.errorMessage = this.error;
-          this.successMessage = '';
-        } else {
-          this.successMessage = this.success;
-          this.errorMessage = '';
-
-          setTimeout(() => {
-            this.$router.push({ name: 'ClientList' });
-          }, 2000);
-        }
+        await this.updateClient({ id: this.$route.params.id, clientData });
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'ClientList' });
+        }, 2000);
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

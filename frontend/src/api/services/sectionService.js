@@ -21,8 +21,6 @@ export const createSection = async (sectionData) => {
 export const getSections = async () => {
   try {
     const response = await http.get(apiUrl);
-    console.log(response)
-
     return response.data;
   } catch (error) {
     handleError(error);

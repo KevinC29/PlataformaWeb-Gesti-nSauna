@@ -5,13 +5,14 @@ import { updateCredentialPassword,
     getUserByAuthenticatedUser,
  } from '@/api/services/credentialService';
  import { handleError } from '@/middleware/errorHandler';
-//  import { handleSuccess } from '@/middleware/successHandler';
+ import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
     namespaced: true,
     state: {
         user: {},
-        error: ''
+        error: '',
+        success: '',
     },
     mutations: {
         SET_USER(state, user) {
@@ -24,6 +25,9 @@ export default {
         },
         SET_ERROR(state, error) {
             state.error = error;
+        },
+        SET_SUCCESS(state, success) {
+            state.success = success;
         }
     },
     actions: {
@@ -31,6 +35,8 @@ export default {
             try {
                 const response = await updateUser(id, userData);
                 commit('UPDATE_USER', response.data);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -42,6 +48,8 @@ export default {
             try { 
                 const response = await getUserByAuthenticatedUser();
                 commit('SET_USER', response.data);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -51,7 +59,9 @@ export default {
         },
         async updatePasswordCredential({ commit }, { id, credentialData }) {
             try {
-                await updateCredentialPassword(id, credentialData);
+                const response = await updateCredentialPassword(id, credentialData);
+                const successMsg = handleSuccess(response);
+                commit('SET_SUCCESS', successMsg);
                 return null;
             } catch (error) {
                 const errorMsg = handleError(error);
@@ -62,6 +72,7 @@ export default {
     },
     getters: {
         user: state => state.user,
-        error: state => state.error
+        error: state => state.error,
+        success: state => state.success,
     }
 };

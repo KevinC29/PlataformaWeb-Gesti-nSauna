@@ -28,13 +28,6 @@ export default {
                 },
                 {
                     icon: 'mdi-folder',
-                    text: 'Detalles de Ordenes',
-                    value: 'detalleOrden',
-                    href: '/dashboard/detailOrders',
-                    roles: ['ADMIN', 'CASHIER'],
-                },
-                {
-                    icon: 'mdi-folder',
                     text: 'Items',
                     value: 'item',
                     href: '/dashboard/items',

@@ -1,6 +1,5 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItems" :sort-by="[{ value: 'user.name', order: 'desc' }]"
-    :items-per-page="10">
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>CLIENTES</v-toolbar-title>
@@ -81,6 +80,7 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {
+      sortBy: [{ key: 'user.name', order: 'asc' }],
       search: '',
       dialogDelete: false,
       editedItem: null,
@@ -92,9 +92,9 @@ export default {
     ...mapGetters('client', ['clients', 'error', 'success']),
     headers() {
       return [
-        { title: 'Usuario', value: 'user', align: 'start' },
-        { title: 'Cuenta', value: 'account' },
-        { title: 'Estado de Cuenta', value: 'accountState' },
+        { title: 'Usuario', key: 'user', align: 'start' },
+        { title: 'Cuenta', key: 'account' },
+        { title: 'Estado de Cuenta', key: 'accountState' },
         { title: 'Acciones', value: 'actions', sortable: false }
       ];
     },
@@ -132,7 +132,6 @@ export default {
           setTimeout(() => {
             this.dialogDelete = false;
           }, 2000);
-
           this.fetchClients();
         } catch (error) {
           this.errorMessage = this.error || 'Error desconocido';

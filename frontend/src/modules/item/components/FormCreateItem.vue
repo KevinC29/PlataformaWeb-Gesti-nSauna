@@ -1,72 +1,31 @@
 <template>
   <form @submit.prevent="submitForm">
     <!-- Campo Nombre -->
-    <v-text-field
-      v-model="state.name"
-      :error-messages="v$.state.name.$errors.map(e => e.$message)"
-      label="Nombre"
-      required
-      @blur="v$.state.name.$touch"
-      @input="v$.state.name.$touch"
-    ></v-text-field>
+    <v-text-field v-model="state.name" :error-messages="v$.state.name.$errors.map(e => e.$message)" label="Nombre"
+      required @blur="v$.state.name.$touch" @input="v$.state.name.$touch"></v-text-field>
 
     <!-- Campo Descripción -->
-    <v-textarea
-      v-model="state.description"
-      :error-messages="v$.state.description.$errors.map(e => e.$message)"
-      label="Descripción"
-      required
-      @blur="v$.state.description.$touch"
-      @input="v$.state.description.$touch"
-    ></v-textarea>
+    <v-textarea v-model="state.description" :error-messages="v$.state.description.$errors.map(e => e.$message)"
+      label="Descripción" required @blur="v$.state.description.$touch"
+      @input="v$.state.description.$touch"></v-textarea>
 
     <!-- Campo Precio -->
-    <v-text-field
-      v-model="state.price"
-      :error-messages="v$.state.price.$errors.map(e => e.$message)"
-      label="Precio"
-      type="number"
-      required
-      min="0"
-      step="0.01"
-      @blur="v$.state.price.$touch"
-      @input="v$.state.price.$touch"
-      @change="formatPrice"
-      prepend-icon="mdi-currency-usd"
-    ></v-text-field>
+    <v-text-field v-model="state.price" :error-messages="v$.state.price.$errors.map(e => e.$message)" label="Precio"
+      type="number" required min="0" step="0.01" @blur="v$.state.price.$touch" @input="v$.state.price.$touch"
+      @change="formatPrice" prepend-icon="mdi-currency-usd"></v-text-field>
 
     <!-- Campo URL de Imagen -->
-    <v-text-field
-      v-model="state.imageUrl"
-      :error-messages="v$.state.imageUrl.$errors.map(e => e.$message)"
-      label="URL de Imagen"
-      required
-      @blur="v$.state.imageUrl.$touch"
-      @input="v$.state.imageUrl.$touch"
-    ></v-text-field>
+    <v-text-field v-model="state.imageUrl" :error-messages="v$.state.imageUrl.$errors.map(e => e.$message)"
+      label="URL de Imagen" required @blur="v$.state.imageUrl.$touch" @input="v$.state.imageUrl.$touch"></v-text-field>
 
     <!-- Campo Tipo de Ítem (Selector) -->
-    <v-select
-      v-model="state.itemType"
-      :items="itemTypesList"
-      item-value="_id"
-      item-title="name"
-      clearable
-      dense
-      :error-messages="v$.state.itemType.$errors.map(e => e.$message)"
-      label="Tipo de Ítem"
-      required
-      @change="v$.state.itemType.$touch"
-      @blur="v$.state.itemType.$touch"
-    ></v-select>
+    <v-select v-model="state.itemType" :items="itemTypesList" item-value="_id" item-title="name" clearable dense
+      :error-messages="v$.state.itemType.$errors.map(e => e.$message)" label="Tipo de Ítem" required
+      @change="v$.state.itemType.$touch" @blur="v$.state.itemType.$touch"></v-select>
 
     <!-- Campo Estado (Checkbox para 'isActive') -->
-    <v-checkbox
-      v-model="state.isActive"
-      :error-messages="v$.state.isActive.$errors.map(e => e.$message)"
-      label="Activo"
-      @change="v$.state.isActive.$touch"
-    ></v-checkbox>
+    <v-checkbox v-model="state.isActive" :error-messages="v$.state.isActive.$errors.map(e => e.$message)" label="Activo"
+      @change="v$.state.isActive.$touch"></v-checkbox>
 
     <!-- Alerta de errores -->
     <v-alert v-if="errorMessage" type="error" dismissible>
@@ -102,7 +61,7 @@ export default {
         price: null,
         imageUrl: '',
         isActive: true,
-        itemType: null, // Inicializar como null
+        itemType: null,
       },
       itemTypesList: [],
       errorMessage: '',
@@ -110,7 +69,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('item', ['itemTypes', 'error']),
+    ...mapGetters('item', ['itemTypes', 'error', 'success']),
   },
   methods: {
     ...mapActions('item', ['createItem', 'fetchAndSetItemTypes']),
@@ -120,7 +79,22 @@ export default {
         this.state.price = parseFloat(this.state.price).toFixed(2);
       }
     },
-
+    async fetchData() {
+      try {
+        await this.fetchAndSetItemTypes();
+        this.itemTypesList = this.itemTypes
+          .filter(itemType => itemType.isActive)
+          .map(itemType => ({
+            _id: itemType._id,
+            name: itemType.name,
+          }));
+        this.successMessage = this.success;
+        this.errorMessage = '';
+      } catch (error) {
+        this.errorMessage = this.error;
+        this.successMessage = '';
+      }
+    },
     async submitForm() {
       this.v$.$touch();
 
@@ -138,21 +112,14 @@ export default {
       };
 
       try {
-        const errorMsg = await this.createItem(itemData);
-
-        if (errorMsg) {
-          this.errorMessage = errorMsg;
-          this.successMessage = '';
-        } else {
-          this.successMessage = 'Ítem creado con éxito';
-          this.errorMessage = '';
-
-          setTimeout(() => {
-            this.$router.push({ name: 'ItemList' });
-          }, 2000);
-        }
+        await this.createItem(itemData);
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'ItemList' });
+        }, 2000);
       } catch (error) {
-        this.errorMessage = 'Error en el envío del formulario: ' + (error.message || 'Desconocido');
+        this.errorMessage = this.error;
         this.successMessage = '';
       }
     },
@@ -178,17 +145,7 @@ export default {
     return { v$ };
   },
   async created() {
-    try {
-      await this.fetchAndSetItemTypes(); // Carga los tipos de ítem
-      this.itemTypesList = this.itemTypes
-        .filter(itemType => itemType.isActive) // Filtra los tipos de ítem activos
-        .map(itemType => ({
-          _id: itemType._id,
-          name: itemType.name,
-        }));
-    } catch (error) {
-      this.errorMessage = 'Error al cargar los tipos de ítem: ' + (error.message || 'Desconocido');
-    }
+    await this.fetchData();
   }
 };
 </script>

@@ -1,58 +1,67 @@
 import {
-    createUser,
-    getUsers,
-    getUser,
-    updateUser,
-    deleteUser
-} from '@/api/services/userService';
-import { updateCredentialStatus } from '@/api/services/credentialService';
-import { resetPassword } from '@/api/services/authService';
+    createOrder,
+    getOrders,
+    getOrder,
+    updateOrder,
+    deleteOrder
+} from '@/api/services/orderService';
+
 import { handleError } from '@/middleware/errorHandler';
 import { handleSuccess } from '@/middleware/successHandler';
+
 
 export default {
     namespaced: true,
     state: {
-        users: [],
-        user: null,
-        roles: [],
+        orders: [],
+        order: null,
+        clients: [],
         error: '',
         success: '',
+        items: [],
+        detailsOrder: [],
+        detailOrder: null,
     },
     mutations: {
-        SET_USERS(state, users) {
-            state.users = users;
+        SET_ORDERS(state, orders) {
+            state.orders = orders;
         },
-        SET_USER(state, user) {
-            state.user = user;
+        SET_ORDER(state, order) {
+            state.order = order;
         },
-        ADD_USER(state, user) {
-            state.users.push(user);
+        ADD_ORDER(state, order) {
+            state.orders.push(order);
         },
-        UPDATE_USER(state, updatedUser) {
-            const index = state.users.findIndex(user => user._id === updatedUser._id);
+        UPDATE_ORDER(state, updatedOrder) {
+            const index = state.orders.findIndex(order => order._id === updatedOrder._id);
             if (index !== -1) {
-                state.users.splice(index, 1, updatedUser);
+                state.order.splice(index, 1, updatedOrder);
             }
         },
-        DELETE_USER(state, userId) {
-            state.users = state.users.filter(user => user._id !== userId);
+        DELETE_ORDER(state, orderId) {
+            state.orders = state.orders.filter(order => order._id !== orderId);
         },
-        SET_ROLES(state, roles) {
-            state.roles = roles;
+        SET_CLIENTS(state, clients) {
+            state.clients = clients;
         },
         SET_ERROR(state, error) {
             state.error = error;
         },
         SET_SUCCESS(state, success) {
             state.success = success;
-        }
+        },
+        SET_DETAILSORDER(state, detailsOrder) {
+            state.detailsOrder = detailsOrder;
+        },
+        SET_DETAILORDER(state, detailOrder) {
+            state.detailOrder = detailOrder;
+        },
     },
     actions: {
-        async fetchUsers({ commit }) {
+        async fetchOrders({ commit }) {
             try {
-                const response = await getUsers();
-                commit('SET_USERS', response.data);
+                const response = await getOrders();
+                commit('SET_ORDERS', response.data);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -62,10 +71,10 @@ export default {
                 throw error;
             }
         },
-        async fetchUser({ commit }, id) {
+        async fetchOrder({ commit }, id) {
             try {
-                const response = await getUser(id);
-                commit('SET_USER', response.data);
+                const response = await getOrder(id);
+                commit('SET_ORDER', response.data);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -75,10 +84,10 @@ export default {
                 throw error;
             }
         },
-        async createUser({ commit }, userData) {
+        async createOrder({ commit }, orderData) {
             try {
-                const response = await createUser(userData);
-                commit('ADD_USER', response.data);
+                const response = await createOrder(orderData);
+                commit('ADD_ORDER', response.data);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -88,10 +97,10 @@ export default {
                 throw error;
             }
         },
-        async updateUser({ commit }, { id, userData }) {
+        async updateOrder({ commit }, { id, orderData }) {
             try {
-                const response = await updateUser(id, userData);
-                commit('UPDATE_USER', response.data);
+                const response = await updateOrder(id, orderData);
+                commit('UPDATE_ORDER', response.data);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -101,10 +110,10 @@ export default {
                 throw error;
             }
         },
-        async deleteUser({ commit }, id) {
+        async deleteOrder({ commit }, id) {
             try {
-                const response = await deleteUser(id);
-                commit('DELETE_USER', id);
+                const response = await deleteOrder(id);
+                commit('DELETE_ORDER', id);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -114,11 +123,11 @@ export default {
                 throw error;
             }
         },
-        async fetchAndSetRoles({ dispatch, commit }) {
+        async fetchAndSetClients({ dispatch, commit }) {
             try {
-                const response = await dispatch('role/fetchRoles', null, { root: true });
-                const roles = this.getters['role/roles'];
-                commit('SET_ROLES', roles);
+                const response = await dispatch('client/fetchClients', null, { root: true });
+                const clients = this.getters['client/clients'];
+                commit('SET_CLIENTS', clients);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -128,9 +137,11 @@ export default {
                 throw error;
             }
         },
-        async updateCredentialStatus({ commit }, statusData) {
+        async fetchAndSetDetailsOrder({ dispatch, commit }, orderID) {
             try {
-                const response = await updateCredentialStatus(statusData);
+                const response = await dispatch('detailOrder/fetchDetailsOrderByOrder', orderID, { root: true });
+                const detailsOrder = this.getters['detailOrder/detailsOrderbyOrder'];
+                commit('SET_DETAILSORDER', detailsOrder);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
                 return null;
@@ -140,24 +151,13 @@ export default {
                 throw error;
             }
         },
-        async resetPasswordCredential({ commit }, email) {
-            try {
-                const response = await resetPassword(email);
-                const successMsg = handleSuccess(response);
-                commit('SET_SUCCESS', successMsg);
-                return null;
-            } catch (error) {
-                const errorMsg = handleError(error);
-                commit('SET_ERROR', errorMsg);
-                throw error;
-            }
-        }
     },
     getters: {
-        users: state => state.users,
-        user: state => state.user,
-        roles: state => state.roles,
+        orders: state => state.orders,
+        order: state => state.order,
+        clients: state => state.clients,
         error: state => state.error,
         success: state => state.success,
+        detailsOrder: state => state.detailsOrder,
     }
 };

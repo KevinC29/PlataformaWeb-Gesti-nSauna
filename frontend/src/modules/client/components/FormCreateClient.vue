@@ -1,18 +1,9 @@
 <template>
   <form @submit.prevent="submitForm">
     <!-- Buscador de Usuario -->
-    <v-autocomplete
-      v-model="state.user"
-      :items="filteredUsersList"
-      item-value="_id"
-      item-title="fullName"
-      v-model:search-input="searchTerm"
-      label="Buscar y Seleccionar Usuario"
-      clearable
-      dense
-      :items-per-page="5"
-      @update:search-input="filterUsers"
-    ></v-autocomplete>
+    <v-autocomplete v-model="state.user" :items="filteredUsersList" item-value="_id" item-title="fullName"
+      v-model:search-input="searchTerm" label="Buscar y Seleccionar Usuario" clearable dense :items-per-page="5"
+      @update:search-input="filterUsers"></v-autocomplete>
 
     <!-- Alerta de errores -->
     <v-alert v-if="errorMessage" type="error" dismissible>
@@ -43,11 +34,11 @@ export default {
   data() {
     return {
       state: {
-        user: null, // Mantén la referencia del usuario seleccionado
+        user: null, 
       },
-      usersList: [], // Lista completa de usuarios
-      filteredUsersList: [], // Lista filtrada por búsqueda
-      searchTerm: '', // Búsqueda activa
+      usersList: [],
+      filteredUsersList: [],
+      searchTerm: '',
       errorMessage: '',
       successMessage: '',
     };
@@ -68,8 +59,11 @@ export default {
             fullName: `${user.name} ${user.lastName} (${user.dni})`,
           }));
         this.filteredUsersList = this.usersList;
+        this.successMessage = this.success;
+        this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
+        this.successMessage = '';
       }
     },
 
@@ -90,19 +84,12 @@ export default {
       };
 
       try {
-        const errorMsg = await this.createClient(clientData);
-
-        if (errorMsg) {
-          this.errorMessage = this.error;
-          this.successMessage = '';
-        } else {
-          this.successMessage = this.success;
-          this.errorMessage = '';
-
-          setTimeout(() => {
-            this.$router.push({ name: 'ClientList' });
-          }, 2000);
-        }
+        await this.createClient(clientData);
+        this.successMessage = this.success;
+        this.errorMessage = '';
+        setTimeout(() => {
+          this.$router.push({ name: 'ClientList' });
+        }, 2000);
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';
