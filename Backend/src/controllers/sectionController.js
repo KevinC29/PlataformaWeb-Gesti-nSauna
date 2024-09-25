@@ -112,7 +112,13 @@ export const getSectionsWithItems = async (req, res) => {
 // Obtener una sola Sección
 export const getSection = async (req, res) => {
   try {
-    const section = await Section.findById(req.params.id).select("_id name isActive").exec();
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return handleError(res, null, 400, 'ID de sección no válido');
+    }
+
+    const section = await Section.findById(id).select("_id name isActive").exec();
     if (!section) {
       return handleError(res, null, 404, 'Sección no encontrada');
     }

@@ -95,6 +95,11 @@ export const getOrders = async (req, res) => {
 export const getOrder = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de orden no válido');
+        }
+        
         const order = await Order.findById(id)
             .populate({
                 path: 'client',

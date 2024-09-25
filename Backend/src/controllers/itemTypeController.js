@@ -78,7 +78,13 @@ export const getItemTypes = async (req, res) => {
 // Obtener un solo ItemType
 export const getItemType = async (req, res) => {
     try {
-        const itemType = await ItemType.findById(req.params.id)
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de tipo de ítem no válido');
+        }
+
+        const itemType = await ItemType.findById(id)
             .select("_id name description isActive section")
             .populate('section', 'name')
             .exec();
