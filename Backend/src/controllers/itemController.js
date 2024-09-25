@@ -85,6 +85,11 @@ export const getItems = async (req, res) => {
 export const getItem = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de ítem no válido');
+        }
+
         const item = await Item.findById(id)
             .select("_id name description price imageUrl isActive itemType")
             .populate('itemType', 'name')

@@ -135,7 +135,12 @@ export const getUsers = async (req, res) => {
 // Obtener un solo Usuario
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return handleError(res, null, 400, 'ID de usuario no válido');
+    }
+    const user = await User.findById(id)
       .select("_id name lastName dni email isActive role")
       .populate({
         path: 'role',

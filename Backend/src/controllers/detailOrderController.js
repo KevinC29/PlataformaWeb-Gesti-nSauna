@@ -71,7 +71,7 @@ export const createDetailOrder = async (req, res) => {
 };
 
 // Obtener todos los DetailOrders
-export const getDetailOrders = async (req, res) => {
+export const getDetailsOrder = async (req, res) => {
     try {
         const detailOrders = await DetailOrder.find()
             .populate('item', 'name price')
@@ -92,6 +92,11 @@ export const getDetailOrders = async (req, res) => {
 export const getDetailOrder = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de detalle de orden no válido');
+        }
+
         const detailOrder = await DetailOrder.findById(id)
             .populate('item', 'name price')
             .populate('order', 'numberOrder')
@@ -102,6 +107,27 @@ export const getDetailOrder = async (req, res) => {
         }
 
         res.status(200).json({ data: detailOrder, message: "Detalle de orden encontrado" });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
+// Obtener todos los DetailOrders de una Order específica
+export const getDetailsOrderByOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const detailsOrder = await DetailOrder.find({ order: id }).exec();
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de orden no válido');
+        }
+
+        if (detailsOrder.length === 0) {
+            return handleError(res, null, 404, 'No se encontraron detalles para la orden');
+        }
+
+        res.status(200).json({ data: detailOrder, message: "Detalles de orden encontrados" });
     } catch (error) {
         handleError(res, error);
     }

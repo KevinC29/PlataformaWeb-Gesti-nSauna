@@ -69,7 +69,13 @@ export const getRoles = async (req, res) => {
 // Obtener un solo Rol
 export const getRole = async (req, res) => {
   try {
-    const role = await Role.findById(req.params.id).select("_id name isActive").exec();
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return handleError(res, null, 400, 'ID de rol no válido');
+    }
+
+    const role = await Role.findById(id).select("_id name isActive").exec();
     if (!role) {
       return handleError(res, null, 404, 'Rol no encontrado');
     }

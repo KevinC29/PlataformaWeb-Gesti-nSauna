@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post('/', checkAuth(['ADMIN', 'CASHIER']), createOrder);
 router.get('/', checkAuth(['ADMIN', 'CASHIER', 'MANAGER']), getOrders);
-router.get('/by-date', checkAuth(['ADMIN', 'CASHIER', 'MANAGER']), getOrdersByDate);
+router.get('/by-date', checkAuth(['ADMIN', 'MANAGER']), getOrdersByDate);
 router.get('/:id', checkAuth(['ADMIN', 'CASHIER', 'MANAGER']), getOrder);
 router.put('/:id', checkAuth(['ADMIN', 'CASHIER']), updateOrder);
 router.delete('/:id', checkAuth(['ADMIN', 'CASHIER']), deleteOrder);

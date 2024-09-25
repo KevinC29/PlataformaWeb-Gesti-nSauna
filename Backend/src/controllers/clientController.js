@@ -63,7 +63,7 @@ export const createClient = async (req, res) => {
 export const getClients = async (req, res) => {
     try {
         const clients = await Client.find()
-            .populate('user', 'name lastName dni')
+            .populate('user', 'name lastName dni isActive')
             .exec();
 
         if (!clients.length) {
@@ -80,6 +80,11 @@ export const getClients = async (req, res) => {
 export const getClient = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return handleError(res, null, 400, 'ID de cliente no válido');
+        }
+
         const client = await Client.findById(id)
             .populate('user', 'name lastName dni')
             .exec();
