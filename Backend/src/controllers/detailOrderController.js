@@ -116,18 +116,19 @@ export const getDetailOrder = async (req, res) => {
 export const getDetailsOrderByOrder = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        const detailsOrder = await DetailOrder.find({ order: id }).exec();
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return handleError(res, null, 400, 'ID de orden no válido');
         }
+        
+        const detailsOrder = await DetailOrder.find({ order: id }).populate('item', 'name price');
 
         if (detailsOrder.length === 0) {
-            return handleError(res, null, 404, 'No se encontraron detalles para la orden');
+            res.status(200).json({ data: [], message: "No se encontraron detalles para la orden" });
+        }else{
+            res.status(200).json({ data: detailsOrder, message: "Detalles de orden encontrados" });
         }
 
-        res.status(200).json({ data: detailOrder, message: "Detalles de orden encontrados" });
     } catch (error) {
         handleError(res, error);
     }
