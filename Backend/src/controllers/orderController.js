@@ -18,7 +18,7 @@ export const createOrder = async (req, res) => {
             return handleError(res, null, session, 400, validationResult.message);
         }
 
-        const { numberOrder, client } = req.body;
+        const { numberOrder, balance, client } = req.body;
 
         if (!await Client.exists({ _id: client })) {
             return handleError(res, null, session, 409, 'El cliente ingresado no existe');
@@ -28,7 +28,7 @@ export const createOrder = async (req, res) => {
             return handleError(res, null, session, 409, 'El numero de orden ya existe');
         }
 
-        const newOrder = new Order({ numberOrder, client });
+        const newOrder = new Order({ numberOrder, balance, client });
         await newOrder.save({ session });
 
         // await saveAuditEntry({

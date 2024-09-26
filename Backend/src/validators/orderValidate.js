@@ -31,14 +31,14 @@ export const validateOrderData = (data) => {
   // Validar `balance` si está presente: debe ser un número válido y mayor a cero
   if (data.hasOwnProperty('balance')) {
     if (typeof data.balance !== 'number' || isNaN(data.balance) || data.balance < 0) {
-      return { isValid: false, message: "El campo 'Saldo' debe ser un número válido y mayor a cero." };
+      return { isValid: false, message: "El campo 'Saldo' debe ser un número válido." };
     }
   }
 
   // Validar `total` si está presente: debe ser un número válido y mayor a cero
   if (data.hasOwnProperty('total')) {
     if (typeof data.total !== 'number' || isNaN(data.total) || data.total < 0) {
-      return { isValid: false, message: "El campo 'Total' debe ser un número válido y mayor a cero." };
+      return { isValid: false, message: "El campo 'Total' debe ser un número válido." };
     }
   }
 
