@@ -1,6 +1,6 @@
 import {
     createDetailOrder,
-    getDetailOrders,
+    getDetailsOrder,
     getDetailOrder,
     getDetailsOrderByOrder,
     updateDetailOrder,
@@ -16,8 +16,8 @@ export default {
     state: {
         detailsOrder: [],
         detailOrder: null,
-        error: '',
-        success: '',
+        errorDetail: '',
+        successDetail: '',
         detailsOrderbyOrder: [],
     },
     mutations: {
@@ -34,28 +34,25 @@ export default {
             state.detailsOrder.push(detailOrder);
         },
         UPDATE_DETAILORDER(state, updatedDetailOrder) {
-            // const index = state.detailsOrder.findIndex(detailOrder => detailOrder._id === updatedDetailOrder._id);
-            // if (index !== -1) {
-            //     state.detailOrder.splice(index, 1, updatedDetailOrder);
-            // }
-            if (state.detailOrder._id === updatedDetailOrder._id) {
-                Object.assign(state.detailOrder, updatedDetailOrder);
+            const index = state.detailsOrder.findIndex(detailOrder => detailOrder._id === updatedDetailOrder._id);
+            if (index !== -1) {
+                state.detailOrder.splice(index, 1, updatedDetailOrder);
             }
         },
         DELETE_DETAILORDER(state, detailOrderId) {
             state.detailsOrder = state.detailsOrder.filter(detailOrder => detailOrder._id !== detailOrderId);
         },
-        SET_ERROR(state, error) {
-            state.error = error;
+        SET_ERROR(state, errorDetail) {
+            state.errorDetail = errorDetail;
         },
-        SET_SUCCESS(state, success) {
-            state.success = success;
+        SET_SUCCESS(state, successDetail) {
+            state.successDetail = successDetail;
         }
     },
     actions: {
-        async fetchOrders({ commit }) {
+        async fetchDetailsOrder({ commit }) {
             try {
-                const response = await getDetailOrders();
+                const response = await getDetailsOrder();
                 commit('SET_DETAILSORDER', response.data);
                 const successMsg = handleSuccess(response);
                 commit('SET_SUCCESS', successMsg);
@@ -105,7 +102,7 @@ export default {
                 throw error;
             }
         },
-        async updateOrder({ commit }, { id, detailOrderData }) {
+        async updateDetailOrder({ commit }, { id, detailOrderData }) {
             try {
                 const response = await updateDetailOrder(id, detailOrderData);
                 commit('UPDATE_DETAILORDER', response.data);
@@ -118,7 +115,7 @@ export default {
                 throw error;
             }
         },
-        async deleteUser({ commit }, id) {
+        async deleteDetailOrder({ commit }, id) {
             try {
                 const response = await deleteDetailOrder(id);
                 commit('DELETE_DETAILORDER', id);
@@ -136,7 +133,7 @@ export default {
         detailsOrder: state => state.detailsOrder,
         detailOrder: state => state.detailOrder,
         detailsOrderbyOrder: state => state.detailsOrderbyOrder,
-        error: state => state.error,
-        success: state => state.success,
+        errorDetail: state => state.errorDetail,
+        successDetail: state => state.successDetail,
     }
 };

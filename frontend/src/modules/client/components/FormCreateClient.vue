@@ -59,8 +59,8 @@ export default {
             fullName: `${user.name} ${user.lastName} (${user.dni})`,
           }));
         this.filteredUsersList = this.usersList;
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

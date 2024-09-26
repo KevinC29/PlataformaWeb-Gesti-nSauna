@@ -75,8 +75,8 @@ export default {
 
         await this.fetchItemType(this.$route.params.id);
         this.state = { ...this.itemType };
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

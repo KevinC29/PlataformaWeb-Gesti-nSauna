@@ -50,8 +50,8 @@ export default {
       try {
         await this.fetchAndSetClient();
         this.state.client = this.client._id;
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error || 'Usted aún no esta registrado como cliente';
         this.successMessage = '';

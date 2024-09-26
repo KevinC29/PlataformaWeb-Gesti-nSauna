@@ -58,8 +58,8 @@ export default {
           name: section.name,
           isActive: section.isActive,
         };
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

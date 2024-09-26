@@ -140,6 +140,8 @@ export default {
     async confirmDelete(comment) {
       this.editedItem = comment;
       this.dialogDelete = true;
+      this.successMessage = '';
+      this.errorMessage = '';
     },
     async deleteItemConfirm() {
       if (this.editedItem) {

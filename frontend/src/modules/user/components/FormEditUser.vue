@@ -92,8 +92,8 @@ export default {
           isActive: user.isActive,
           role: user.role._id,
         };
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

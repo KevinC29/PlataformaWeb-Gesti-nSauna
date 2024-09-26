@@ -17,7 +17,7 @@
 
         <!-- Columna de Número de Orden -->
         <template v-slot:[`item.numberOrder`]="{ item }">
-            {{ item.numberOrder }}
+            {{ `0${item.numberOrder}` }}
         </template>
 
         <!-- Columna de Fecha de Orden -->
@@ -115,19 +115,18 @@ export default {
                 { title: 'Cliente', key: 'client' },
                 { title: 'Total', key: 'total' },
                 { title: 'Estado de Pago', key: 'paymentState' },
-                { title: 'Acciones', key: 'actions', sortable: false }
+                { title: 'Acciones', value: 'actions', sortable: false }
             ];
         },
         filteredItems() {
             const filteredOrders = this.orders.filter(order => order.paymentState === 'pending');
-            
             if (!this.search) return filteredOrders;
-
             const searchLower = this.search.toLowerCase();
             return filteredOrders.filter(order =>
                 order.numberOrder.toString().includes(searchLower) ||
-                order.client.name.toLowerCase().includes(searchLower) ||
-                order.client.lastName.toLowerCase().includes(searchLower)
+                new Date(order.dateOrder).toLocaleDateString('en-GB').includes(searchLower) ||
+                order.client.user.name.toLowerCase().includes(searchLower) ||
+                order.client.user.lastName.toLowerCase().includes(searchLower)
             );
         }
     },

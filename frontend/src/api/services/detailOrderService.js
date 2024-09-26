@@ -18,7 +18,7 @@ export const createDetailOrder = async (detailOrderData) => {
 };
 
 // Obtener todos los detalles de orden
-export const getDetailOrders = async () => {
+export const getDetailsOrder = async () => {
   try {
     const response = await http.get(apiUrl);
     return response.data;

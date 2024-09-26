@@ -74,8 +74,8 @@ export default {
     async fetchUserProfile() {
       try {
         await this.fetchAndSetUser();
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

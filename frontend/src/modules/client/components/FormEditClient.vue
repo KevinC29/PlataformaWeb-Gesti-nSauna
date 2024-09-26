@@ -64,8 +64,8 @@ export default {
           account: client.account,
           accountState: client.accountState,
         };
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

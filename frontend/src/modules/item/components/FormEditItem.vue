@@ -94,8 +94,8 @@ export default {
           isActive: item.isActive,
           itemType: item.itemType._id,
         };
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';

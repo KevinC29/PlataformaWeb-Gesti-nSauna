@@ -150,8 +150,8 @@ export default {
           email: user.email,
         };
         this.userID = user._id;
-        this.successMessage = this.success;
-        this.errorMessage = '';
+        // this.successMessage = this.success;
+        // this.errorMessage = '';
       } catch (error) {
         this.errorMessage = this.error;
         this.successMessage = '';
