@@ -72,7 +72,7 @@ export const getOrders = async (req, res) => {
             .exec();
 
         if (!orders.length) {
-            return handleError(res, null, 404, 'No existen órdenes');
+            return handleError(res, null, null, 404, 'No existen órdenes');
         }
 
         const ordersWithDetails = await Promise.all(
@@ -97,7 +97,7 @@ export const getOrder = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de orden no válido');
+            return handleError(res, null, null, 400, 'ID de orden no válido');
         }
         
         const order = await Order.findById(id)
@@ -112,7 +112,7 @@ export const getOrder = async (req, res) => {
             .exec();
 
         if (!order) {
-            return handleError(res, null, 404, 'Orden no encontrada');
+            return handleError(res, null, null, 404, 'Orden no encontrada');
         }
 
         const detailOrders = await DetailOrder.find({ order: order._id }).exec();
@@ -137,7 +137,7 @@ export const getOrdersByDate = async (req, res) => {
         const end = new Date(endDate);
 
         if (start > end) {
-            return handleError(res, null, 400, 'La fecha de inicio no puede ser posterior a la fecha de fin');
+            return handleError(res, null, null, 400, 'La fecha de inicio no puede ser posterior a la fecha de fin');
         }
 
         const orders = await Order.find({
@@ -154,7 +154,7 @@ export const getOrdersByDate = async (req, res) => {
             .exec();
 
         if (!orders.length) {
-            return handleError(res, null, 400, 'No existen órdenes en el rango de fechas proporcionado');
+            return handleError(res, null, null, 400, 'No existen órdenes en el rango de fechas proporcionado');
         }
 
         const ordersWithDetails = await Promise.all(
@@ -205,7 +205,7 @@ export const updateOrder = async (req, res) => {
         const totalSum = detallesOrden.reduce((total, detalle) => total + detalle.price, 0);
 
         if (totalSum !== consumptionAccount || consumptionAccount !== total) {
-            return res.status(409).json({ error: "Error en el total de la orden" }); // Código 409 es más apropiado para conflictos de estado
+            return handleError(res, null, session, 409, "Error en el total de la orden");
         }
 
         const updatedFields = { consumptionAccount, balance, total, paymentState };
@@ -221,7 +221,6 @@ export const updateOrder = async (req, res) => {
 
         await session.commitTransaction();
         res.status(200).json({ data: updatedOrder, message: "Orden actualizada con éxito" });
-
     } catch (error) {
         if (session && session.inTransaction()) {
             try {

@@ -67,7 +67,7 @@ export const getClients = async (req, res) => {
             .exec();
 
         if (!clients.length) {
-            return handleError(res, null, 404, 'No existen clientes');
+            return handleError(res, null, null, 404, 'No existen clientes');
         }
 
         res.status(200).json({ data: clients, message: "Clientes extraídos con éxito" });
@@ -82,7 +82,7 @@ export const getClient = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de cliente no válido');
+            return handleError(res, null, null, 400, 'ID de cliente no válido');
         }
 
         const client = await Client.findById(id)
@@ -90,7 +90,7 @@ export const getClient = async (req, res) => {
             .exec();
 
         if (!client) {
-            return handleError(res, null, 404, 'Cliente no encontrado');
+            return handleError(res, null, null, 404, 'Cliente no encontrado');
         }
 
         res.status(200).json({ data: client, message: "Cliente encontrado" });
@@ -106,7 +106,7 @@ export const getClientByAuthenticatedUser = async (req, res) => {
         const client = await Client.findOne({ user: userId });
 
         if (!client) {
-            return handleError(res, null, 404, 'Cuenta de Cliente no encontrada');
+            return handleError(res, null, null, 404, 'Cuenta de Cliente no encontrada');
         }
 
         res.status(200).json({ data: client, message: "Cliente encontrado" });

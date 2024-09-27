@@ -59,7 +59,7 @@ export const getSections = async (req, res) => {
   try {
     const sections = await Section.find().select("_id name isActive").exec();
     if (!sections.length) {
-      return handleError(res, null, 404, 'No existen secciones');
+      return handleError(res, null, null, 404, 'No existen secciones');
     }
     res.status(200).json({ data: sections, message: "Secciones extraídas con éxito" });
   } catch (error) {
@@ -73,7 +73,7 @@ export const getSectionsWithItems = async (req, res) => {
     const sections = await Section.find().select('_id name isActive').exec();
 
     if (!sections.length) {
-      return handleError(res, null, 404, 'No existen secciones');
+      return handleError(res, null, null, 404, 'No existen secciones');
     }
 
     const sectionPromises = sections.map(async (section) => {
@@ -115,12 +115,12 @@ export const getSection = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return handleError(res, null, 400, 'ID de sección no válido');
+      return handleError(res, null, null, 400, 'ID de sección no válido');
     }
 
     const section = await Section.findById(id).select("_id name isActive").exec();
     if (!section) {
-      return handleError(res, null, 404, 'Sección no encontrada');
+      return handleError(res, null, null, 404, 'Sección no encontrada');
     }
     res.status(200).json({ data: section, message: "Sección encontrada" });
   } catch (error) {
