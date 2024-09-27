@@ -75,7 +75,7 @@ export const updateCredentialStatus = async (req, res) => {
     const validationResult = validateCredentialData(req.body);
 
     if (!validationResult.isValid) {
-      return handleError(res, null, 400, validationResult.message);
+      return handleError(res, null, null, 400, validationResult.message);
     }
 
     const { _id, isActive } = req.body;
@@ -83,13 +83,13 @@ export const updateCredentialStatus = async (req, res) => {
     const credentialUser = await Credential.findOne({ user: _id }).exec();
 
     if (!credentialUser) {
-      return handleError(res, null, 404, "Credencial no encontrada");
+      return handleError(res, null, null, 404, "Credencial no encontrada");
     }
 
     const credential = await Credential.findByIdAndUpdate(credentialUser._id, { isActive }, { new: true }).exec();
 
     const successMessage = isActive ? "Credencial activada con éxito" : "Credencial desactivada con éxito";
-    res.status(200).json({ message: successMessage, data: credential });
+    res.status(200).json({ data: credential, message: successMessage });
   } catch (error) {
     handleError(res, error);
   }
@@ -102,13 +102,13 @@ export const getUserWithCredential = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return handleError(res, null, 404, 'Cuenta de usuario no encontrada');
+      return handleError(res, null, null, 404, 'Cuenta de usuario no encontrada');
     }
 
     const credential = await Credential.findOne({ user: userId }).exec();
 
     if (!credential) {
-      return handleError(res, null, 404, 'Credenciales no encontradas');
+      return handleError(res, null, null, 404, 'Credenciales no encontradas');
     }
 
     const userWithCredentialId = {
@@ -116,10 +116,7 @@ export const getUserWithCredential = async (req, res) => {
       credentialId: credential._id
     };
 
-    res.status(200).json({
-      data: userWithCredentialId,
-      message: "Usuario y credencial encontrados"
-    });
+    res.status(200).json({ data: userWithCredentialId, message: "Usuario y credencial encontrados"});
   } catch (error) {
     handleError(res, error);
   }

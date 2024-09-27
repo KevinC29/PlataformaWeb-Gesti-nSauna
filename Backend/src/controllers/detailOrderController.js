@@ -79,7 +79,7 @@ export const getDetailsOrder = async (req, res) => {
             .exec();
 
         if (!detailOrders.length) {
-            return handleError(res, null, 404, 'No existen detalles de órdenes');
+            return handleError(res, null, null, 404, 'No existen detalles de órdenes');
         }
 
         res.status(200).json({ data: detailOrders, message: "Detalles de órdenes extraídos con éxito" });
@@ -94,7 +94,7 @@ export const getDetailOrder = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de detalle de orden no válido');
+            return handleError(res, null, null, 400, 'ID de detalle de orden no válido');
         }
 
         const detailOrder = await DetailOrder.findById(id)
@@ -103,7 +103,7 @@ export const getDetailOrder = async (req, res) => {
             .exec();
 
         if (!detailOrder) {
-            return handleError(res, null, 404, 'Detalle de orden no encontrado');
+            return handleError(res, null, null, 404, 'Detalle de orden no encontrado');
         }
 
         res.status(200).json({ data: detailOrder, message: "Detalle de orden encontrado" });
@@ -118,14 +118,14 @@ export const getDetailsOrderByOrder = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de orden no válido');
+            return handleError(res, null, null, 400, 'ID de orden no válido');
         }
-        
+
         const detailsOrder = await DetailOrder.find({ order: id }).populate('item', 'name price');
 
         if (detailsOrder.length === 0) {
             res.status(200).json({ data: [], message: "No se encontraron detalles para la orden" });
-        }else{
+        } else {
             res.status(200).json({ data: detailsOrder, message: "Detalles de orden encontrados" });
         }
 
@@ -147,21 +147,31 @@ export const updateDetailOrder = async (req, res) => {
         }
 
         const { id } = req.params;
-        const { cantidad, price } = req.body;
-
+        const { cantidad, price, order } = req.body;
         const detailOrder = await DetailOrder.findById(id).exec();
+        const existingItem = await Item.findById(detailOrder.item).exec();
+        const existingOrder = await Order.findById(order).exec();
+
         if (!detailOrder) {
             return handleError(res, null, session, 404, "El detalle de orden no existe");
         }
-
-        const existingItem = await Item.findById(detailOrder.item).exec();
-        if (!(existingItem.price * cantidad === price)) {
+        if (!existingItem) {
+            return handleError(res, null, session, 404, 'El ítem no existe');
+        }
+        if (!existingOrder) {
+            return handleError(res, null, session, 404, 'La orden no existe');
+        }
+        if (existingItem.price * cantidad !== price) {
             return handleError(res, null, session, 409, 'El total del detalle de la orden es incorrecto');
         }
 
+        const priceDifference = price - detailOrder.price;
+
+        const updatedOrder = await Order.findByIdAndUpdate(existingOrder._id, {$inc: {consumptionAccount: priceDifference, total: priceDifference,}}, { new: true, session }).exec();
+
         const updatedFields = { cantidad, price };
         const updatedDetailOrder = await DetailOrder.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
-        
+
         // await saveAuditEntry({
         //     eventType: 'UPDATE',
         //     documentId: updatedDetailOrder._id,
@@ -171,7 +181,7 @@ export const updateDetailOrder = async (req, res) => {
         //   });
 
         await session.commitTransaction();
-        res.status(200).json({ data: updatedDetailOrder, message: "Detalle de orden actualizado con éxito" });
+        res.status(200).json({ data: { updatedDetailOrder, updatedOrder }, message: "Detalle de orden actualizado con éxito" });
     } catch (error) {
         if (session && session.inTransaction()) {
             try {

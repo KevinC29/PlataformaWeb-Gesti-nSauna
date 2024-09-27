@@ -72,7 +72,7 @@ export const getItems = async (req, res) => {
             .exec();
 
         if (items.length === 0) {
-            return handleError(res, null, 404, 'No existen ítems');
+            return handleError(res, null, null, 404, 'No existen ítems');
         }
 
         res.status(200).json({ data: items, message: "Ítems extraídos con éxito" });
@@ -87,7 +87,7 @@ export const getItem = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de ítem no válido');
+            return handleError(res, null, null, 400, 'ID de ítem no válido');
         }
 
         const item = await Item.findById(id)
@@ -96,7 +96,7 @@ export const getItem = async (req, res) => {
             .exec();
 
         if (!item) {
-            return handleError(res, null, 404, 'Ítem no encontrado');
+            return handleError(res, null, null, 404, 'Ítem no encontrado');
         }
 
         res.status(200).json({ data: item, message: "Ítem encontrado" });

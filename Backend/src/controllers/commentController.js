@@ -68,7 +68,7 @@ export const getComments = async (req, res) => {
             .exec();
 
         if (!comments.length) {
-            return handleError(res, null, 404, 'No existen comentarios');
+            return handleError(res, null, null, 404, 'No existen comentarios');
         }
 
         res.status(200).json({ data: comments, message: "Comentarios extraídos con éxito" });
@@ -90,11 +90,11 @@ export const updateCommentStatus = async (req, res) => {
         const comment = await Comment.findByIdAndUpdate(_id, { isActive }, { new: true }).exec();
 
         if (!comment) {
-            return handleError(res, null, 404, 'El comentario no se encuentra registrado');
+            return handleError(res, null, null, 404, 'El comentario no se encuentra registrado');
         }
 
         const successMessage = isActive ? "Comentario activado con éxito" : "Comentario desactivado con éxito";
-        res.status(200).json({ message: successMessage, data: comment });
+        res.status(200).json({ data: comment, message: successMessage });
     } catch (error) {
         handleError(res, error);
     }

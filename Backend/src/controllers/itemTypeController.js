@@ -66,7 +66,7 @@ export const getItemTypes = async (req, res) => {
             .exec();
 
         if (itemTypes.length === 0) {
-            return handleError(res, null, session, 404, 'No existen tipos de ítem');
+            return handleError(res, null, null, 404, 'No existen tipos de ítem');
         }
 
         res.status(200).json({ data: itemTypes, message: "Tipos de ítem extraídos con éxito" });
@@ -81,7 +81,7 @@ export const getItemType = async (req, res) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return handleError(res, null, 400, 'ID de tipo de ítem no válido');
+            return handleError(res, null, null, 400, 'ID de tipo de ítem no válido');
         }
 
         const itemType = await ItemType.findById(id)

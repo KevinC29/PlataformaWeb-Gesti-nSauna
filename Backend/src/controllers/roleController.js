@@ -58,7 +58,7 @@ export const getRoles = async (req, res) => {
   try {
     const roles = await Role.find().select("_id name isActive").exec();
     if (!roles.length) {
-      return handleError(res, null, 404, 'No existen roles');
+      return handleError(res, null, null, 404, 'No existen roles');
     }
     res.status(200).json({ data: roles, message: "Roles extraídos con éxito" });
   } catch (error) {
@@ -72,12 +72,12 @@ export const getRole = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return handleError(res, null, 400, 'ID de rol no válido');
+      return handleError(res, null, null, 400, 'ID de rol no válido');
     }
 
     const role = await Role.findById(id).select("_id name isActive").exec();
     if (!role) {
-      return handleError(res, null, 404, 'Rol no encontrado');
+      return handleError(res, null, null, 404, 'Rol no encontrado');
     }
     res.status(200).json({ data: role, message: "Rol encontrado" });
   } catch (error) {

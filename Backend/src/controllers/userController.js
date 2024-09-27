@@ -12,15 +12,13 @@ import { validateUserData } from '../validators/userValidate.js';
 export const createUser = async (req, res) => {
   let session;
   try {
-
-    const validationResult = validateUserData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
     session = await mongoose.startSession();
     session.startTransaction();
+
+    const validationResult = validateUserData(req.body);
+    if (!validationResult.isValid) {
+      return handleError(res, null, session, 400, validationResult.message);
+    }
 
     const { name, lastName, dni, email, role, password, confirmPassword, isActive } = req.body;
 
@@ -108,7 +106,7 @@ export const getUsers = async (req, res) => {
       .exec();
 
     if (!users.length) {
-      return res.status(404).json({ error: 'No existen usuarios' });
+      return handleError(res, null, null, 404, 'No existen usuarios');
     }
 
     const userIds = users.map(user => user._id);
@@ -138,7 +136,7 @@ export const getUser = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return handleError(res, null, 400, 'ID de usuario no válido');
+      return handleError(res, null, null, 400, 'ID de usuario no válido');
     }
     const user = await User.findById(id)
       .select("_id name lastName dni email isActive role")
@@ -147,7 +145,7 @@ export const getUser = async (req, res) => {
         select: '_id name'
       }).exec();
     if (!user) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+      return handleError(res, null, null, 404, 'Usuario no encontrado');
     }
     res.status(200).json({ data: user, message: "Usuario encontrado" });
   } catch (error) {
@@ -159,14 +157,13 @@ export const getUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   let session;
   try {
-    const validationResult = validateUserData(req.body);
-
-    if (!validationResult.isValid) {
-      return res.status(400).json({ error: validationResult.message });
-    }
-
     session = await mongoose.startSession();
     session.startTransaction();
+
+    const validationResult = validateUserData(req.body);
+    if (!validationResult.isValid) {
+      return handleError(res, null, session, 400, validationResult.message);
+    }
 
     const { id } = req.params;
     const { name, lastName, dni, email, role, isActive } = req.body;
@@ -259,8 +256,7 @@ export const deleteUser = async (req, res) => {
     }
 
     if (await Client.exists({ user: id })) {
-      await session.abortTransaction();
-      return res.status(409).json({ error: "Existe un cliente asociados a este usuario" });
+      return handleError(res, null, session, 409, 'Existe un cliente asociados a este usuario');
     }
 
     await User.findByIdAndDelete(id, { session }).exec();
