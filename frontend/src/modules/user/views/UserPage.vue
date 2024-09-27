@@ -188,7 +188,42 @@ export default {
   },
   methods: {
     ...mapActions('user', ['fetchUsers', 'deleteUser', 'updateCredentialStatus', 'resetPasswordCredential']),
-
+    formattedError(option, error, message) {
+      if (option === 0) {
+        this.errorMessage = error || message;
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 2000);
+      } else if (option === 1) {
+        this.statusUpdateErrorMessage = error || message;
+        setTimeout(() => {
+          this.statusUpdateErrorMessage = '';
+        }, 2000);
+      } else {
+        this.passwordResetErrorMessage = error || message;
+        setTimeout(() => {
+          this.passwordResetErrorMessage = '';
+        }, 2000);
+      }
+    },
+    formattedSuccess(option, success, message) {
+      if (option === 0) {
+        this.successMessage = success || message;
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 2000);
+      } else if (option === 1) {
+        this.statusUpdateSuccessMessage = success || message;
+        setTimeout(() => {
+          this.statusUpdateSuccessMessage = '';
+        }, 2000);
+      } else {
+        this.passwordResetSuccessMessage = success || message;
+        setTimeout(() => {
+          this.passwordResetSuccessMessage = '';
+        }, 2000);
+      }
+    },
     navigateToCreate() {
       this.$router.push({ name: 'UserCreate' });
     },
@@ -205,56 +240,45 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteUser(this.editedItem._id);
-          this.successMessage = this.success;
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.dialogDelete = false;
-          }, 2000);
+          this.formattedSuccess(0, this.success, "Usuario eliminado con éxito");
+          this.dialogDelete = false;
           this.fetchUsers();
         } catch (error) {
-          this.errorMessage = this.error || 'Error desconocido';
-          this.successMessage = '';
+          this.formattedError(0, this.error, "Error al eliminar el usuario");
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.successMessage = '';
-      this.errorMessage = '';
     },
     async toggleCredentialStatus(user) {
       try {
         const newStatus = !user.credentialStatus;
         await this.updateCredentialStatus({ _id: user._id, isActive: newStatus });
+        this.formattedSuccess(1, this.success, "Status actualizado con éxito");
         this.dialogStatusUpdate = true;
-        this.statusUpdateSuccessMessage = this.success;
         user.credentialStatus = newStatus;
       } catch (error) {
-        this.statusUpdateErrorMessage = this.error || 'Error al modificar el status';
+        this.formattedError(1, this.error, "Error al modificar el status");
         this.dialogStatusUpdate = true;
       }
     },
     closeStatusUpdate() {
       this.dialogStatusUpdate = false;
-      this.statusUpdateErrorMessage = '';
-      this.statusUpdateSuccessMessage = '';
-
     },
     async resetPassword(user) {
       try {
         const email = user.email || user.dni;
         await this.resetPasswordCredential({ email });
+        this.formattedSuccess(2, this.success, "Contraseña reseteada con éxito");
         this.dialogResetPassword = true;
-        this.passwordResetSuccessMessage = this.success;
       } catch (error) {
-        this.passwordResetErrorMessage = this.error || 'Error al resetear la contraseña';
+        this.formattedSuccess(2, this.success, "Error al resetear la contraseña");
         this.dialogResetPassword = true;
       }
     },
     closePasswordReset() {
       this.dialogResetPassword = false;
-      this.passwordResetErrorMessage = '';
-      this.passwordResetSuccessMessage = '';
     }
   },
   created() {

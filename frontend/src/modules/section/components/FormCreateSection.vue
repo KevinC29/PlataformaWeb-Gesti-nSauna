@@ -49,7 +49,18 @@ export default {
   },
   methods: {
     ...mapActions('section', ['createSection']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async submitForm() {
       this.v$.$touch();
 
@@ -62,14 +73,10 @@ export default {
 
       try {
         await this.createSection(sectionData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'SectionList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Sección creada con éxito");
+        this.$router.push({ name: 'SectionList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear la sección");
       }
     },
 

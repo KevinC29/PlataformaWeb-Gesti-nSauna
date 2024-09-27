@@ -21,7 +21,7 @@
 
     <!-- Columna de Cuenta -->
     <template v-slot:[`item.account`]="{ item }">
-      {{ item.account.toFixed(2) }}
+      <span>$ {{ item.account.toFixed(2) }}</span>
     </template>
 
     <!-- Columna de Estado de Cuenta -->
@@ -110,7 +110,18 @@ export default {
   },
   methods: {
     ...mapActions('client', ['fetchClients', 'deleteClient']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     navigateToCreate() {
       this.$router.push({ name: 'ClientCreate' });
     },
@@ -127,22 +138,16 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteClient(this.editedItem._id);
-          this.successMessage = this.success;
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.dialogDelete = false;
-          }, 2000);
+          this.formattedSuccess(this.success, "Cliente eliminado con éxito");
+          this.dialogDelete = false;
           this.fetchClients();
         } catch (error) {
-          this.errorMessage = this.error || 'Error desconocido';
-          this.successMessage = '';
+          this.formattedError(this.error, "Error al eliminar el cliente");
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.successMessage = '';
-      this.errorMessage = '';
     }
   },
   created() {

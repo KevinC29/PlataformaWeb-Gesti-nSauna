@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       state: {
-        user: null, 
+        user: null,
       },
       usersList: [],
       filteredUsersList: [],
@@ -48,7 +48,18 @@ export default {
   },
   methods: {
     ...mapActions('client', ['createClient', 'fetchAndSetUsers']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetUsers();
@@ -59,11 +70,8 @@ export default {
             fullName: `${user.name} ${user.lastName} (${user.dni})`,
           }));
         this.filteredUsersList = this.usersList;
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
 
@@ -85,14 +93,10 @@ export default {
 
       try {
         await this.createClient(clientData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ClientList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Cliente creado con éxito");
+        this.$router.push({ name: 'ClientList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear el cliente");
       }
     },
 

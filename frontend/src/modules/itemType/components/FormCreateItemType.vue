@@ -62,7 +62,18 @@ export default {
   },
   methods: {
     ...mapActions('itemType', ['createItemType', 'fetchAndSetSections']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetSections();
@@ -72,11 +83,8 @@ export default {
             _id: section._id,
             name: section.name,
           }));
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
     async submitForm() {
@@ -93,14 +101,10 @@ export default {
 
       try {
         await this.createItemType(itemTypeData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ItemTypeList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Tipo de Ítem creado con éxito");
+        this.$router.push({ name: 'ItemTypeList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear el Tipo de Ítem");
       }
     },
 

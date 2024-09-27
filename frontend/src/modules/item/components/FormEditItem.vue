@@ -73,7 +73,18 @@ export default {
   },
   methods: {
     ...mapActions('item', ['updateItem', 'fetchAndSetItemTypes', 'fetchItem']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetItemTypes();
@@ -94,17 +105,14 @@ export default {
           isActive: item.isActive,
           itemType: item.itemType._id,
         };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
 
     formatPrice() {
       if (this.state.price !== null && this.state.price !== '') {
-        this.state.price = parseFloat(this.state.price).toFixed(2);
+        this.state.price =  Math.max(0, parseFloat(this.state.price).toFixed(2));
       }
     },
 
@@ -126,14 +134,10 @@ export default {
 
       try {
         await this.updateItem({ id: this.$route.params.id, itemData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ItemList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Ítem actualizado con éxito");
+        this.$router.push({ name: 'ItemList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al modificar el ítem");
       }
     },
 

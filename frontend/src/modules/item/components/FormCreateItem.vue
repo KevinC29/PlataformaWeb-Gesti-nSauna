@@ -73,10 +73,21 @@ export default {
   },
   methods: {
     ...mapActions('item', ['createItem', 'fetchAndSetItemTypes']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     formatPrice() {
       if (this.state.price !== null && this.state.price !== '') {
-        this.state.price = parseFloat(this.state.price).toFixed(2);
+        this.state.price =  Math.max(0, parseFloat(this.state.price).toFixed(2));
       }
     },
     async fetchData() {
@@ -88,11 +99,8 @@ export default {
             _id: itemType._id,
             name: itemType.name,
           }));
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
     async submitForm() {
@@ -113,14 +121,10 @@ export default {
 
       try {
         await this.createItem(itemData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ItemList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Ítem creado con éxito");
+        this.$router.push({ name: 'ItemList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear el ítem");
       }
     },
 

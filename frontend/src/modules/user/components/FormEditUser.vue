@@ -71,7 +71,18 @@ export default {
   },
   methods: {
     ...mapActions('user', ['updateUser', 'fetchAndSetRoles', 'fetchUser']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetRoles();
@@ -92,11 +103,8 @@ export default {
           isActive: user.isActive,
           role: user.role._id,
         };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
 
@@ -118,14 +126,10 @@ export default {
 
       try {
         await this.updateUser({ id: this.$route.params.id, userData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'UserList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Usuario actualizado con éxito");
+        this.$router.push({ name: 'UserList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al modificar el usuario");
       }
     },
 

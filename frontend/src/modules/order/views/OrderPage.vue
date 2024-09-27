@@ -132,7 +132,18 @@ export default {
     },
     methods: {
         ...mapActions('order', ['fetchOrders', 'deleteOrder']),
-
+        formattedError(error, message) {
+            this.errorMessage = error || message;
+            setTimeout(() => {
+                this.errorMessage = '';
+            }, 2000);
+        },
+        formattedSuccess(success, message) {
+            this.successMessage = success || message;
+            setTimeout(() => {
+                this.successMessage = '';
+            }, 2000);
+        },
         navigateToCreate() {
             this.$router.push({ name: 'OrderCreate' });
         },
@@ -147,22 +158,16 @@ export default {
             if (this.editedItem) {
                 try {
                     await this.deleteOrder(this.editedItem._id);
-                    this.successMessage = this.success;
-                    this.errorMessage = '';
-                    setTimeout(() => {
-                        this.dialogDelete = false;
-                    }, 2000);
+                    this.formattedSuccess(this.success, "Orden eliminada con éxito");
+                    this.dialogDelete = false;
                     this.fetchOrders();
                 } catch (error) {
-                    this.errorMessage = this.error || 'Error desconocido';
-                    this.successMessage = '';
+                    this.formattedError(this.error, "Error al eliminar la orden");
                 }
             }
         },
         closeDelete() {
             this.dialogDelete = false;
-            this.successMessage = '';
-            this.errorMessage = '';
         }
     },
     created() {

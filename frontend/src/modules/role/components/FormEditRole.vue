@@ -49,7 +49,18 @@ export default {
   },
   methods: {
     ...mapActions('role', ['fetchRole', 'updateRole']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchRole(this.$route.params.id);
@@ -58,11 +69,8 @@ export default {
           name: role.name,
           isActive: role.isActive,
         };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
     async submitForm() {
@@ -77,14 +85,10 @@ export default {
 
       try {
         await this.updateRole({ id: this.$route.params.id, roleData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'RoleList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Rol actualizado con éxito");
+        this.$router.push({ name: 'RoleList' });
       } catch (error) {
-        this.errorMessage = this.error || 'Error desconocido';
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al modificar el rol");
       }
     },
 

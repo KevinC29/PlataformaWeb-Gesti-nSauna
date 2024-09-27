@@ -55,7 +55,18 @@ export default {
   },
   methods: {
     ...mapActions('client', ['updateClient', 'fetchClient']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchClient(this.$route.params.id);
@@ -64,17 +75,14 @@ export default {
           account: client.account,
           accountState: client.accountState,
         };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
 
     formatAccount() {
       if (this.state.account !== null && this.state.account !== '') {
-        this.state.account = parseFloat(this.state.account).toFixed(2);
+        this.state.account = Math.max(0, parseFloat(this.state.account).toFixed(2));
       }
     },
 
@@ -92,14 +100,10 @@ export default {
 
       try {
         await this.updateClient({ id: this.$route.params.id, clientData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ClientList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Cliente creado con éxito");
+        this.$router.push({ name: 'ClientList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al editar el cliente");
       }
     },
 

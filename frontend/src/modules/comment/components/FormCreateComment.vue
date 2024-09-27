@@ -45,16 +45,24 @@ export default {
   },
   methods: {
     ...mapActions('comment', ['createComment', 'fetchAndSetClient']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetClient();
         this.state.client = this.client._id;
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error || 'Usted aún no esta registrado como cliente';
-        this.successMessage = '';
+        this.formattedError(this.error, "Usted aún no esta registrado como cliente");
       }
     },
     async submitForm() {
@@ -69,14 +77,10 @@ export default {
 
       try {
         await this.createComment(commentData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'CommentList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Comentario creado con éxito");
+        this.$router.push({ name: 'CommentList' });
       } catch (error) {
-        this.errorMessage = this.error || 'Error al enviar el formulario';
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear el comentario");
       }
     },
 

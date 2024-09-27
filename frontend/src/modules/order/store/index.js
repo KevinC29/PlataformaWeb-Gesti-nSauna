@@ -36,7 +36,7 @@ export default {
     UPDATE_ORDER(state, updatedOrder) {
       const index = state.orders.findIndex(order => order._id === updatedOrder._id);
       if (index !== -1) {
-        state.order.splice(index, 1, updatedOrder);
+        state.orders.splice(index, 1, updatedOrder);
       }
     },
     DELETE_ORDER(state, orderId) {

@@ -100,7 +100,7 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {
-      sortBy:[{ key: 'date', order: 'desc' }],
+      sortBy: [{ key: 'date', order: 'desc' }],
       search: '',
       dialogDelete: false,
       dialogStatusUpdate: false,
@@ -133,7 +133,32 @@ export default {
   },
   methods: {
     ...mapActions('comment', ['fetchComments', 'deleteComment', 'updateCommentStatus']),
-
+    formattedError(option, error, message) {
+      if (option === 1) {
+        this.errorMessage = error || message;
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 2000);
+      } else {
+        this.statusUpdateErrorMessage = error || message;
+        setTimeout(() => {
+          this.statusUpdateErrorMessage = '';
+        }, 2000);
+      }
+    },
+    formattedSuccess(option, success, message) {
+      if (option === 1) {
+        this.successMessage = success || message;
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 2000);
+      } else {
+        this.statusUpdateSuccessMessage = success || message;
+        setTimeout(() => {
+          this.statusUpdateSuccessMessage = '';
+        }, 2000);
+      }
+    },
     navigateToCreate() {
       this.$router.push({ name: 'CommentCreate' });
     },
@@ -147,33 +172,27 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteComment(this.editedItem._id);
-          this.successMessage = this.success;
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.dialogDelete = false;
-          }, 2000);
+          this.formattedSuccess(1,this.success, "Comentario eliminado con éxito");
+          this.dialogDelete = false;
           this.fetchComments();
         } catch (error) {
-          this.errorMessage = this.error || 'Error desconocido';
-          this.successMessage = '';
+          this.formattedError(1,this.error, "Error al eliminar el comentario");
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.successMessage = '';
-      this.errorMessage = '';
     },
     async confirmStatusToggle(comment) {
       try {
         const newStatus = !comment.isActive;
         await this.updateCommentStatus({ _id: comment._id, isActive: newStatus });
+        this.formattedSuccess(0,this.success, "Status modificado con éxito");
         this.dialogStatusUpdate = true;
-        this.statusUpdateSuccessMessage = this.success;
         comment.isActive = newStatus;
         await this.fetchComments();
       } catch (error) {
-        this.statusUpdateErrorMessage = this.error || 'Error al modificar el status';
+        this.formattedError(0,this.error, "Error al modificar el Status");
         this.dialogStatusUpdate = true;
       }
     },

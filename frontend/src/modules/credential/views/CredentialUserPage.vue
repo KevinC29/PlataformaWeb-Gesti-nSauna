@@ -66,7 +66,18 @@ export default {
   },
   methods: {
     ...mapActions('credential', ['fetchAndSetUser']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     navigateToEdit() {
       this.$router.push({ name: 'CredentialEdit', params: { id: this.user.credentialId } });
     },
@@ -74,11 +85,9 @@ export default {
     async fetchUserProfile() {
       try {
         await this.fetchAndSetUser();
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
+        this.formattedSuccess(`Bienvenido ${this.user.name}`, this.success);
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
   },

@@ -138,7 +138,32 @@ export default {
   },
   methods: {
     ...mapActions('credential', ['updateUser', 'fetchAndSetUser', 'updatePasswordCredential']),
-
+    formattedError(option, error, message) {
+      if (option === 1) {
+        this.errorMessage = error || message;
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 2000);
+      } else {
+        this.passwordErrorMessage = error || message;
+        setTimeout(() => {
+          this.passwordErrorMessage = '';
+        }, 2000);
+      }
+    },
+    formattedSuccess(option, success, message) {
+      if (option === 1) {
+        this.successMessage = success || message;
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 2000);
+      } else {
+        this.passwordSuccessMessage = success || message;
+        setTimeout(() => {
+          this.passwordSuccessMessage = '';
+        }, 2000);
+      }
+    },
     async fetchData() {
       try {
         await this.fetchAndSetUser();
@@ -150,11 +175,8 @@ export default {
           email: user.email,
         };
         this.userID = user._id;
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(1,this.error, "Error al cargar los datos");
       }
     },
 
@@ -171,14 +193,10 @@ export default {
 
       try {
         await this.updateUser({ id: this.userID, userData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'CredentialUser' });
-        }, 2000);
+        this.formattedSuccess(1,this.success, "Usuario actualizado con éxito");
+        this.$router.push({ name: 'CredentialUser' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(1,this.error, "Error al modificar el usuario");
       }
     },
     cancel() {
@@ -211,7 +229,7 @@ export default {
       const confirmPassword = this.credential.confirmPassword.trim();
 
       if (newPassword !== confirmPassword) {
-        this.passwordErrorMessage = 'Las contraseñas no coinciden';
+        this.formattedError(0,"Las contraseñas no coinciden", "Revise las contraseñas ingresadas");
         return;
       }
 
@@ -223,14 +241,10 @@ export default {
 
       try {
         await this.updatePasswordCredential({ id: this.$route.params.id, credentialData: credentialData });
-        this.passwordSuccessMessage = this.success;
-        this.passwordErrorMessage = '';
-        setTimeout(() => {
-          this.closePasswordModal();
-        }, 2000);
+        this.formattedSuccess(0,this.success, "Contraseña actualizada con éxito");
+        this.closePasswordModal();
       } catch (error) {
-        this.passwordErrorMessage = this.error;
-        this.passwordSuccessMessage = '';
+        this.formattedError(0,this.error, "Revise las contraseñas ingresadas");
       }
     },
 

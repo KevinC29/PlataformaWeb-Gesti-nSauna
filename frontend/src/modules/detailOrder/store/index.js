@@ -36,7 +36,7 @@ export default {
         UPDATE_DETAILORDER(state, updatedDetailOrder) {
             const index = state.detailsOrder.findIndex(detailOrder => detailOrder._id === updatedDetailOrder._id);
             if (index !== -1) {
-                state.detailOrder.splice(index, 1, updatedDetailOrder);
+                state.detailsOrder.splice(index, 1, updatedDetailOrder);
             }
         },
         DELETE_DETAILORDER(state, detailOrderId) {

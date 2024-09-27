@@ -1,10 +1,19 @@
 <template>
-  <v-navigation-drawer app permanent width="256" class="sidebar">
+  <v-navigation-drawer v-model="drawer" :rail="rail" app permanent width="256" class="sidebar">
     <v-list>
-      <v-list-item prepend-avatar="https://cdn.vuetifyjs.com/images/john.png" subtitle="john@google.com"
-        title="John Leider">
+      <!-- Hacer click en la información del usuario para redirigir -->
+      <v-list-item @click="handleAvatarClick" class="cursor-pointer" nav>
+        <template v-slot:prepend>
+          <v-avatar color="info">
+            <v-icon icon="mdi-account-circle"></v-icon>
+          </v-avatar>
+        </template>
+        <v-list-item-content>
+          <v-list-item-title v-text="userName"></v-list-item-title>
+          <v-list-item-subtitle v-text="userEmail"></v-list-item-subtitle>
+        </v-list-item-content>
         <template v-slot:append>
-          <v-btn icon="mdi-menu-down" size="small" variant="text"></v-btn>
+          <v-btn icon="mdi-chevron-left" size="small" variant="text" @click.stop="rail = !rail"></v-btn>
         </template>
       </v-list-item>
     </v-list>
@@ -16,7 +25,6 @@
         <template v-slot:prepend>
           <v-icon :icon="item.icon"></v-icon>
         </template>
-
         <v-list-item-title v-text="item.text"></v-list-item-title>
       </v-list-item>
     </v-list>
@@ -31,12 +39,34 @@ export default {
       type: Array,
       default: () => [],
     },
+    userName: {
+      type: String,
+      default: 'Usuario',
+    },
+    userEmail: {
+      type: String,
+      default: 'usuario@google.com',
+    },
+    userProfileUrl: {
+      type: String,
+      default: '/dashboard/credentials',
+    },
+  },
+  data() {
+    return {
+      drawer: true,
+      rail: true,
+    };
   },
   methods: {
     handleItemClick(item) {
       if (item.href) {
-        this.$router.push(item.href); // Navegar a la ruta especificada
+        this.rail = false;
+        this.$router.push(item.href);
       }
+    },
+    handleAvatarClick() {
+      this.$router.push(this.userProfileUrl);
     },
   },
 };
@@ -45,6 +75,9 @@ export default {
 <style scoped>
 .sidebar {
   height: 100vh;
-  /* Ocupa toda la altura de la vista */
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

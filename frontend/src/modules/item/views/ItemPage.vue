@@ -131,7 +131,18 @@ export default {
   },
   methods: {
     ...mapActions('item', ['fetchItems', 'deleteItem']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     navigateToCreate() {
       this.$router.push({ name: 'ItemCreate' });
     },
@@ -148,22 +159,16 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteItem(this.editedItem._id);
-          this.successMessage = this.success;
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.dialogDelete = false;
-          }, 2000);
+          this.formattedSuccess(this.success, "Ítem eliminado con éxito");
+          this.dialogDelete = false;
           this.fetchItems();
         } catch (error) {
-          this.errorMessage = this.error || 'Error desconocido';
-          this.successMessage = '';
+          this.formattedError(this.error, "Error al eliminar el ítem");
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.successMessage = '';
-      this.errorMessage = '';
     },
     openImageModal(imageUrl) {
       this.selectedImage = imageUrl;

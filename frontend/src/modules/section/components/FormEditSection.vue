@@ -49,7 +49,18 @@ export default {
   },
   methods: {
     ...mapActions('section', ['fetchSection', 'updateSection']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchSection(this.$route.params.id);
@@ -58,11 +69,8 @@ export default {
           name: section.name,
           isActive: section.isActive,
         };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
     async submitForm() {
@@ -77,14 +85,10 @@ export default {
 
       try {
         await this.updateSection({ id: this.$route.params.id, sectionData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'SectionList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Sección actualizada con éxito");
+        this.$router.push({ name: 'SectionList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al modificar la sección");
       }
     },
 

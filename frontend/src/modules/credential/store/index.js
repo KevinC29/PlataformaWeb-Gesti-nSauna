@@ -1,11 +1,12 @@
 import {
     updateUser,
 } from '@/api/services/userService';
-import { updateCredentialPassword,
+import {
+    updateCredentialPassword,
     getUserByAuthenticatedUser,
- } from '@/api/services/credentialService';
- import { handleError } from '@/middleware/errorHandler';
- import { handleSuccess } from '@/middleware/successHandler';
+} from '@/api/services/credentialService';
+import { handleError } from '@/middleware/errorHandler';
+import { handleSuccess } from '@/middleware/successHandler';
 
 export default {
     namespaced: true,
@@ -45,7 +46,7 @@ export default {
             }
         },
         async fetchAndSetUser({ commit }) {
-            try { 
+            try {
                 const response = await getUserByAuthenticatedUser();
                 commit('SET_USER', response.data);
                 const successMsg = handleSuccess(response);

@@ -62,7 +62,18 @@ export default {
   },
   methods: {
     ...mapActions('itemType', ['fetchItemType', 'updateItemType', 'fetchAndSetSections']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     async fetchData() {
       try {
         await this.fetchAndSetSections();
@@ -75,11 +86,8 @@ export default {
 
         await this.fetchItemType(this.$route.params.id);
         this.state = { ...this.itemType };
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
     async submitForm() {
@@ -96,14 +104,10 @@ export default {
 
       try {
         await this.updateItemType({ id: this.$route.params.id, itemTypeData });
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'ItemTypeList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Tipo de Ítem actualizado con éxito");
+        this.$router.push({ name: 'ItemTypeList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al modificar el Tipo de Ítem");
       }
     },
 

@@ -99,7 +99,18 @@ export default {
   },
   methods: {
     ...mapActions('itemType', ['fetchItemTypes', 'deleteItemType']),
-
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
+    },
     navigateToCreate() {
       this.$router.push({ name: 'ItemTypeCreate' });
     },
@@ -116,22 +127,16 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteItemType(this.editedItem._id);
-          this.successMessage = this.success;
-          this.errorMessage = '';
-          setTimeout(() => {
-            this.dialogDelete = false;
-          }, 2000);
+          this.formattedSuccess(this.success, "Tipo de Ítem eliminado con éxito");
+          this.dialogDelete = false;
           this.fetchItemTypes();
         } catch (error) {
-          this.errorMessage = this.error || 'Error desconocido';
-          this.successMessage = '';
+          this.formattedError(this.error, "Error al eliminar el Tipo de Ítem");
         }
       }
     },
     closeDelete() {
       this.dialogDelete = false;
-      this.successMessage = '';
-      this.errorMessage = '';
     },
   },
   created() {

@@ -62,8 +62,20 @@ export default {
 
     formatBalance() {
       if (this.state.balance !== null && this.state.balance !== '') {
-        this.state.balance = parseFloat(this.state.balance).toFixed(2);
+        this.state.balance = Math.max(0, parseFloat(this.state.balance).toFixed(2));
       }
+    },
+    formattedError(error, message) {
+      this.errorMessage = error || message;
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 2000);
+    },
+    formattedSuccess(success, message) {
+      this.successMessage = success || message;
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 2000);
     },
     async fetchData() {
       try {
@@ -78,11 +90,8 @@ export default {
 
         await this.fetchAndSetNumberOrder();
         this.state.numberOrder = this.numberOrder;
-        // this.successMessage = this.success;
-        // this.errorMessage = '';
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al cargar los datos");
       }
     },
 
@@ -106,14 +115,10 @@ export default {
 
       try {
         await this.createOrder(orderData);
-        this.successMessage = this.success;
-        this.errorMessage = '';
-        setTimeout(() => {
-          this.$router.push({ name: 'OrderList' });
-        }, 2000);
+        this.formattedSuccess(this.success, "Orden creada con éxito");
+        this.$router.push({ name: 'OrderList' });
       } catch (error) {
-        this.errorMessage = this.error;
-        this.successMessage = '';
+        this.formattedError(this.error, "Error al crear la orden");
       }
     },
 
