@@ -66,7 +66,7 @@ export const getItemTypes = async (req, res) => {
             .exec();
 
         if (itemTypes.length === 0) {
-            return handleError(res, null, null, 404, 'No existen tipos de ítem');
+            return res.status(200).json({ data: [], message: 'No existen tipos de ítem' });
         }
 
         res.status(200).json({ data: itemTypes, message: "Tipos de ítem extraídos con éxito" });

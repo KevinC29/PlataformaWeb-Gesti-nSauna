@@ -72,7 +72,7 @@ export const getOrders = async (req, res) => {
             .exec();
 
         if (!orders.length) {
-            return handleError(res, null, null, 404, 'No existen órdenes');
+            return res.status(200).json({ data: [], message: 'No existen órdenes' });
         }
 
         const ordersWithDetails = await Promise.all(
@@ -99,7 +99,7 @@ export const getOrder = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return handleError(res, null, null, 400, 'ID de orden no válido');
         }
-        
+
         const order = await Order.findById(id)
             .populate({
                 path: 'client',
@@ -148,21 +148,39 @@ export const getOrdersByDate = async (req, res) => {
                 select: 'user',
                 populate: {
                     path: 'user',
-                    select: 'name dni'
+                    select: 'name lastName'
                 }
             })
+            .select('total client')
             .exec();
 
         if (!orders.length) {
-            return handleError(res, null, null, 400, 'No existen órdenes en el rango de fechas proporcionado');
+            return res.status(200).json({ data: [], message: "No existen órdenes en el rango de fechas proporcionado" });
         }
 
+        // Obtener detalles de cada orden
         const ordersWithDetails = await Promise.all(
             orders.map(async (order) => {
-                const detailOrders = await DetailOrder.find({ order: order._id }).exec();
+                const detailOrders = await DetailOrder.find({ order: order._id })
+                    .populate({
+                        path: 'item',
+                        select: 'name _id'
+                    })
+                    .select('cantidad price item')
+                    .exec();
+
                 return {
-                    ...order.toObject(),
-                    detailOrders
+                    total: order.total,
+                    client: {
+                        name: order.client.user.name,
+                        lastName: order.client.user.lastName,
+                    },
+                    detailOrders: detailOrders.map(detail => ({
+                        cantidad: detail.cantidad,
+                        price: detail.price,
+                        itemName: detail.item.name,
+                        itemId: detail.item._id,
+                    }))
                 };
             })
         );
@@ -172,6 +190,7 @@ export const getOrdersByDate = async (req, res) => {
         handleError(res, error);
     }
 };
+
 
 // Actualizar una Orden
 export const updateOrder = async (req, res) => {

@@ -67,7 +67,7 @@ export const getClients = async (req, res) => {
             .exec();
 
         if (!clients.length) {
-            return handleError(res, null, null, 404, 'No existen clientes');
+            return res.status(200).json({ data: [], message: 'No existen clientes' });
         }
 
         res.status(200).json({ data: clients, message: "Clientes extraídos con éxito" });

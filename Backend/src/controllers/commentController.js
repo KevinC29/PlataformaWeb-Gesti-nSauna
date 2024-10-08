@@ -68,7 +68,7 @@ export const getComments = async (req, res) => {
             .exec();
 
         if (!comments.length) {
-            return handleError(res, null, null, 404, 'No existen comentarios');
+            return res.status(200).json({ data: [], message: 'No existen comentarios' });
         }
 
         res.status(200).json({ data: comments, message: "Comentarios extraídos con éxito" });
