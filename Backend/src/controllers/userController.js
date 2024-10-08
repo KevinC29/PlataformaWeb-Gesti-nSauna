@@ -106,7 +106,7 @@ export const getUsers = async (req, res) => {
       .exec();
 
     if (!users.length) {
-      return handleError(res, null, null, 404, 'No existen usuarios');
+      return res.status(200).json({ data: [], message: 'No existen usuarios' });
     }
 
     const userIds = users.map(user => user._id);

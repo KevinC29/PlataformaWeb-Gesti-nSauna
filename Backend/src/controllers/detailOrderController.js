@@ -79,7 +79,7 @@ export const getDetailsOrder = async (req, res) => {
             .exec();
 
         if (!detailOrders.length) {
-            return handleError(res, null, null, 404, 'No existen detalles de órdenes');
+            return res.status(200).json({ data: [], message: 'No existen detalles de órdenes' });
         }
 
         res.status(200).json({ data: detailOrders, message: "Detalles de órdenes extraídos con éxito" });
@@ -123,12 +123,11 @@ export const getDetailsOrderByOrder = async (req, res) => {
 
         const detailsOrder = await DetailOrder.find({ order: id }).populate('item', 'name price');
 
-        if (detailsOrder.length === 0) {
-            res.status(200).json({ data: [], message: "No se encontraron detalles para la orden" });
-        } else {
-            res.status(200).json({ data: detailsOrder, message: "Detalles de orden encontrados" });
+        if (!detailsOrder.length) {
+            return res.status(200).json({ data: [], message: "No se encontraron detalles para la orden" });
         }
 
+        res.status(200).json({ data: detailsOrder, message: "Detalles de orden encontrados" });
     } catch (error) {
         handleError(res, error);
     }

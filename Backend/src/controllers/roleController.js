@@ -58,7 +58,7 @@ export const getRoles = async (req, res) => {
   try {
     const roles = await Role.find().select("_id name isActive").exec();
     if (!roles.length) {
-      return handleError(res, null, null, 404, 'No existen roles');
+      return res.status(200).json({ data: [], message: 'No existen roles' });
     }
     res.status(200).json({ data: roles, message: "Roles extraídos con éxito" });
   } catch (error) {

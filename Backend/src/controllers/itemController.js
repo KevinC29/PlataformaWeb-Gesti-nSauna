@@ -72,7 +72,7 @@ export const getItems = async (req, res) => {
             .exec();
 
         if (items.length === 0) {
-            return handleError(res, null, null, 404, 'No existen ítems');
+            return res.status(200).json({ data: [], message: 'No existen ítems' });
         }
 
         res.status(200).json({ data: items, message: "Ítems extraídos con éxito" });

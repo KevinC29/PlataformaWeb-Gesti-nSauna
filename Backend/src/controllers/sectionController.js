@@ -59,7 +59,7 @@ export const getSections = async (req, res) => {
   try {
     const sections = await Section.find().select("_id name isActive").exec();
     if (!sections.length) {
-      return handleError(res, null, null, 404, 'No existen secciones');
+      return res.status(200).json({ data: [], message: 'No existen secciones' });
     }
     res.status(200).json({ data: sections, message: "Secciones extraídas con éxito" });
   } catch (error) {
