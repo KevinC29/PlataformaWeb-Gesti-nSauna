@@ -29,13 +29,15 @@ export const getOrders = async () => {
 };
 
 // Obtener órdenes por fecha
-export const getOrdersByDate = async (date) => {
+export const getOrdersByDate = async ({ startDate, endDate }) => {
   try {
-    const response = await http.get(`${apiUrl}/by-date`, { params: { date } });
+    const response = await http.get(`${apiUrl}/by-date`, {
+      params: { startDate, endDate },
+    });
     return response.data;
   } catch (error) {
     handleError(error);
-    throw error;
+    throw error; 
   }
 };
 

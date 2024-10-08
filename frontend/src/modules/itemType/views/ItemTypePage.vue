@@ -84,6 +84,7 @@ export default {
     headers() {
       return [
         { title: 'Nombre', key: 'name', align: 'start' },
+        { title: 'Descripción', key: 'description' },
         { title: 'Sección', key: 'section.name' },
         { title: 'Estado', key: 'isActive' },
         { title: 'Acciones', value: 'actions', sortable: false }

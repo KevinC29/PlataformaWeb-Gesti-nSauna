@@ -53,7 +53,14 @@ export default {
                 text: 'Ordenes',
                 value: 'orden',
                 href: '/dashboard/orders',
-                roles: ['ADMIN', 'CASHIER', 'MANAGER'],
+                roles: ['ADMIN', 'CASHIER'],
+            },
+            {
+                icon: 'mdi-cart',
+                text: 'Estadísticas',
+                value: 'estadistica',
+                href: '/dashboard/statisticsByDate',
+                roles: ['ADMIN', 'MANAGER'],
             },
             {
                 icon: 'mdi-shield-lock',

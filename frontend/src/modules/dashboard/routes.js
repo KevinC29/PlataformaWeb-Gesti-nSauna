@@ -7,6 +7,7 @@ import client from '@/modules/client/routes';
 import comment from '@/modules/comment/routes';
 import credential from '@/modules/credential/routes';
 import order from '@/modules/order/routes';
+import statistics from '@/modules/statistics/routes';
 
 export default [
   {
@@ -61,6 +62,11 @@ export default [
       ...order.map(route => ({
         ...route,
         path: `orders${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...statistics.map(route => ({
+        ...route,
+        path: `statisticsByDate${route.path}`,
         name: `${route.name}`,
       })),
     ]

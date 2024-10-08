@@ -26,14 +26,5 @@ export default [
         roles: ['ADMIN', 'CASHIER']
       }
     },
-    // {
-    //   path: '/by-date',
-    //   name: 'OrdersByDate',
-    //   component: () => import('./views/OrdersByDate.vue'),
-    //   meta: {
-    //     requiresAuth: true,
-    //     roles: ['ADMIN', 'MANAGER']
-    //   }
-    // }
   ];
   
