@@ -191,6 +191,69 @@ export const getOrdersByDate = async (req, res) => {
     }
 };
 
+// Obtener todas las Órdenes para facturar
+export const getOrdersForInvoices = async (req, res) => {
+    try {
+        const orders = await Order.find({
+            paymentState: 'paid'
+        })
+        .populate({
+            path: 'client',
+            select: 'user',
+            populate: {
+                path: 'user',
+                select: '_id name lastName phone dni'
+            }
+        })
+        .select('_id dateOrder numberOrder total client paymentState paymentMethod isActive')
+        .exec();
+
+        if (!orders.length) {
+            return res.status(200).json({ data: [], message: "No existen órdenes pagadas" });
+        }
+
+        const ordersWithDetails = await Promise.all(
+            orders.map(async (order) => {
+                const detailOrders = await DetailOrder.find({ order: order._id })
+                    .populate({
+                        path: 'item',
+                        select: 'name price description'
+                    })
+                    .select('cantidad price item')
+                    .exec();
+
+                return {
+                    orderId: order._id,
+                    dateOrder: order.dateOrder,
+                    numberOrder: order.numberOrder,
+                    total: order.total,
+                    paymentState: order.paymentState,
+                    paymentMethod: order.paymentMethod,
+                    isActive: order.isActive,
+                    client: {
+                        clientId: order.client._id,
+                        name: order.client.user.name,
+                        lastName: order.client.user.lastName,
+                        phone: order.client.user.phone,
+                        dni: order.client.user.dni,
+                    },
+                    detailOrders: detailOrders.map(detail => ({
+                        cantidad: detail.cantidad,
+                        price: detail.price,
+                        itemName: detail.item.name,
+                        itemDescription: detail.item.description,
+                        itemPrice: detail.item.price,
+                        itemId: detail.item._id,
+                    }))
+                };
+            })
+        );
+
+        res.status(200).json({ data: ordersWithDetails, message: "Órdenes extraídas con éxito" });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
 
 // Actualizar una Orden
 export const updateOrder = async (req, res) => {
@@ -205,14 +268,14 @@ export const updateOrder = async (req, res) => {
         }
 
         const { id } = req.params;
-        const { consumptionAccount, balance, total, paymentState } = req.body;
+        const { consumptionAccount, balance, total, paymentState, paymentMethod } = req.body;
 
         const order = await Order.findById(id).exec();
         if (!order) {
             return handleError(res, null, session, 404, "La orden no existe");
         }
 
-        if (paymentState === "paid") {
+        if (order.paymentState === "paid") {
             return handleError(res, null, session, 404, "No se puede modificar la orden una vez pagada");
         }
 
@@ -227,7 +290,7 @@ export const updateOrder = async (req, res) => {
             return handleError(res, null, session, 409, "Error en el total de la orden");
         }
 
-        const updatedFields = { consumptionAccount, balance, total, paymentState };
+        const updatedFields = { consumptionAccount, balance, total, paymentState, paymentMethod };
         const updatedOrder = await Order.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, session }).exec();
 
         // await saveAuditEntry({

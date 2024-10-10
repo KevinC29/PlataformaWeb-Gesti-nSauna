@@ -32,6 +32,12 @@ const orderSchema = new mongoose.Schema({
         enum: ['paid', 'pending'],
         default: 'pending',
     },
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['cash', 'credit/debit card', 'electronic money', 'other'],
+        default: 'cash',
+      },
     isActive: {
         type: Boolean,
         required: true,

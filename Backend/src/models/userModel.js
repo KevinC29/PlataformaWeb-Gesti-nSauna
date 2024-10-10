@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phone: {
+        type: String,
+        required: false,
+        default: "0000000000",
+    },
     dni: {
         type: String,
         required: true,

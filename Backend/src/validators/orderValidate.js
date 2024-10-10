@@ -50,6 +50,14 @@ export const validateOrderData = (data) => {
     }
   }
 
+  // Validar `paymentMethod` si está presente: debe ser uno de los valores permitidos
+  if (data.hasOwnProperty('paymentMethod')) {
+    const validMethods = ['cash', 'credit/debit card', 'electronic money', 'other'];
+    if (typeof data.paymentMethod !== 'string' || !validMethods.includes(data.paymentMethod)) {
+      return { isValid: false, message: "El campo 'Método de pago' debe ser uno de los valores permitidos 'Efectivo', 'Tarjeta de Crédito/Débito', 'Dinero Electrónico' u 'Otros'." };
+    }
+  }
+
   // Validar `isActive` si está presente: debe ser un booleano
   if (data.hasOwnProperty('isActive')) {
     if (typeof data.isActive !== 'boolean') {

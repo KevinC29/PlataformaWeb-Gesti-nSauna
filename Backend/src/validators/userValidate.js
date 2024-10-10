@@ -39,6 +39,13 @@ export const validateUserData = (data) => {
     }
   }
 
+  // Validar `phone` si está presente y no está vacío
+  if (data.hasOwnProperty('phone') && data.phone.trim() !== '') {
+    const phoneRegex = /^\+?(\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?[\d\s-]{7,15}$|^\d{7,15}$/;
+    if (typeof data.phone !== 'string' || !phoneRegex.test(data.phone.trim())) {
+      return { isValid: false, message: "El campo 'Teléfono' debe tener un formato válido con o sin código de país." };
+    }
+  }
 
   // Validar `isActive` si está presente: debe ser un booleano
   if (data.hasOwnProperty('isActive')) {

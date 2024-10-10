@@ -20,10 +20,20 @@ export const createUser = async (req, res) => {
       return handleError(res, null, session, 400, validationResult.message);
     }
 
-    const { name, lastName, dni, email, role, password, confirmPassword, isActive } = req.body;
+    const { name, lastName, phone, dni, email, role, password, confirmPassword, isActive } = req.body;
 
     if (await User.exists({ dni })) {
       return handleError(res, null, session, 409, 'El DNI ya está registrado');
+    }
+
+    
+    let userPhone = phone && phone.trim() !== '' ? phone : null;
+
+    if (userPhone) {
+      const phoneExists = await User.exists({ phone: userPhone });
+      if (phoneExists) {
+        return handleError(res, null, session, 409, 'El número de teléfono ya está registrado');
+      }
     }
 
     let userEmail = email && email.trim() !== '' ? email : null;
@@ -52,7 +62,7 @@ export const createUser = async (req, res) => {
       passwordHash = await encryptPassword(password);
     }
 
-    const newUser = new User({ name, lastName, dni, email: userEmail || '', role, isActive });
+    const newUser = new User({ name, lastName, phone, dni, email: userEmail || '', role, isActive });
 
     await newUser.save({ session });
 
@@ -98,7 +108,7 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find()
-      .select("_id name lastName dni email isActive role")
+      .select("_id name lastName phone dni email isActive role")
       .populate({
         path: 'role',
         select: '_id name'
@@ -139,7 +149,7 @@ export const getUser = async (req, res) => {
       return handleError(res, null, null, 400, 'ID de usuario no válido');
     }
     const user = await User.findById(id)
-      .select("_id name lastName dni email isActive role")
+      .select("_id name lastName phone dni email isActive role")
       .populate({
         path: 'role',
         select: '_id name'
@@ -166,13 +176,17 @@ export const updateUser = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { name, lastName, dni, email, role, isActive } = req.body;
+    const { name, lastName, phone, dni, email, role, isActive } = req.body;
 
     const user = await User.findById(id).exec();
     const credential = await Credential.findOne({ user: user._id }).exec();
 
     if (!user) {
       return handleError(res, null, session, 404, "El usuario no existe");
+    }
+
+    if (phone && await User.exists({ phone, _id: { $ne: id } })) {
+      return handleError(res, null, session, 400, "No puede repetir el número de teléfono de otro usuario registrado");
     }
 
     if (dni && await User.exists({ dni, _id: { $ne: id } })) {
@@ -192,7 +206,7 @@ export const updateUser = async (req, res) => {
       return handleError(res, null, session, 404, 'Credencial no encontrada');
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, dni, email, role, isActive }, { new: true, session }).exec();
+    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, phone, dni, email, role, isActive }, { new: true, session }).exec();
 
     if (email && email.trim() !== '') {
       await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();
