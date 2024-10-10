@@ -41,6 +41,17 @@ export const getOrdersByDate = async ({ startDate, endDate }) => {
   }
 };
 
+// Obtener órdenes para facturar
+export const getOrdersForInvoices = async () => {
+  try {
+    const response = await http.get(`${apiUrl}/invoices`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error; 
+  }
+};
+
 // Obtener una orden por ID
 export const getOrder = async (id) => {
   try {

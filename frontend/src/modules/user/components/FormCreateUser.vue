@@ -7,6 +7,9 @@
     <v-text-field v-model="state.lastName" :error-messages="v$.state.lastName.$errors.map(e => e.$message)"
       label="Apellido" required @blur="v$.state.lastName.$touch" @input="v$.state.lastName.$touch"></v-text-field>
 
+    <v-text-field v-model="state.phone" :error-messages="v$.state.phone.$errors.map(e => e.$message)" label="Teléfono"
+      @blur="v$.state.phone.$touch" @input="v$.state.phone.$touch"></v-text-field>
+
     <v-text-field v-model="state.dni" :error-messages="v$.state.dni.$errors.map(e => e.$message)" label="DNI" required
       @blur="v$.state.dni.$touch" @input="v$.state.dni.$touch"></v-text-field>
 
@@ -62,7 +65,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email as emailValidator } from '@vuelidate/validators';
+import { required, email as emailValidator, helpers } from '@vuelidate/validators';
 
 export default {
   data() {
@@ -70,6 +73,7 @@ export default {
       state: {
         name: '',
         lastName: '',
+        phone: '',
         dni: '',
         email: '',
         role: null,
@@ -101,6 +105,13 @@ export default {
       setTimeout(() => {
         this.successMessage = '';
       }, 2000);
+    },
+    createPhoneValidator() {
+      return helpers.withMessage('El teléfono debe tener al menos 10 dígitos y puede incluir un código de país opcional', (value) => {
+        if (!value) return true; // Solo valida si el campo no está vacío
+        const phoneRegex = /^(?:\+?\d{1,3})?\s?\d{10,}$/;
+        return phoneRegex.test(value);
+      });
     },
     async fetchData() {
       try {
@@ -138,6 +149,7 @@ export default {
       const userData = {
         name: this.state.name,
         lastName: this.state.lastName,
+        phone: this.state.phone,
         dni: this.state.dni,
         email: this.state.email || '',
         role: this.state.role,
@@ -167,6 +179,9 @@ export default {
       state: {
         name: { required },
         lastName: { required },
+        phone: {
+          phone: this.createPhoneValidator(),
+        },
         dni: { required },
         email: { emailValidator },
         role: { required },

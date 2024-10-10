@@ -57,6 +57,13 @@ export default {
             },
             {
                 icon: 'mdi-cart',
+                text: 'Facturas',
+                value: 'factura',
+                href: '/dashboard/invoices',
+                roles: ['ADMIN', 'CASHIER', 'MANAGER'],
+            },
+            {
+                icon: 'mdi-cart',
                 text: 'Estadísticas',
                 value: 'estadistica',
                 href: '/dashboard/statisticsByDate',

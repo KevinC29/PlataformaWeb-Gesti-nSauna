@@ -78,6 +78,10 @@
                             <v-select v-model="state.paymentState" :items="paymentStates" item-text="text"
                                 item-value="value" label="Estado de Pago" required>
                             </v-select>
+
+                            <v-select v-model="state.paymentMethod" :items="paymentMethod" item-text="text"
+                                item-value="value" label="Método de Pago" required>
+                            </v-select>
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -120,11 +124,18 @@ export default {
                 consumptionAccount: 0.00,
                 total: 0.00,
                 paymentState: '',
+                paymentMethod: '',
             },
             detailsOrderList: [],
             paymentStates: [
                 { title: 'Pagado', value: 'paid' },
                 { title: 'Pendiente', value: 'pending' }
+            ],
+            paymentMethod: [
+                { title: 'Efectivo', value: 'cash' },
+                { title: 'Tarjeta de Crédito/Débito', value: 'credit/debit card' },
+                { title: 'Dinero Electrónico', value: 'electronic money' },
+                { title: 'Otros', value: 'other' },
             ],
             searchItem: '',
             filteredItems: [],
@@ -193,6 +204,7 @@ export default {
                     consumptionAccount: order.consumptionAccount,
                     total: order.total,
                     paymentState: order.paymentState,
+                    paymentMethod: order.paymentMethod,
                 };
 
                 await this.fetchAndSetDetailsOrder(this.$route.params.id);
@@ -265,6 +277,7 @@ export default {
                 balance: this.roundToTwoDecimals(Number(this.state.balance)) || 0.00,
                 total: this.roundToTwoDecimals(Number(this.state.total)) || 0.00,
                 paymentState: this.state.paymentState,
+                paymentMethod: this.state.paymentMethod,
             };
             try {
                 await this.updateOrder({ id: this.$route.params.id, orderData });
@@ -285,6 +298,7 @@ export default {
                 consumptionAccount: { required, minValue: minValue(0) },
                 total: { required, minValue: minValue(0) },
                 paymentState: { required },
+                paymentMethod: { required },
             },
         };
     },

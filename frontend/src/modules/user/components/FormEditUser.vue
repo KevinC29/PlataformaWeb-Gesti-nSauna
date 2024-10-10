@@ -7,6 +7,10 @@
     <!-- Campo Apellido -->
     <v-text-field v-model="state.lastName" :error-messages="v$.state.lastName.$errors.map(e => e.$message)"
       label="Apellido" required @blur="v$.state.lastName.$touch" @input="v$.state.lastName.$touch"></v-text-field>
+      
+    <!-- Campo Telefono -->
+    <v-text-field v-model="state.phone" :error-messages="v$.state.phone.$errors.map(e => e.$message)"
+      label="Teléfono" @blur="v$.state.phone.$touch" @input="v$.state.phone.$touch"></v-text-field>
 
     <!-- Campo DNI -->
     <v-text-field v-model="state.dni" :error-messages="v$.state.dni.$errors.map(e => e.$message)" label="DNI" required
@@ -48,7 +52,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, email } from '@vuelidate/validators';
+import { required, minLength, email, helpers } from '@vuelidate/validators';
 
 export default {
   data() {
@@ -56,6 +60,7 @@ export default {
       state: {
         name: '',
         lastName: '',
+        phone: '',
         dni: '',
         email: '',
         isActive: true,
@@ -83,6 +88,13 @@ export default {
         this.successMessage = '';
       }, 2000);
     },
+    createPhoneValidator() {
+      return helpers.withMessage('El teléfono debe tener al menos 10 dígitos y puede incluir un código de país opcional', (value) => {
+        if (!value) return true;
+        const phoneRegex = /^(?:\+?\d{1,3})?\s?\d{10,}$/;
+        return phoneRegex.test(value);
+      });
+    },
     async fetchData() {
       try {
         await this.fetchAndSetRoles();
@@ -98,6 +110,7 @@ export default {
         this.state = {
           name: user.name,
           lastName: user.lastName,
+          phone: user.phone,
           dni: user.dni,
           email: user.email,
           isActive: user.isActive,
@@ -118,6 +131,7 @@ export default {
       const userData = {
         name: this.state.name,
         lastName: this.state.lastName,
+        phone: this.state.phone,
         dni: this.state.dni,
         email: this.state.email || '',
         isActive: this.state.isActive,
@@ -142,6 +156,10 @@ export default {
       state: {
         name: { required },
         lastName: { required },
+        phone: {
+          phone: this.createPhoneValidator(),
+          minLength: minLength(10),
+        },
         dni: { required, minLength: minLength(10) },
         email: { email },
         isActive: { required },

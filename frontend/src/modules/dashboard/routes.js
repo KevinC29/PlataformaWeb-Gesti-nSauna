@@ -8,6 +8,7 @@ import comment from '@/modules/comment/routes';
 import credential from '@/modules/credential/routes';
 import order from '@/modules/order/routes';
 import statistics from '@/modules/statistics/routes';
+import invoice from '@/modules/invoice/routes';
 
 export default [
   {
@@ -67,6 +68,11 @@ export default [
       ...statistics.map(route => ({
         ...route,
         path: `statisticsByDate${route.path}`,
+        name: `${route.name}`,
+      })),
+      ...invoice.map(route => ({
+        ...route,
+        path: `invoices${route.path}`,
         name: `${route.name}`,
       })),
     ]

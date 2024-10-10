@@ -13,6 +13,7 @@ import credential from '@/modules/credential/store/index';
 import order from '@/modules/order/store/index';
 import detailOrder from '@/modules/detailOrder/store/index';
 import statistics from '@/modules/statistics/store/index';
+import invoice from '@/modules/invoice/store/index';
 
 const store = createStore({
   modules: {
@@ -29,7 +30,8 @@ const store = createStore({
     credential,
     order,
     detailOrder,
-    statistics
+    statistics,
+    invoice
   }
 });
 

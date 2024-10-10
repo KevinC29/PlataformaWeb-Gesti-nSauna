@@ -20,7 +20,14 @@ const i18n = createI18n({
   legacy: false,
   locale: 'es',
   fallback: 'en',
-  messages: { en, es },
+  messages: {
+    en: {
+      $vuetify: en
+    },
+    es: {
+      $vuetify: es
+    }
+  },
 })
 
 const vuetify = createVuetify({

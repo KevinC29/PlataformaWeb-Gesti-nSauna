@@ -24,9 +24,14 @@
       {{ item.lastName }}
     </template>
 
-    <!-- Columna de DNI -->
+    <!-- Columna de   Telefono -->
     <template v-slot:[`item.dni`]="{ item }">
       {{ item.dni }}
+    </template>
+
+    <!-- Columna de DNI -->
+    <template v-slot:[`item.phone`]="{ item }">
+      {{ item.phone ? item.phone : 'N/A' }}
     </template>
 
     <!-- Columna de Correo Electrónico -->
@@ -166,6 +171,7 @@ export default {
       return [
         { title: 'Nombre', key: 'name', align: 'start' },
         { title: 'Apellido', key: 'lastName' },
+        { title: 'Teléfono', key: 'phone' },
         { title: 'DNI', key: 'dni' },
         { title: 'Correo Electrónico', key: 'email' },
         { title: 'Rol', key: 'role.name' },
@@ -181,6 +187,7 @@ export default {
       return this.users.filter(user =>
         user.name.toLowerCase().includes(searchLower) ||
         user.lastName.toLowerCase().includes(searchLower) ||
+        user.phone.toLowerCase().includes(searchLower) ||
         user.dni.toLowerCase().includes(searchLower) ||
         (user.email && user.email.toLowerCase().includes(searchLower))
       );

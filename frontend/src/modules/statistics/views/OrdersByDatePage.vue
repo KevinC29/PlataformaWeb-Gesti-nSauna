@@ -5,25 +5,25 @@
     <v-spacer></v-spacer>
   </v-toolbar>
 
-  <v-menu v-model="startDateMenu" :close-on-content-click="false" transition="scale-transition"
-    >
+  <!-- Input para la fecha de inicio -->
+  <v-dialog v-model="startDateDialog" width="auto" persistent scrollable @click:outside="startDateDialog = false">
     <template v-slot:activator="{ props }">
       <v-text-field v-model="startDateFormatted" label="Fecha Inicio" prepend-icon="mdi-calendar" readonly
-        v-bind="props" @click="startDateMenu = true"></v-text-field>
+        v-bind="props"></v-text-field>
     </template>
     <v-date-picker v-model="startDate" color="primary" title="Selecciona la fecha" header=""
-    @update:modelValue="startDateMenu = false" first-day-of-week="1" />
-  </v-menu>
+      @update:modelValue="startDateDialog = false" first-day-of-week="1" />
+  </v-dialog>
 
-  <v-menu v-model="endDateMenu" :close-on-content-click="false" transition="scale-transition"
-    >
+  <!-- Input para la fecha de fin -->
+  <v-dialog v-model="endDateDialog" width="auto" persistent scrollable @click:outside="endDateDialog = false">
     <template v-slot:activator="{ props }">
-      <v-text-field v-model="endDateFormatted" label="Fecha Fin" prepend-icon="mdi-calendar" readonly v-bind="props"
-       @click="endDateMenu = true"></v-text-field>
+      <v-text-field v-model="endDateFormatted" label="Fecha Fin" prepend-icon="mdi-calendar" readonly
+        v-bind="props"></v-text-field>
     </template>
-    <v-date-picker v-model="endDate" color="primary" title="Selecciona la fecha" header="" @update:modelValue="endDateMenu = false"
-      first-day-of-week="1" />
-  </v-menu>
+    <v-date-picker v-model="endDate" color="primary" title="Selecciona la fecha" header=""
+      @update:modelValue="endDateDialog = false" first-day-of-week="1" />
+  </v-dialog>
 
   <!-- Botón de búsqueda -->
   <v-btn color="primary" @click="sendDates">
@@ -44,8 +44,8 @@ export default {
     return {
       startDate: null,
       endDate: null,
-      startDateMenu: false,
-      endDateMenu: false,
+      startDateDialog: false,
+      endDateDialog: false,
       isOrdersVisible: false,
       ordersKey: 0,
     };
@@ -82,6 +82,14 @@ export default {
     sendDates() {
       this.isOrdersVisible = true;
       this.ordersKey += 1;
+    },
+    cancelStartDate() {
+      this.startDateDialog = false;
+      this.startDate = null;
+    },
+    cancelEndDate() {
+      this.endDateDialog = false;
+      this.endDate = null;
     },
   },
 };
