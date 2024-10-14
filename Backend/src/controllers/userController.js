@@ -20,7 +20,7 @@ export const createUser = async (req, res) => {
       return handleError(res, null, session, 400, validationResult.message);
     }
 
-    const { name, lastName, phone, dni, email, role, password, confirmPassword, isActive } = req.body;
+    const { name, lastName, address, phone, dni, email, role, password, confirmPassword, isActive } = req.body;
 
     if (await User.exists({ dni })) {
       return handleError(res, null, session, 409, 'El DNI ya está registrado');
@@ -62,7 +62,7 @@ export const createUser = async (req, res) => {
       passwordHash = await encryptPassword(password);
     }
 
-    const newUser = new User({ name, lastName, phone, dni, email: userEmail || '', role, isActive });
+    const newUser = new User({ name, lastName, address, phone, dni, email: userEmail || '', role, isActive });
 
     await newUser.save({ session });
 
@@ -176,7 +176,7 @@ export const updateUser = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { name, lastName, phone, dni, email, role, isActive } = req.body;
+    const { name, lastName, address, phone, dni, email, role, isActive } = req.body;
 
     const user = await User.findById(id).exec();
     const credential = await Credential.findOne({ user: user._id }).exec();
@@ -206,7 +206,7 @@ export const updateUser = async (req, res) => {
       return handleError(res, null, session, 404, 'Credencial no encontrada');
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, phone, dni, email, role, isActive }, { new: true, session }).exec();
+    const updatedUser = await User.findByIdAndUpdate(id, { name, lastName, address, phone, dni, email, role, isActive }, { new: true, session }).exec();
 
     if (email && email.trim() !== '') {
       await Credential.findByIdAndUpdate(credential._id, { email }, { new: true, session }).exec();

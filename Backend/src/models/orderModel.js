@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema({
         required: true,
         enum: ['cash', 'credit/debit card', 'electronic money', 'other'],
         default: 'cash',
-      },
+    },
     isActive: {
         type: Boolean,
         required: true,

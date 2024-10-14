@@ -20,6 +20,13 @@ export const validateUserData = (data) => {
     }
   }
 
+  // Validar `address` si está presente: debe ser una cadena no vacía
+  if (data.hasOwnProperty('address')) {
+    if (typeof data.address !== 'string' || data.address.trim().length === 0) {
+      return { isValid: false, message: "El campo 'Dirección' no puede estar vacío." };
+    }
+  }
+
   // Validar `dni` si está presente: debe ser una cadena con al menos 10 dígitos
   if (data.hasOwnProperty('dni')) {
     if (typeof data.dni !== 'string') {

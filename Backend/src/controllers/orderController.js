@@ -234,6 +234,7 @@ export const getOrdersForInvoices = async (req, res) => {
                         clientId: order.client._id,
                         name: order.client.user.name,
                         lastName: order.client.user.lastName,
+                        address: order.client.user.address,
                         phone: order.client.user.phone,
                         dni: order.client.user.dni,
                     },
@@ -243,7 +244,6 @@ export const getOrdersForInvoices = async (req, res) => {
                         itemName: detail.item.name,
                         itemDescription: detail.item.description,
                         itemPrice: detail.item.price,
-                        itemId: detail.item._id,
                     }))
                 };
             })
