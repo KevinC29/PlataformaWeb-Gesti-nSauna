@@ -7,6 +7,10 @@
     <!-- Campo Apellido -->
     <v-text-field v-model="state.lastName" :error-messages="v$.state.lastName.$errors.map(e => e.$message)"
       label="Apellido" required @blur="v$.state.lastName.$touch" @input="v$.state.lastName.$touch"></v-text-field>
+
+    <!-- Campo Dirección -->
+    <v-text-field v-model="state.address" :error-messages="v$.state.address.$errors.map(e => e.$message)"
+      label="Dirección" required @blur="v$.state.address.$touch" @input="v$.state.address.$touch"></v-text-field>
       
     <!-- Campo Telefono -->
     <v-text-field v-model="state.phone" :error-messages="v$.state.phone.$errors.map(e => e.$message)"
@@ -60,6 +64,7 @@ export default {
       state: {
         name: '',
         lastName: '',
+        address: '',
         phone: '',
         dni: '',
         email: '',
@@ -110,6 +115,7 @@ export default {
         this.state = {
           name: user.name,
           lastName: user.lastName,
+          address: user.address,
           phone: user.phone,
           dni: user.dni,
           email: user.email,
@@ -131,6 +137,7 @@ export default {
       const userData = {
         name: this.state.name,
         lastName: this.state.lastName,
+        address: this.state.address,
         phone: this.state.phone,
         dni: this.state.dni,
         email: this.state.email || '',
@@ -156,6 +163,7 @@ export default {
       state: {
         name: { required },
         lastName: { required },
+        address: { required },
         phone: {
           phone: this.createPhoneValidator(),
           minLength: minLength(10),

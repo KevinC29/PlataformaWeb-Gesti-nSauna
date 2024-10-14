@@ -1,6 +1,5 @@
 <template>
-    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy"
-        :items-per-page="10">
+    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title>ÓRDENES PAGADAS</v-toolbar-title>
@@ -47,7 +46,7 @@
 
         <!-- Nueva Columna: Ver Factura -->
         <template v-slot:[`item.viewInvoice`]="{ item }">
-            <v-btn color="primary" @click="viewInvoice(item)">
+            <v-btn color="primary" @click="openInvoiceModal(item)">
                 Ver Factura
             </v-btn>
         </template>
@@ -67,7 +66,27 @@
         </template>
     </v-data-table>
 
-    <InvoiceOrder/>
+    <!-- Modal para Ver Factura -->
+    <v-dialog v-model="showInvoiceModal" max-width="800">
+        <v-card>
+            <v-toolbar flat dark color="primary">
+                <v-toolbar-title>Factura</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon dark @click="closeInvoiceModal">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+            </v-toolbar>
+            <v-card-text>
+                <InvoiceOrder :dynamicNumber="invoiceData.dynamicNumber" :day="invoiceData.day"
+                    :month="invoiceData.month" :year="invoiceData.year" :clientName="invoiceData.clientName"
+                    :clientAddress="invoiceData.clientAddress" :clientRUC="invoiceData.clientRUC"
+                    :clientPhone="invoiceData.clientPhone" :items="invoiceData.items"
+                    :totalAmount="invoiceData.totalAmount" :paymentCash="invoiceData.paymentCash"
+                    :paymentCard="invoiceData.paymentCard" :paymentElectronic="invoiceData.paymentElectronic"
+                    :paymentOther="invoiceData.paymentOther" />
+            </v-card-text>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -84,6 +103,23 @@ export default {
             search: '',
             errorMessage: '',
             successMessage: '',
+            showInvoiceModal: false,
+            invoiceData: {
+                dynamicNumber: '',
+                day: '',
+                month: '',
+                year: '',
+                clientName: '',
+                clientAddress: '',
+                clientRUC: '',
+                clientPhone: '',
+                items: [],
+                totalAmount: 0,
+                paymentCash: '',
+                paymentCard: '',
+                paymentElectronic: '',
+                paymentOther: '',
+            },
             paymentMethods: [
                 { title: 'Efectivo', value: 'cash' },
                 { title: 'Tarjeta de Crédito/Débito', value: 'credit/debit card' },
@@ -121,19 +157,59 @@ export default {
     },
     methods: {
         ...mapActions('invoice', ['fetchOrdersForInvoices']),
-        
+
         getPaymentMethodTitle(paymentMethod) {
             const method = this.paymentMethods.find(method => method.value === paymentMethod);
             return method ? method.title : 'Desconocido';
         },
 
-        viewInvoice(item) {
-            console.log('Ver Factura:', item);
+        openInvoiceModal(item) {
+            this.fillInvoiceData(item);
+            this.showInvoiceModal = true;
+        },
+
+        closeInvoiceModal() {
+            this.showInvoiceModal = false;
         },
 
         sendInvoice(item) {
             console.log('Enviar Factura:', item);
         },
+
+        fillInvoiceData(item) {
+            const date = new Date(item.dateOrder);
+            this.invoiceData.dynamicNumber = item.numberOrder;
+            this.invoiceData.day = date.getDate().toString().padStart(2, '0');
+            this.invoiceData.month = (date.getMonth() + 1).toString().padStart(2, '0');
+            this.invoiceData.year = date.getFullYear().toString();
+            this.invoiceData.clientName = item.client.name + ' ' + item.client.lastName;
+            this.invoiceData.clientAddress = item.client.address;
+            this.invoiceData.clientRUC = item.client.dni;
+            this.invoiceData.clientPhone = item.client.phone;
+            this.invoiceData.items = item.detailOrders;
+            this.invoiceData.totalAmount = item.total;
+            this.invoiceData.paymentCash = '';
+            this.invoiceData.paymentCard = '';
+            this.invoiceData.paymentElectronic = '';
+            this.invoiceData.paymentOther = '';
+
+            switch (item.paymentMethod) {
+                case 'cash':
+                    this.invoiceData.paymentCash = 'X';
+                    break;
+                case 'credit/debit card':
+                    this.invoiceData.paymentCard = 'X';
+                    break;
+                case 'electronic money':
+                    this.invoiceData.paymentElectronic = 'X';
+                    break;
+                case 'other':
+                    this.invoiceData.paymentOther = 'X';
+                    break;
+                default:
+                    break;
+            }
+        }
     },
     created() {
         this.fetchOrdersForInvoices();

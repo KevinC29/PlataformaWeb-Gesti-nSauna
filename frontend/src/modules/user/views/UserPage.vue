@@ -171,6 +171,7 @@ export default {
       return [
         { title: 'Nombre', key: 'name', align: 'start' },
         { title: 'Apellido', key: 'lastName' },
+        { title: 'Dirección', key: 'address' },
         { title: 'Teléfono', key: 'phone' },
         { title: 'DNI', key: 'dni' },
         { title: 'Correo Electrónico', key: 'email' },
@@ -187,6 +188,7 @@ export default {
       return this.users.filter(user =>
         user.name.toLowerCase().includes(searchLower) ||
         user.lastName.toLowerCase().includes(searchLower) ||
+        user.address.toLowerCase().includes(searchLower) ||
         user.phone.toLowerCase().includes(searchLower) ||
         user.dni.toLowerCase().includes(searchLower) ||
         (user.email && user.email.toLowerCase().includes(searchLower))
