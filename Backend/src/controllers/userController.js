@@ -108,7 +108,7 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find()
-      .select("_id name lastName phone dni email isActive role")
+      .select("_id name lastName address phone dni email isActive role")
       .populate({
         path: 'role',
         select: '_id name'

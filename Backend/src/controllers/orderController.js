@@ -202,7 +202,7 @@ export const getOrdersForInvoices = async (req, res) => {
             select: 'user',
             populate: {
                 path: 'user',
-                select: '_id name lastName phone dni'
+                select: '_id name lastName address phone dni email'
             }
         })
         .select('_id dateOrder numberOrder total client paymentState paymentMethod isActive')
@@ -237,6 +237,7 @@ export const getOrdersForInvoices = async (req, res) => {
                         address: order.client.user.address,
                         phone: order.client.user.phone,
                         dni: order.client.user.dni,
+                        email: order.client.user.email,
                     },
                     detailOrders: detailOrders.map(detail => ({
                         cantidad: detail.cantidad,
