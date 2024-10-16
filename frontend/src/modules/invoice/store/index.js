@@ -1,6 +1,9 @@
 import {
   getOrdersForInvoices,
 } from '@/api/services/orderService';
+import {
+  createAndSendInvoice,
+} from '@/api/services/invoiceService';
 
 import { handleError } from '@/middleware/errorHandler';
 import { handleSuccess } from '@/middleware/successHandler';
@@ -28,8 +31,20 @@ export default {
     async fetchOrdersForInvoices({ commit }) {
       try {
         const response = await getOrdersForInvoices();
-        console.log(response)
         commit('SET_ORDERS', response.data);
+        const successMsg = handleSuccess(response);
+        commit('SET_SUCCESS', successMsg);
+        return null;
+      } catch (error) {
+        const errorMsg = handleError(error);
+        commit('SET_ERROR', errorMsg);
+        throw error;
+      }
+    },
+    async sendInvoiceToEmail({ commit }, { htmlTemplate, email, subject, numberInvoice }) {
+      try {
+        const response = await createAndSendInvoice(htmlTemplate, email, subject, numberInvoice);
+        console.log(response)
         const successMsg = handleSuccess(response);
         commit('SET_SUCCESS', successMsg);
         return null;

@@ -66,6 +66,22 @@
         </template>
     </v-data-table>
 
+    <v-dialog v-model="showSendInvoiceModal" max-width="400">
+        <v-card>
+            <v-card-title class="headline">Confirmación de Envío</v-card-title>
+            <v-alert v-if="errorMessage" type="error" class="mt-3">
+                {{ errorMessage }}
+            </v-alert>
+            <v-alert v-if="successMessage" type="success" dismissible>
+                {{ successMessage }}
+            </v-alert>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" @click="closeConfirmationModal">Cerrar</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
     <!-- Modal para Ver Factura -->
     <v-dialog v-model="showInvoiceModal" max-width="800">
         <v-card>
@@ -91,12 +107,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { convertInvoiceToHTML } from '@/utils/convertInvoiceHTML'; 
 import InvoiceOrder from '@/modules/invoice/components/InvoiceOrder.vue';
 
 export default {
     components: {
         InvoiceOrder,
-  },
+    },
     data() {
         return {
             sortBy: [{ key: 'numberOrder', order: 'asc' }],
@@ -104,6 +121,7 @@ export default {
             errorMessage: '',
             successMessage: '',
             showInvoiceModal: false,
+            showSendInvoiceModal: false,
             invoiceData: {
                 dynamicNumber: '',
                 day: '',
@@ -156,7 +174,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions('invoice', ['fetchOrdersForInvoices']),
+        ...mapActions('invoice', ['fetchOrdersForInvoices', 'sendInvoiceToEmail']),
 
         getPaymentMethodTitle(paymentMethod) {
             const method = this.paymentMethods.find(method => method.value === paymentMethod);
@@ -172,8 +190,27 @@ export default {
             this.showInvoiceModal = false;
         },
 
-        sendInvoice(item) {
-            console.log('Enviar Factura:', item);
+        async sendInvoice(item) {
+            try {
+                this.fillInvoiceData(item);
+                const htmlTemplate = convertInvoiceToHTML(this.invoiceData);
+                console.log(htmlTemplate);
+                const email = item.client.email;
+                const subject = `Nota de venta de la Orden #${item.numberOrder}`;
+                const numberInvoice = item.numberOrder;
+                await this.sendInvoiceToEmail(htmlTemplate, email, subject, numberInvoice);
+                this.successMessage = this.success;
+                this.showSendInvoiceModal = true;
+            } catch (error) {
+                this.showSendInvoiceModal = true;
+                this.errorMessage = this.error;
+            }
+        },
+
+        closeConfirmationModal() {
+            this.showSendInvoiceModal = false;
+            this.errorMessage = '';
+            this.successMessage = '';
         },
 
         fillInvoiceData(item) {
@@ -188,27 +225,10 @@ export default {
             this.invoiceData.clientPhone = item.client.phone;
             this.invoiceData.items = item.detailOrders;
             this.invoiceData.totalAmount = item.total;
-            this.invoiceData.paymentCash = '';
-            this.invoiceData.paymentCard = '';
-            this.invoiceData.paymentElectronic = '';
-            this.invoiceData.paymentOther = '';
-
-            switch (item.paymentMethod) {
-                case 'cash':
-                    this.invoiceData.paymentCash = 'X';
-                    break;
-                case 'credit/debit card':
-                    this.invoiceData.paymentCard = 'X';
-                    break;
-                case 'electronic money':
-                    this.invoiceData.paymentElectronic = 'X';
-                    break;
-                case 'other':
-                    this.invoiceData.paymentOther = 'X';
-                    break;
-                default:
-                    break;
-            }
+            this.invoiceData.paymentCash = item.paymentMethod === 'cash' ? 'X' : '';
+            this.invoiceData.paymentCard = item.paymentMethod === 'credit/debit card' ? 'X' : '';
+            this.invoiceData.paymentElectronic = item.paymentMethod === 'electronic money' ? 'X' : '';
+            this.invoiceData.paymentOther = item.paymentMethod === 'other' ? 'X' : '';
         }
     },
     created() {
