@@ -6,9 +6,9 @@ import apiConfig from '../apiConfig';
 const apiUrl = `${apiConfig.baseURL}/invoice`;
 
 // Crear y enviar factura
-export const createAndSendInvoice = async (htmlTemplate, email, subject, numberInvoice) => {
+export const createAndSendInvoice = async (invoiceData) => {
   try {
-    const response = await http.post(`${apiUrl}/send`, { htmlTemplate, email, subject, numberInvoice });
+    const response = await http.post(`${apiUrl}/send`, invoiceData);
     return response.data;
   } catch (error) {
     handleError(error);

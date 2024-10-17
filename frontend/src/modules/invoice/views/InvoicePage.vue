@@ -193,12 +193,15 @@ export default {
         async sendInvoice(item) {
             try {
                 this.fillInvoiceData(item);
-                const htmlTemplate = convertInvoiceToHTML(this.invoiceData);
-                console.log(htmlTemplate);
-                const email = item.client.email;
-                const subject = `Nota de venta de la Orden #${item.numberOrder}`;
-                const numberInvoice = item.numberOrder;
-                await this.sendInvoiceToEmail(htmlTemplate, email, subject, numberInvoice);
+                const invoiceData = {
+                    htmlTemplate: convertInvoiceToHTML(this.invoiceData),
+                    email: item.client.email,
+                    subject: `Nota de venta de la Orden #00${item.numberOrder}`,
+                    numberInvoice: `00${item.numberOrder}`,
+                    orderId: item.orderId,
+                }
+                await this.sendInvoiceToEmail(invoiceData);
+                this.fetchOrdersForInvoices();
                 this.successMessage = this.success;
                 this.showSendInvoiceModal = true;
             } catch (error) {

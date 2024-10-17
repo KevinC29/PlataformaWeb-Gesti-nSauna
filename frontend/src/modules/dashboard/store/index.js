@@ -56,14 +56,14 @@ export default {
                 roles: ['ADMIN', 'CASHIER'],
             },
             {
-                icon: 'mdi-cart',
+                icon: 'mdi-invoice-list',
                 text: 'Facturas',
                 value: 'factura',
                 href: '/dashboard/invoices',
                 roles: ['ADMIN', 'CASHIER', 'MANAGER'],
             },
             {
-                icon: 'mdi-cart',
+                icon: 'mdi-chart-bar',
                 text: 'Estadísticas',
                 value: 'estadistica',
                 href: '/dashboard/statisticsByDate',

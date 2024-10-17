@@ -41,9 +41,9 @@ export default {
         throw error;
       }
     },
-    async sendInvoiceToEmail({ commit }, { htmlTemplate, email, subject, numberInvoice }) {
+    async sendInvoiceToEmail({ commit }, invoiceData) {
       try {
-        const response = await createAndSendInvoice(htmlTemplate, email, subject, numberInvoice);
+        const response = await createAndSendInvoice(invoiceData);
         console.log(response)
         const successMsg = handleSuccess(response);
         commit('SET_SUCCESS', successMsg);
