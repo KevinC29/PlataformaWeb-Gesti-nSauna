@@ -50,7 +50,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minValue } from '@vuelidate/validators';
+import { editItemValidations } from '@/validators/itemValidations.js';
 
 export default {
   data() {
@@ -146,16 +146,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        description: { required },
-        price: { required, minValue: minValue(0) },
-        imageUrl: { required },
-        isActive: { required },
-        itemType: { required },
-      },
-    };
+    return editItemValidations();
   },
   setup() {
     const v$ = useVuelidate();

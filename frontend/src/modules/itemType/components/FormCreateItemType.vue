@@ -41,7 +41,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { createItemTypeValidations } from '@/validators/itemTypeValidations.js';
 
 export default {
   data() {
@@ -113,14 +113,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        description: { required },
-        isActive: { required },
-        section: { required },
-      },
-    };
+    return createItemTypeValidations();
   },
   setup() {
     const v$ = useVuelidate();

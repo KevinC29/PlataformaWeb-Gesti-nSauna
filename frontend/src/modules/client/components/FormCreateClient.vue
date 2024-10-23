@@ -3,7 +3,8 @@
     <!-- Buscador de Usuario -->
     <v-autocomplete v-model="state.user" :items="filteredUsersList" item-value="_id" item-title="fullName"
       v-model:search-input="searchTerm" label="Buscar y Seleccionar Usuario" clearable dense :items-per-page="5"
-      @update:search-input="filterUsers"></v-autocomplete>
+      @update:search-input="filterUsers" :error-messages="v$.state.user.$errors.map(e => e.$message)"
+      @blur="v$.state.user.$touch" @input="v$.state.user.$touch"></v-autocomplete>
 
     <!-- Alerta de errores -->
     <v-alert v-if="errorMessage" type="error" dismissible>
@@ -28,7 +29,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { createClientValidations } from '@/validators/clientValidations.js';
 
 export default {
   data() {
@@ -105,11 +106,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        user: { required },
-      },
-    };
+    return createClientValidations();
   },
 
   setup() {

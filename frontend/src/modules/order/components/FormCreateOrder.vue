@@ -37,7 +37,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minValue } from '@vuelidate/validators';
+import { createOrderValidations } from '@/validators/orderValidations.js';
 
 export default {
   data() {
@@ -127,13 +127,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        numberOrder: { required },
-        balance: { required, minValue: minValue(0) },
-        client: { required },
-      },
-    };
+    return createOrderValidations();
   },
 
   setup() {

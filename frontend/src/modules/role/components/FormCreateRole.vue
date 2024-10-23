@@ -31,7 +31,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { createRoleValidations } from '@/validators/roleValidations.js';
 
 export default {
   data() {
@@ -85,12 +85,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        isActive: { required },
-      },
-    };
+    return createRoleValidations();
   },
   setup() {
     const v$ = useVuelidate();

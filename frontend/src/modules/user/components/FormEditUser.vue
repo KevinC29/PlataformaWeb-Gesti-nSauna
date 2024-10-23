@@ -56,7 +56,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, email, helpers } from '@vuelidate/validators';
+import { editUserValidations } from '@/validators/userValidations.js';
 
 export default {
   data() {
@@ -92,13 +92,6 @@ export default {
       setTimeout(() => {
         this.successMessage = '';
       }, 2000);
-    },
-    createPhoneValidator() {
-      return helpers.withMessage('El teléfono debe tener al menos 10 dígitos y puede incluir un código de país opcional', (value) => {
-        if (!value) return true;
-        const phoneRegex = /^(?:\+?\d{1,3})?\s?\d{10,}$/;
-        return phoneRegex.test(value);
-      });
     },
     async fetchData() {
       try {
@@ -159,21 +152,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        lastName: { required },
-        address: { required },
-        phone: {
-          phone: this.createPhoneValidator(),
-          minLength: minLength(10),
-        },
-        dni: { required, minLength: minLength(10) },
-        email: { email },
-        isActive: { required },
-        role: { required },
-      },
-    };
+    return editUserValidations();
   },
   setup() {
     const v$ = useVuelidate();

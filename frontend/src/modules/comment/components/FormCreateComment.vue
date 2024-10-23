@@ -27,7 +27,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { createCommentValidations } from '@/validators/commentValidations.js';
 
 export default {
   data() {
@@ -89,11 +89,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        message: { required },
-      },
-    };
+    return createCommentValidations();
   },
 
   setup() {

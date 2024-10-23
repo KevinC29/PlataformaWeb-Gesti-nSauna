@@ -31,7 +31,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required } from '@vuelidate/validators';
+import { editSectionValidations } from '@/validators/sectionValidations.js';
 
 export default {
   data() {
@@ -97,12 +97,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        isActive: { required },
-      },
-    };
+    return editSectionValidations();
   },
   async created() {
     await this.fetchData();

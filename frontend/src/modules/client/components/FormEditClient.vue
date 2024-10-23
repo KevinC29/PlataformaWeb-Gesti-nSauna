@@ -33,7 +33,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minValue } from '@vuelidate/validators';
+import { editClientValidations } from '@/validators/clientValidations.js';
 
 export default {
   data() {
@@ -112,12 +112,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        account: { required, minValue: minValue(0) },
-        accountState: { required },
-      },
-    };
+    return editClientValidations();
   },
   setup() {
     const v$ = useVuelidate();

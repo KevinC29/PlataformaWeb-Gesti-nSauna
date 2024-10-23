@@ -106,7 +106,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength, email } from '@vuelidate/validators';
+import { editCredentialValidations } from '@/validators/credentialValidations.js';
 
 export default {
   data() {
@@ -259,19 +259,7 @@ export default {
     },
   },
   validations() {
-    return {
-      state: {
-        name: { required },
-        lastName: { required },
-        dni: { required, minLength: minLength(10) },
-        email: { email },
-      },
-      credential: {
-        password: { required },
-        newPassword: { required, minLength: minLength(6) },
-        confirmPassword: { required, minLength: minLength(6) },
-      },
-    };
+    return editCredentialValidations();
   },
   setup() {
     const v$ = useVuelidate();

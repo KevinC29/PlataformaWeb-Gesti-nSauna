@@ -111,7 +111,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
-import { required, minValue } from '@vuelidate/validators';
+import { editOrderValidations } from '@/validators/orderValidations.js';
 
 export default {
     data() {
@@ -292,15 +292,7 @@ export default {
         },
     },
     validations() {
-        return {
-            state: {
-                balance: { required, minValue: minValue(0) },
-                consumptionAccount: { required, minValue: minValue(0) },
-                total: { required, minValue: minValue(0) },
-                paymentState: { required },
-                paymentMethod: { required },
-            },
-        };
+        return editOrderValidations();
     },
     setup() {
         const v$ = useVuelidate();

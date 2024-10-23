@@ -57,7 +57,7 @@ export default {
         await this.login({ email: this.email, password: this.password });
         this.$router.push({ name: 'Dashboard' });
       } catch (error) {
-        this.errorMessage = 'Login failed. Please check your credentials.';
+        this.errorMessage = 'Error al iniciar sesión, revise sus credenciales';
       }
     }
   }
