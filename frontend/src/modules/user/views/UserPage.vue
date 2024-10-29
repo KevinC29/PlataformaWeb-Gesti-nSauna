@@ -1,14 +1,15 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
+  <v-container class="my-4">
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
     <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>USUARIOS</v-toolbar-title>
+      <v-toolbar class="toolbar-container">
+        <v-toolbar-title><strong>USUARIOS</strong></v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" flat hide-details single-line></v-text-field>
+          variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
           Crear Usuario
         </v-btn>
       </v-toolbar>
@@ -83,6 +84,7 @@
       </v-btn>
     </template>
   </v-data-table>
+</v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
@@ -147,6 +149,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
   data() {
@@ -169,17 +173,17 @@ export default {
     ...mapGetters('user', ['users', 'error', 'success']),
     headers() {
       return [
-        { title: 'Nombre', key: 'name', align: 'start' },
-        { title: 'Apellido', key: 'lastName' },
-        { title: 'Dirección', key: 'address' },
-        { title: 'Teléfono', key: 'phone' },
-        { title: 'DNI', key: 'dni' },
-        { title: 'Correo Electrónico', key: 'email' },
-        { title: 'Rol', key: 'role.name' },
-        { title: 'Estado Usuario', key: 'isActive' },
-        { title: 'Estado Credencial', key: 'credentialStatus' },
-        { title: 'Resetear Contraseña', value: 'resetPassword', sortable: false },
-        { title: 'Acciones', value: 'actions', sortable: false }
+        { title: 'Nombre', key: 'name', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Apellido', key: 'lastName', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Dirección', key: 'address', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Teléfono', key: 'phone', headerProps: { class: 'font-weight-bold' } },
+        { title: 'DNI', key: 'dni', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Correo Electrónico', key: 'email', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Rol', key: 'role.name', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Estado Usuario', key: 'isActive', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Estado Credencial', key: 'credentialStatus', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Resetear Contraseña', value: 'resetPassword', sortable: false, headerProps: { class: 'font-weight-bold' } },
+        { title: 'Acciones', value: 'actions', sortable: false, headerProps: { class: 'font-weight-bold' } }
       ];
     },
     filteredItems() {

@@ -1,29 +1,39 @@
 <template>
-  <v-sheet class="mx-auto" width="300">
+  <v-sheet class="mx-auto custom-form" width="400">
+    <!-- Título centrado para el formulario -->
+    <h2 class="text-center mb-4">Inicio de Sesión</h2>
+
     <v-form @submit.prevent="handleLogin" ref="form">
-      <v-text-field
-        v-model="email"
-        :rules="emailRules"
-        label="Correo"
-        type="email"
-        required
-      ></v-text-field>
+      <!-- Título referente al correo -->
+      <v-row>
+        <v-col cols="12">
+          <label for="email" class="field-label">Usuario</label>
+          <v-text-field id="email" v-model="email" :rules="emailRules" type="email" variant="outlined" required
+            autocomplete="off" rounded append-inner-icon="''" prepend-inner-icon="mdi-account" bg-color="cyan-lighten-5"
+            color="#388e3c"></v-text-field>
+        </v-col>
+      </v-row>
 
-      <v-text-field
-        v-model="password"
-        :rules="passwordRules"
-        label="Contraseña"
-        type="password"
-        required
-      ></v-text-field>
+      <!-- Título referente a la contraseña -->
+      <v-row>
+        <v-col cols="12">
+          <label for="password" class="field-label">Contraseña</label>
+          <v-text-field id="password" v-model="password" :rules="passwordRules" :type="passwordFieldType"
+            variant="outlined" required rounded autocomplete="off" prepend-inner-icon="mdi-lock"
+            bg-color="cyan-lighten-5" color="#388e3c"
+            :append-inner-icon="passwordFieldType === 'password' ? 'mdi-eye-off' : 'mdi-eye'"
+            @click:append-inner="togglePasswordVisibility"></v-text-field>
+        </v-col>
+      </v-row>
 
-      <v-btn class="mt-2" type="submit" block>Login</v-btn>
+      <!-- Botón de login -->
+      <v-btn class="mt-4 custom-login-btn" type="submit" block rounded="lg">
+        <v-icon left class="mr-2" icon="mdi-login"></v-icon>
+        Iniciar Sesión
+      </v-btn>
 
-      <v-alert
-        v-if="errorMessage"
-        type="error"
-        class="mt-3"
-      >
+      <!-- Mensaje de error -->
+      <v-alert v-if="errorMessage" type="error" class="mt-3">
         {{ errorMessage }}
       </v-alert>
     </v-form>
@@ -39,13 +49,14 @@ export default {
       email: '',
       password: '',
       errorMessage: '',
+      passwordFieldType: 'password',
       emailRules: [
         v => !!v || 'El correo es requerido',
-        v => /.+@.+\..+/.test(v) || 'Email must be valid',
+        v => /.+@.+\..+/.test(v) || 'Email debe ser válido',
       ],
       passwordRules: [
         v => !!v || 'La contraseña es requerida',
-        v => v.length >= 6 || 'Password must be at least 6 characters long',
+        v => v.length >= 6 || 'La contraseña debe tener al menos 6 caracteres',
       ]
     };
   },
@@ -59,12 +70,50 @@ export default {
       } catch (error) {
         this.errorMessage = 'Error al iniciar sesión, revise sus credenciales';
       }
-    }
+    },
+    togglePasswordVisibility() {
+      this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    },
   }
-
 };
 </script>
 
 <style scoped>
-/* Puedes agregar estilos personalizados aquí */
+.custom-form {
+  padding: 30px;
+  background: linear-gradient(135deg, #5fe6da, #388e3c);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.field-label {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+  display: block;
+  color: #555;
+  text-align: left
+}
+
+.custom-login-btn {
+  background-color: #388e3c;
+  color: white;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.custom-login-btn:hover {
+  background-color: #2e7d32;
+}
+
+.v-alert {
+  font-size: 14px;
+}
 </style>

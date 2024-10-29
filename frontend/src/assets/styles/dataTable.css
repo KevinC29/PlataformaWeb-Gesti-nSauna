@@ -1,0 +1,16 @@
+.bordered-table {
+  background: rgb(189, 255, 203);
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.toolbar-container {
+  background: rgba(8, 119, 32, 0.411);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.font-weight-bold {
+  font-weight: bold;
+}

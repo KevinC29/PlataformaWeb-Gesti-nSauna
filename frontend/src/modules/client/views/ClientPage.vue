@@ -1,53 +1,57 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>CLIENTES</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
-        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" flat hide-details single-line></v-text-field>
-        <v-spacer></v-spacer>
-        <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
-          Crear Cliente
+  <v-container class="my-4">
+    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10"
+      class="bordered-table">
+      <template v-slot:top>
+        <v-toolbar class="toolbar-container">
+          <v-toolbar-title><strong>CLIENTES</strong></v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+            variant="solo-filled" hide-details single-line></v-text-field>
+          <v-spacer></v-spacer>
+          <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
+            Crear Cliente
+          </v-btn>
+        </v-toolbar>
+      </template>
+
+      <!-- Columna de Usuario -->
+      <template v-slot:[`item.user`]="{ item }">
+        {{ item.user.name }} {{ item.user.lastName }}
+      </template>
+
+      <!-- Columna de Cuenta -->
+      <template v-slot:[`item.account`]="{ item }">
+        <span>$ {{ item.account.toFixed(2) }}</span>
+      </template>
+
+      <!-- Columna de Estado de Cuenta -->
+      <template v-slot:[`item.accountState`]="{ item }">
+        <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase black-text" size="small"
+          label>
+          {{ item.accountState === 'paid' ? 'Pagada' : 'Pendiente' }}
+        </v-chip>
+      </template>
+
+      <!-- Columna de Acciones -->
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon class="me-2" size="small" @click="navigateToEdit(item)">
+          mdi-pencil
+        </v-icon>
+        <v-icon size="small" @click="confirmDelete(item)">
+          mdi-delete
+        </v-icon>
+      </template>
+
+      <!-- Sin datos -->
+      <template v-slot:no-data>
+        <v-btn color="primary" @click="fetchClients">
+          Reiniciar
         </v-btn>
-      </v-toolbar>
-    </template>
-
-    <!-- Columna de Usuario -->
-    <template v-slot:[`item.user`]="{ item }">
-      {{ item.user.name }} {{ item.user.lastName }}
-    </template>
-
-    <!-- Columna de Cuenta -->
-    <template v-slot:[`item.account`]="{ item }">
-      <span>$ {{ item.account.toFixed(2) }}</span>
-    </template>
-
-    <!-- Columna de Estado de Cuenta -->
-    <template v-slot:[`item.accountState`]="{ item }">
-      <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase" size="small" label>
-        {{ item.accountState === 'paid' ? 'Pagada' : 'Pendiente' }}
-      </v-chip>
-    </template>
-
-    <!-- Columna de Acciones -->
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="me-2" size="small" @click="navigateToEdit(item)">
-        mdi-pencil
-      </v-icon>
-      <v-icon size="small" @click="confirmDelete(item)">
-        mdi-delete
-      </v-icon>
-    </template>
-
-    <!-- Sin datos -->
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="fetchClients">
-        Reiniciar
-      </v-btn>
-    </template>
-  </v-data-table>
+      </template>
+    </v-data-table>
+  </v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
@@ -76,6 +80,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
   data() {
@@ -92,10 +98,10 @@ export default {
     ...mapGetters('client', ['clients', 'error', 'success']),
     headers() {
       return [
-        { title: 'Usuario', key: 'user', align: 'start' },
-        { title: 'Cuenta', key: 'account' },
-        { title: 'Estado de Cuenta', key: 'accountState' },
-        { title: 'Acciones', value: 'actions', sortable: false }
+        { title: 'Usuario', key: 'user', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Cuenta', key: 'account', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Estado de Cuenta', key: 'accountState', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Acciones', value: 'actions', sortable: false, headerProps: { class: 'font-weight-bold' } }
       ];
     },
     filteredItems() {

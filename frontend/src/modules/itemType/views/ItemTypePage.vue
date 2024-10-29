@@ -1,19 +1,19 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItemTypes" v-model:sort-by="sortBy" :items-per-page="10">
+  <v-container class="my-4">
+  <v-data-table :headers="headers" :items="filteredItemTypes" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
     <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>TIPOS DE ÍTEM</v-toolbar-title>
+      <v-toolbar class="toolbar-container">
+        <v-toolbar-title><strong>TIPOS DE ÍTEM</strong></v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" flat hide-details single-line></v-text-field>
+          variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
           Crear Tipo de Ítem
         </v-btn>
       </v-toolbar>
     </template>
-
 
     <!-- Columnas de acciones -->
     <template v-slot:[`item.actions`]="{ item }">
@@ -39,6 +39,7 @@
       </v-btn>
     </template>
   </v-data-table>
+</v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
@@ -67,6 +68,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
   data() {

@@ -1,0 +1,38 @@
+.custom-create-btn {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 8px 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-create-btn:hover {
+    background-color: #66bb6a;
+    color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-viewInvoice-btn {
+    background-color: #29B6F6;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-viewInvoice-btn:hover {
+    background-color: #0277BD;
+    color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-sendInvoice-btn {
+    background-color: red-lighten-1;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-sendInvoice-btn:hover {
+    background-color: #C62828;
+    color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}

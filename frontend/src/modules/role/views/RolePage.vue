@@ -1,14 +1,15 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredRoles" v-model:sort-by="sortBy" :items-per-page="10">
+  <v-container class="my-4">
+  <v-data-table :headers="headers" :items="filteredRoles" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
     <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>ROLES</v-toolbar-title>
+      <v-toolbar class="toolbar-container">
+        <v-toolbar-title><strong>ROLES</strong></v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" flat hide-details single-line></v-text-field>
+          variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
           Crear Rol
         </v-btn>
       </v-toolbar>
@@ -38,6 +39,7 @@
       </v-btn>
     </template>
   </v-data-table>
+</v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
@@ -66,6 +68,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
   data() {
@@ -82,9 +86,9 @@ export default {
     ...mapGetters('role', ['roles', 'error', 'success']),
     headers() { 
       return [
-        { title: 'Nombre', key: 'name', align: 'start' },
-        { title: 'Estado', key: 'isActive' },
-        { title: 'Acciones', value: 'actions', sortable: false }
+        { title: 'Nombre', key: 'name', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Estado', key: 'isActive', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Acciones', value: 'actions', sortable: false, headerProps: { class: 'font-weight-bold' } }
       ];
     },
     filteredRoles() {

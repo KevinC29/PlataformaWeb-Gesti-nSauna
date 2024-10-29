@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppHeader :items="headerItems" />
-    <v-main>
+    <v-main class="custom-main-background">
       <SidebarContainer />
         <router-view />      
     </v-main>
@@ -24,11 +24,12 @@ export default {
   },
   data() {
     return {
+      errorMessage: '',
       headerItems: [
         {
           title: 'Salir',
           disabled: false,
-          onClick: this.handleLogout, // Usa onClick en lugar de href
+          onClick: this.handleLogout,
         },
       ],
     };
@@ -39,8 +40,7 @@ export default {
     async handleLogout() {
       this.errorMessage = '';
       try {
-        await this.logout();
-        this.$router.push({ name: 'Login' });
+        await this.logout(false);
       } catch (error) {
         this.errorMessage = 'Logout Failed.';
       }
@@ -49,8 +49,16 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .full-width {
   width: 100%;
+}
+
+.custom-main-background {
+  background-image: url('@/assets/img/flat-mountains.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative; 
 }
 </style>

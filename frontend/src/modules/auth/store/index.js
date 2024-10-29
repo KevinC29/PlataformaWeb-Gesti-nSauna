@@ -20,7 +20,7 @@ export default {
         clearTimeout(state.expirationTimeout);
       }
       state.expirationTimeout = setTimeout(() => {
-        this.dispatch('auth/logout');
+        this.dispatch('auth/logout', true);
       }, EXPIRATION_WINDOW_MS);
     },
     REMOVE_TOKEN(state) {
@@ -51,15 +51,19 @@ export default {
         throw error;
       }
     },
-    async logout({ commit, dispatch }) {
+    async logout({ commit, dispatch }, value) {
       try {
         commit('REMOVE_TOKEN');
+        if(value){
+          router.push({ name: 'Login', query: { sessionExpired: true } });
+        }else{
+          router.push({ name: 'Login' });
+        }
         await dispatch('dashboard/cleanSidebar', null, { root: true });
-        router.push({ name: 'Login', query: { sessionExpired: true } });
       } catch (error) {
         handleError(error);
       }
-    }
+    },
   },
   getters: {
     token: state => state.token,

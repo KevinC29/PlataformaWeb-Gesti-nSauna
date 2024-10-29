@@ -1,5 +1,12 @@
 <template>
   <div class="profile-page">
+    <!-- Alerta de éxito general -->
+    <div class="alert-container">
+      <v-alert v-if="successMessage" type="success" dismissible>
+        {{ successMessage }}
+      </v-alert>
+    </div>
+
     <v-card class="mx-auto" max-width="600">
       <v-card-title class="headline">Perfil del Usuario</v-card-title>
       <v-divider></v-divider>
@@ -39,15 +46,11 @@
     </v-card>
 
     <!-- Error de carga -->
-    <v-alert v-if="errorMessage" type="error" class="mt-3">
-      {{ errorMessage }}
-    </v-alert>
-    
-     <!-- Alerta de éxito general -->
-     <v-alert v-if="successMessage" type="success" dismissible>
-      {{ successMessage }}
-    </v-alert>
-    
+    <div class="alert-container">
+      <v-alert v-if="errorMessage" type="error" class="mt-3">
+        {{ errorMessage }}
+      </v-alert>
+    </div>
   </div>
 </template>
 
@@ -100,8 +103,16 @@ export default {
 <style scoped>
 .profile-page {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+}
+
+.alert-container {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
 }
 </style>

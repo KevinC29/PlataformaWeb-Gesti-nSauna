@@ -1,19 +1,19 @@
 <template>
-    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
+    <v-container class="my-4">
+    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
         <template v-slot:top>
-            <v-toolbar flat>
-                <v-toolbar-title>ÓRDENES PAGADAS</v-toolbar-title>
+            <v-toolbar class="toolbar-container">
+                <v-toolbar-title><strong>ÓRDENES PAGADAS</strong></v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
                 <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-                    variant="solo-filled" flat hide-details single-line></v-text-field>
-                <v-spacer></v-spacer>
+                    variant="solo-filled" hide-details single-line class="mr-2"></v-text-field>
             </v-toolbar>
         </template>
 
         <!-- Columna de Número de Orden -->
         <template v-slot:[`item.numberOrder`]="{ item }">
-            {{ `0${item.numberOrder}` }}
+            {{ `00${item.numberOrder}` }}
         </template>
 
         <!-- Columna de Fecha de Orden -->
@@ -46,14 +46,14 @@
 
         <!-- Nueva Columna: Ver Factura -->
         <template v-slot:[`item.viewInvoice`]="{ item }">
-            <v-btn color="primary" @click="openInvoiceModal(item)">
+            <v-btn class="custom-viewInvoice-btn rounded-lg" @click="openInvoiceModal(item)">
                 Ver Factura
             </v-btn>
         </template>
 
         <!-- Nueva Columna: Enviar Factura -->
         <template v-slot:[`item.sendInvoice`]="{ item }">
-            <v-btn :disabled="!item.isActive" color="success" @click="sendInvoice(item)">
+            <v-btn :disabled="!item.isActive" class="custom-sendInvoice-btn rounded-lg" @click="sendInvoice(item)">
                 Enviar Factura
             </v-btn>
         </template>
@@ -65,6 +65,7 @@
             </v-alert>
         </template>
     </v-data-table>
+</v-container>
 
     <v-dialog v-model="showSendInvoiceModal" max-width="400">
         <v-card>
@@ -109,6 +110,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import { convertInvoiceToHTML } from '@/utils/convertInvoiceHTML'; 
 import InvoiceOrder from '@/modules/invoice/components/InvoiceOrder.vue';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
     components: {
@@ -150,14 +153,14 @@ export default {
         ...mapGetters('invoice', ['orders', 'error', 'success']),
         headers() {
             return [
-                { title: 'Número de Orden', key: 'numberOrder', align: 'start' },
-                { title: 'Fecha de Orden', key: 'dateOrder' },
-                { title: 'Cliente', key: 'client' },
-                { title: 'Total', key: 'total' },
-                { title: 'Estado de Pago', key: 'paymentState' },
-                { title: 'Método de Pago', key: 'paymentMethod' },
-                { title: 'Ver Factura', key: 'viewInvoice' },
-                { title: 'Enviar Factura', key: 'sendInvoice' },
+                { title: 'Número de Orden', key: 'numberOrder', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Fecha de Orden', key: 'dateOrder', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Cliente', key: 'client', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Total', key: 'total', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Estado de Pago', key: 'paymentState', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Método de Pago', key: 'paymentMethod', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Factura', key: 'viewInvoice', headerProps: { class: 'font-weight-bold' } },
+                { title: 'Enviar Factura', key: 'sendInvoice', headerProps: { class: 'font-weight-bold' } },
             ];
         },
         filteredItems() {

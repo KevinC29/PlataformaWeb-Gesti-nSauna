@@ -5,7 +5,6 @@ import {
   updateOrder,
   deleteOrder
 } from '@/api/services/orderService';
-
 import { handleError } from '@/middleware/errorHandler';
 import { handleSuccess } from '@/middleware/successHandler';
 
@@ -14,6 +13,7 @@ export default {
   namespaced: true,
   state: {
     orders: [],
+    numberKeys: {},
     order: null,
     clients: [],
     error: '',
@@ -22,8 +22,26 @@ export default {
     detailsOrder: [],
     detailOrder: null,
     numberOrder: null,
+
   },
   mutations: {
+    SET_NUMBERKEY_TEXT(state, { orderId, text }) {
+      state.numberKeys = {
+        ...state.numberKeys,
+        [orderId]: text,
+      };
+      localStorage.setItem('numberKeys', JSON.stringify(state.numberKeys));
+    },
+    LOAD_NUMBER_KEYS(state) {
+      const storedNumberKeys = localStorage.getItem('numberKeys');
+      if (storedNumberKeys) {
+        state.numberKeys = JSON.parse(storedNumberKeys);
+      }
+    },
+    DELETE_NUMBERKEY_TEXT(state, numberKeys) {
+      state.numberKeys = numberKeys;
+      localStorage.removeItem('numberKeys');
+    },
     SET_ORDERS(state, orders) {
       state.orders = orders;
     },
@@ -68,6 +86,9 @@ export default {
     async fetchOrders({ commit }) {
       try {
         const response = await getOrders();
+        if (response.data.length === 0) {
+          commit('DELETE_NUMBERKEY_TEXT', {});
+        }
         commit('SET_ORDERS', response.data);
         const successMsg = handleSuccess(response);
         commit('SET_SUCCESS', successMsg);
@@ -196,6 +217,12 @@ export default {
         throw error;
       }
     },
+    setNumberKeyText({ commit }, { orderId, text }) {
+      commit('SET_NUMBERKEY_TEXT', { orderId, text });
+    },
+    loadNumberKeys({ commit }) {
+      commit('LOAD_NUMBER_KEYS');
+    },
   },
   getters: {
     orders: state => state.orders,
@@ -206,5 +233,6 @@ export default {
     success: state => state.success,
     detailsOrder: state => state.detailsOrder,
     numberOrder: state => state.numberOrder,
+    numberKeys: state => state.numberKeys,
   }
 };

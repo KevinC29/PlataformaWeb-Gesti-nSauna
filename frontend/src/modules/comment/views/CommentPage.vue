@@ -1,14 +1,15 @@
 <template>
-  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10">
+  <v-container class="my-4">
+  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
     <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>COMENTARIOS</v-toolbar-title>
+      <v-toolbar class="toolbar-container">
+        <v-toolbar-title><strong>COMENTARIOS</strong></v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" flat hide-details single-line></v-text-field>
+          variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="mb-2" color="primary" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
           Crear Comentario
         </v-btn>
       </v-toolbar>
@@ -50,6 +51,7 @@
       </v-btn>
     </template>
   </v-data-table>
+  </v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
@@ -96,6 +98,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/dataTable.css';
+import '@/assets/styles/buttons.css';
 
 export default {
   data() {
@@ -115,11 +119,11 @@ export default {
     ...mapGetters('comment', ['comments', 'error']),
     headers() {
       return [
-        { title: 'Fecha', key: 'date', align: 'start' },
-        { title: 'Cliente', key: 'client' },
-        { title: 'Mensaje', key: 'message' },
-        { title: 'Estado', key: 'isActive' },
-        { title: 'Acciones', value: 'actions', sortable: false }
+        { title: 'Fecha', key: 'date', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Cliente', key: 'client', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Mensaje', key: 'message', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Estado', key: 'isActive', headerProps: { class: 'font-weight-bold' } },
+        { title: 'Acciones', value: 'actions', sortable: false, headerProps: { class: 'font-weight-bold' } }
       ];
     },
     filteredItems() {
@@ -172,11 +176,11 @@ export default {
       if (this.editedItem) {
         try {
           await this.deleteComment(this.editedItem._id);
-          this.formattedSuccess(1,this.success, "Comentario eliminado con éxito");
+          this.formattedSuccess(1, this.success, "Comentario eliminado con éxito");
           this.dialogDelete = false;
           this.fetchComments();
         } catch (error) {
-          this.formattedError(1,this.error, "Error al eliminar el comentario");
+          this.formattedError(1, this.error, "Error al eliminar el comentario");
         }
       }
     },
@@ -187,12 +191,12 @@ export default {
       try {
         const newStatus = !comment.isActive;
         await this.updateCommentStatus({ _id: comment._id, isActive: newStatus });
-        this.formattedSuccess(0,this.success, "Status modificado con éxito");
+        this.formattedSuccess(0, this.success, "Status modificado con éxito");
         this.dialogStatusUpdate = true;
         comment.isActive = newStatus;
         await this.fetchComments();
       } catch (error) {
-        this.formattedError(0,this.error, "Error al modificar el Status");
+        this.formattedError(0, this.error, "Error al modificar el Status");
         this.dialogStatusUpdate = true;
       }
     },
