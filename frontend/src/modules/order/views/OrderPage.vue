@@ -10,7 +10,7 @@
                     <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
                         variant="solo-filled" hide-details single-line></v-text-field>
                     <v-spacer></v-spacer>
-                    <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
+                    <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
                         Crear Orden
                     </v-btn>
                 </v-toolbar>
@@ -24,7 +24,7 @@
 
             <!-- Columna de Número de Orden -->
             <template v-slot:[`item.numberOrder`]="{ item }">
-                {{ `0${item.numberOrder}` }}
+                {{ `00${item.numberOrder}` }}
             </template>
 
             <!-- Columna de Fecha de Orden -->
@@ -49,7 +49,7 @@
 
             <!-- Columna de Estado de Pago -->
             <template v-slot:[`item.paymentState`]="{ item }">
-                <v-chip :color="item.paymentState === 'paid' ? 'green' : 'orange'" class="text-uppercase" size="small"
+                <v-chip :color="item.paymentState === 'paid' ? 'green' : 'orange'" class="text-uppercase"
                     label>
                     {{ item.paymentState === 'paid' ? 'Pagada' : 'Pendiente' }}
                 </v-chip>

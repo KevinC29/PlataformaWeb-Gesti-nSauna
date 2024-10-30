@@ -1,0 +1,26 @@
+.custom-form {
+    padding: 30px;
+    background: linear-gradient(180deg, #59b877, #5fe6da);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    height: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.field-label {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+    color: #292828;
+    text-align: left;
+}
+
+.v-alert {
+    font-size: 14px;
+}

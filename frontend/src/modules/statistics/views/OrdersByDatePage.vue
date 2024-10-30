@@ -1,40 +1,47 @@
 <template>
-  <v-toolbar flat>
-    <v-toolbar-title>Órdenes por Fecha</v-toolbar-title>
-    <v-divider class="mx-4" inset vertical></v-divider>
-    <v-spacer></v-spacer>
-  </v-toolbar>
+  <v-sheet class="mx-auto custom-form" width="600">
+    <h2 class="text-center mb-4">ORDENES POR FECHA</h2>
+    <v-row>
+      <v-col cols="12">
+        <!-- Input para la fecha de inicio -->
+        <label class="field-label">Fecha de Inicio</label>
+        <v-dialog v-model="startDateDialog" width="auto" persistent scrollable @click:outside="startDateDialog = false">
+          <template v-slot:activator="{ props }">
+            <v-text-field v-model="startDateFormatted" prepend-inner-icon="mdi-calendar" readonly v-bind="props"
+              bg-color="cyan-lighten-5" color="#388e3c" rounded variant="solo-filled"></v-text-field>
+          </template>
+          <v-date-picker v-model="startDate" color="primary" title="Selecciona la fecha" header=""
+            @update:modelValue="startDateDialog = false" first-day-of-week="1" />
+        </v-dialog>
 
-  <!-- Input para la fecha de inicio -->
-  <v-dialog v-model="startDateDialog" width="auto" persistent scrollable @click:outside="startDateDialog = false">
-    <template v-slot:activator="{ props }">
-      <v-text-field v-model="startDateFormatted" label="Fecha Inicio" prepend-icon="mdi-calendar" readonly
-        v-bind="props"></v-text-field>
-    </template>
-    <v-date-picker v-model="startDate" color="primary" title="Selecciona la fecha" header=""
-      @update:modelValue="startDateDialog = false" first-day-of-week="1" />
-  </v-dialog>
+        <!-- Input para la fecha de fin -->
+        <label class="field-label">Fecha de Fin</label>
+        <v-dialog v-model="endDateDialog" width="auto" persistent scrollable @click:outside="endDateDialog = false">
+          <template v-slot:activator="{ props }">
+            <v-text-field v-model="endDateFormatted" prepend-inner-icon="mdi-calendar" readonly v-bind="props"
+              bg-color="cyan-lighten-5" color="#388e3c" rounded variant="solo-filled"></v-text-field>
+          </template>
+          <v-date-picker v-model="endDate" color="primary" title="Selecciona la fecha" header=""
+            @update:modelValue="endDateDialog = false" first-day-of-week="1" />
+        </v-dialog>
+      </v-col>
+    </v-row>
 
-  <!-- Input para la fecha de fin -->
-  <v-dialog v-model="endDateDialog" width="auto" persistent scrollable @click:outside="endDateDialog = false">
-    <template v-slot:activator="{ props }">
-      <v-text-field v-model="endDateFormatted" label="Fecha Fin" prepend-icon="mdi-calendar" readonly
-        v-bind="props"></v-text-field>
-    </template>
-    <v-date-picker v-model="endDate" color="primary" title="Selecciona la fecha" header=""
-      @update:modelValue="endDateDialog = false" first-day-of-week="1" />
-  </v-dialog>
+    <!-- Boton -->
+    <v-row justify="end" class="mb-4">
+      <v-btn class="custom-submit-btn" @click="sendDates">
+        Buscar Órdenes
+      </v-btn>
+    </v-row>
+    <OrdersByDate v-if="isOrdersVisible" :key="ordersKey" :startDate="startDateISO" :endDate="endDateISO" />
+  </v-sheet>
 
-  <!-- Botón de búsqueda -->
-  <v-btn color="primary" @click="sendDates">
-    Buscar Órdenes
-  </v-btn>
-
-  <OrdersByDate v-if="isOrdersVisible" :key="ordersKey" :startDate="startDateISO" :endDate="endDateISO" />
 </template>
 
 <script>
 import OrdersByDate from '@/modules/statistics/components/OrdersByDate.vue';
+import '@/assets/styles/buttons.css';
+import '@/assets/styles/forms.css';
 
 export default {
   components: {

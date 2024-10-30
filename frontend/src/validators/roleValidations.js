@@ -1,10 +1,10 @@
-import { required } from '@vuelidate/validators';
+import { required, helpers } from '@vuelidate/validators';
 
 export const createRoleValidations = () => {
   return {
     state: {
-      name: { required },
-      isActive: { required },
+      name: { required: helpers.withMessage('El campo Nombre es obligatorio.', required), },
+      isActive: { required: helpers.withMessage('El campo Activar es obligatorio.', required), },
     },
   };
 };
@@ -12,8 +12,8 @@ export const createRoleValidations = () => {
 export const editRoleValidations = () => {
   return {
     state: {
-      name: { required },
-      isActive: { required },
+      name: { required: helpers.withMessage('El campo Nombre es obligatorio.', required), },
+      isActive: { required: helpers.withMessage('El campo Activar es obligatorio.', required), },
     },
   };
 };

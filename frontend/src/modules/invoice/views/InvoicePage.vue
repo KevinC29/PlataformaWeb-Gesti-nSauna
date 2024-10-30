@@ -33,7 +33,7 @@
 
         <!-- Columna de Estado de Pago -->
         <template v-slot:[`item.paymentState`]="{ item }">
-            <v-chip :color="item.paymentState === 'paid' ? 'green' : 'orange'" class="text-uppercase" size="small"
+            <v-chip :color="item.paymentState === 'paid' ? 'green' : 'orange'" class="text-uppercase"
                 label>
                 {{ item.paymentState === 'paid' ? 'Pagada' : 'Pendiente' }}
             </v-chip>
@@ -86,11 +86,9 @@
     <!-- Modal para Ver Factura -->
     <v-dialog v-model="showInvoiceModal" max-width="800">
         <v-card>
-            <v-toolbar flat dark color="primary">
-                <v-toolbar-title>Factura</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-btn icon dark @click="closeInvoiceModal">
-                    <v-icon>mdi-close</v-icon>
+            <v-toolbar color="primary">
+                <v-toolbar-title class="text-center">Nota de Venta</v-toolbar-title>
+                <v-btn dark @click="closeInvoiceModal" icon="mdi-close">
                 </v-btn>
             </v-toolbar>
             <v-card-text>

@@ -1,24 +1,16 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col>
-        <v-row>
-          <v-col>
-            <h3>Total: $ {{ totalSum.toFixed(2) }}</h3>
-          </v-col>
-        </v-row>
-        <apexchart v-if="chartSeries[0].data.length" type="bar" height="350" :options="chartOptions"
-          :series="chartSeries" />
+  <v-container v-if="total">
+    <h3 class="text-center">Total Ganado en el Rango de Fechas: $ {{ totalSum.toFixed(2) }}</h3>
 
-        <v-alert v-if="errorMessage" type="error" class="mt-3">
-          {{ errorMessage }}
-        </v-alert>
-        <v-alert v-if="successMessage" type="success" class="mt-3">
-          {{ successMessage }}
-        </v-alert>
+    <label class="field-label">Buscar Ítem</label>
+    <v-autocomplete v-model="selectedItem" :items="itemNames" item-value="name" clearable bg-color="cyan-lighten-5"
+      color="#388e3c" rounded variant="solo-filled" @update:modelValue="filterChartByItem" />
 
-      </v-col>
-    </v-row>
+    <apexchart v-if="chartSeries[0].data.length" type="bar" height="350" :options="chartOptions"
+      :series="chartSeries" />
+
+    <v-alert v-if="errorMessage" type="error" class="mt-3">{{ errorMessage }}</v-alert>
+    <v-alert v-if="successMessage" type="success" class="mt-3">{{ successMessage }}</v-alert>
   </v-container>
 </template>
 
@@ -46,9 +38,11 @@ export default {
       totalSum: 0,
       errorMessage: '',
       successMessage: '',
+      total: false,
+      selectedItem: null,
+      itemNames: [],
       chartOptions: {
         chart: {
-          id: 'vuechart-example',
           toolbar: {
             show: false,
           },
@@ -94,7 +88,7 @@ export default {
       this.errorMessage = error || message;
       setTimeout(() => {
         this.errorMessage = '';
-      }, 2000);
+      }, 4000);
     },
     formattedSuccess(success, message) {
       this.successMessage = success || message;
@@ -105,27 +99,26 @@ export default {
     async fetchOrdersByDate() {
       if (this.startDate && this.endDate) {
         try {
-          await this.fetchOrders({ startDate: this.startDate, endDate: this.endDate })
+          await this.fetchOrders({ startDate: this.startDate, endDate: this.endDate });
           if (this.success) {
-            this.formattedSuccess(this.success, "No hay datos disponibles para mostrar");
+            this.formattedSuccess(this.success, 'No hay datos disponibles para mostrar');
             this.updateChart();
+            this.total = true;
           }
         } catch (error) {
-          this.formattedError(this.error, "Error al obtener las estadísticas");
+          this.formattedError(this.error, 'Error al obtener las estadísticas');
+          this.total = false;
         }
       } else {
-        this.formattedError('Por favor selecciona un rango de fechas válido', "Error al obtener las estadísticas");
+        this.formattedError('Por favor selecciona un rango de fechas válido', 'Error al obtener las estadísticas');
       }
     },
 
     updateChart() {
       if (this.orders.length > 0) {
         const itemData = {};
-
-        // Calcular el total de las órdenes
         this.totalSum = this.orders.reduce((sum, order) => sum + order.total, 0);
 
-        // Procesar los detalles de cada orden
         this.orders.forEach(order => {
           order.detailOrders.forEach(detail => {
             if (!itemData[detail.itemId]) {
@@ -140,15 +133,46 @@ export default {
           });
         });
 
-        // Preparar las series para el gráfico
+        this.itemNames = Object.values(itemData).map(item => item.name);
+
         this.chartSeries[0].data = Object.values(itemData).map(item => item.quantity);
         this.chartSeries[1].data = Object.values(itemData).map(item => item.totalPrice);
         this.chartOptions.xaxis.categories = Object.values(itemData).map(item => item.name);
       } else {
-        // Limpiar los datos si no hay órdenes
         this.chartSeries[0].data = [];
         this.chartSeries[1].data = [];
         this.totalSum = 0;
+        this.itemNames = [];
+      }
+    },
+
+    filterChartByItem(item) {
+      if (item && this.orders.length > 0) {
+        const filteredData = {
+          quantity: 0,
+          totalPrice: 0,
+        };
+
+        this.orders.forEach(order => {
+          order.detailOrders.forEach(detail => {
+            if (detail.itemName === item) {
+              filteredData.quantity += detail.cantidad;
+              filteredData.totalPrice += detail.price * detail.cantidad;
+            }
+          });
+        });
+
+        this.chartSeries[0].data = [filteredData.quantity];
+        this.chartSeries[1].data = [filteredData.totalPrice];
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: {
+            ...this.chartOptions.xaxis,
+            categories: [item],
+          },
+        };
+      } else {
+        this.updateChart();
       }
     },
   },

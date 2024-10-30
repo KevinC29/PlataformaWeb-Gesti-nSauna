@@ -1,105 +1,118 @@
 <template>
-  <form @submit.prevent="submitForm">
-    <!-- Campo Nombre -->
-    <v-text-field v-model="state.name" :error-messages="v$.state.name.$errors.map(e => e.$message)" label="Nombre"
-      required @blur="v$.state.name.$touch" @input="v$.state.name.$touch"></v-text-field>
+  <v-sheet class="mx-auto custom-form" width="600">
+    <!-- Título centrado para el formulario -->
+    <h2 class="text-center mb-4">Editar Credencial</h2>
+    <v-form @submit.prevent="submitForm">
+      <v-row>
+        <v-col cols="12">
+          <!-- Campo Nombre -->
+          <label class="field-label">Nombres</label>
+          <v-text-field v-model="state.name" :error-messages="v$.state.name.$errors.map(e => e.$message)"
+            required @blur="v$.state.name.$touch" @input="v$.state.name.$touch" bg-color="cyan-lighten-5"
+            color="#388e3c" rounded variant="solo-filled"></v-text-field>
 
-    <!-- Campo Apellido -->
-    <v-text-field v-model="state.lastName" :error-messages="v$.state.lastName.$errors.map(e => e.$message)"
-      label="Apellido" required @blur="v$.state.lastName.$touch" @input="v$.state.lastName.$touch"></v-text-field>
+          <!-- Campo Apellido -->
+          <label class="field-label">Apellidos</label>
+          <v-text-field v-model="state.lastName" :error-messages="v$.state.lastName.$errors.map(e => e.$message)"
+            required @blur="v$.state.lastName.$touch" @input="v$.state.lastName.$touch"
+            bg-color="cyan-lighten-5" color="#388e3c" rounded variant="solo-filled"></v-text-field>
 
-    <!-- Campo DNI -->
-    <v-text-field v-model="state.dni" :error-messages="v$.state.dni.$errors.map(e => e.$message)" label="DNI" required
-      @blur="v$.state.dni.$touch" @input="v$.state.dni.$touch"></v-text-field>
+          <!-- Campo DNI -->
+          <label class="field-label">DNI</label>
+          <v-text-field v-model="state.dni" :error-messages="v$.state.dni.$errors.map(e => e.$message)"
+            required @blur="v$.state.dni.$touch" @input="v$.state.dni.$touch" bg-color="cyan-lighten-5" color="#388e3c"
+            rounded variant="solo-filled"></v-text-field>
 
-    <!-- Campo Email -->
-    <v-text-field v-model="state.email" :error-messages="v$.state.email.$errors.map(e => e.$message)" label="Email"
-      type="email" @blur="v$.state.email.$touch" @input="v$.state.email.$touch"></v-text-field>
+          <!-- Campo Email -->
+          <label class="field-label">Email</label>
+          <v-text-field v-model="state.email" :error-messages="v$.state.email.$errors.map(e => e.$message)"
+            type="email" @blur="v$.state.email.$touch" @input="v$.state.email.$touch"
+            bg-color="cyan-lighten-5" color="#388e3c" rounded variant="solo-filled"></v-text-field>
 
-    <v-btn class="me-4" color="warning" @click="openPasswordModal">
-      Cambiar Contraseña
-    </v-btn>
+          <v-btn class="me-4 custom-warning-btn" @click="openPasswordModal">
+            Cambiar Contraseña
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-dialog v-model="passwordModal" max-width="500px">
+        <v-sheet class="mx-auto custom-form" width="600">
+          <v-form>
+            <v-row>
+              <v-col cols="12">
+                <h2 class="text-center mb-4 headline">Cambiar Contraseña</h2>
+                <label class="field-label">Contraseña Actual</label>
+                <v-text-field v-model="credential.password"
+                  :error-messages="v$.credential.password.$errors.map(e => e.$message)"
+                  :type="showCurrentPassword" required @blur="v$.credential.password.$touch"
+                  @input="v$.credential.password.$touch" bg-color="cyan-lighten-5" color="#388e3c" rounded
+                  variant="solo-filled" :append-inner-icon="showCurrentPassword === 'password' ? 'mdi-eye-off' : 'mdi-eye'"
+                  @click:append-inner="togglePasswordVisibilityCurrent">
+                </v-text-field>
 
-    <v-dialog v-model="passwordModal" max-width="500px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Cambiar Contraseña</span>
-        </v-card-title>
+                <!-- Campo Nueva Contraseña -->
+                <label class="field-label">Nueva Contraseña</label>
+                <v-text-field v-model="credential.newPassword"
+                  :error-messages="v$.credential.newPassword.$errors.map(e => e.$message)"
+                  :type="showNewPassword" required @blur="v$.credential.newPassword.$touch"
+                  @input="v$.credential.newPassword.$touch" bg-color="cyan-lighten-5" color="#388e3c" rounded
+                  variant="solo-filled" :append-inner-icon="showNewPassword === 'password' ? 'mdi-eye-off' : 'mdi-eye'"
+                  @click:append-inner="togglePasswordVisibilityNew">
+                </v-text-field>
 
-        <v-card-text>
-          <!-- Campo Contraseña Actual -->
-          <v-text-field v-model="credential.password"
-            :error-messages="v$.credential.password.$errors.map(e => e.$message)" label="Contraseña Actual"
-            :type="showCurrentPassword ? 'text' : 'password'" required @blur="v$.credential.password.$touch"
-            @input="v$.credential.password.$touch">
-            <template v-slot:append>
-              <v-icon @click="toggleCurrentPasswordVisibility">
-                {{ showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye' }}
-              </v-icon>
-            </template>
-          </v-text-field>
+                <!-- Campo Repetir Nueva Contraseña -->
+                <label class="field-label">Repetir Nueva Contraseña</label>
+                <v-text-field v-model="credential.confirmPassword"
+                  :error-messages="v$.credential.confirmPassword.$errors.map(e => e.$message)"
+                  :type="showConfirmPassword" required
+                  @blur="v$.credential.confirmPassword.$touch" @input="v$.credential.confirmPassword.$touch"
+                  bg-color="cyan-lighten-5" color="#388e3c" rounded variant="solo-filled" :append-inner-icon="showConfirmPassword === 'password' ? 'mdi-eye-off' : 'mdi-eye'"
+                  @click:append="togglePasswordVisibilityConfirm">
+                </v-text-field>
+              </v-col>
+            </v-row>
+            <v-row justify="end" class="mb-4">
+              <v-btn class="custom-submit-btn" @click="submitPasswordChange">
+                Guardar
+              </v-btn>
+              <v-btn class="custom-cancel-btn" @click="closePasswordModal">
+                Cancelar
+              </v-btn>
+            </v-row>
 
-          <!-- Campo Nueva Contraseña -->
-          <v-text-field v-model="credential.newPassword"
-            :error-messages="v$.credential.newPassword.$errors.map(e => e.$message)" label="Nueva Contraseña"
-            :type="showNewPassword ? 'text' : 'password'" required @blur="v$.credential.newPassword.$touch"
-            @input="v$.credential.newPassword.$touch">
-            <template v-slot:append>
-              <v-icon @click="toggleNewPasswordVisibility">
-                {{ showNewPassword ? 'mdi-eye-off' : 'mdi-eye' }}
-              </v-icon>
-            </template>
-          </v-text-field>
+            <!-- Alerta de errores de contraseñas -->
+            <v-alert v-if="passwordErrorMessage" type="error" class="mt-3" border>
+              {{ passwordErrorMessage }}
+            </v-alert>
 
-          <!-- Campo Repetir Nueva Contraseña -->
-          <v-text-field v-model="credential.confirmPassword"
-            :error-messages="v$.credential.confirmPassword.$errors.map(e => e.$message)"
-            label="Repetir Nueva Contraseña" :type="showConfirmPassword ? 'text' : 'password'" required
-            @blur="v$.credential.confirmPassword.$touch" @input="v$.credential.confirmPassword.$touch">
-            <template v-slot:append>
-              <v-icon @click="toggleConfirmPasswordVisibility">
-                {{ showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye' }}
-              </v-icon>
-            </template>
-          </v-text-field>
-        </v-card-text>
+            <!-- Alerta de éxito de contraseñas -->
+            <v-alert v-if="passwordSuccessMessage" type="success" class="mt-3" border>
+              {{ passwordSuccessMessage }}
+            </v-alert>
+          </v-form>
+        </v-sheet>
+      </v-dialog>
 
-        <!-- Alerta de errores de contraseñas -->
-        <v-alert v-if="passwordErrorMessage" type="error" dismissible>
-          {{ passwordErrorMessage }}
-        </v-alert>
+      <!-- Botones -->
+      <v-row justify="end" class="mb-4">
+        <v-btn class="custom-submit-btn" type="submit">
+          Guardar
+        </v-btn>
+        <v-btn class="custom-cancel-btn" @click="cancel">
+          Cancelar
+        </v-btn>
+      </v-row>
 
-        <!-- Alerta de éxito de contraseñas -->
-        <v-alert v-if="passwordSuccessMessage" type="success" dismissible>
-          {{ passwordSuccessMessage }}
-        </v-alert>
+      <!-- Alerta de errores generales -->
+      <v-alert v-if="errorMessage" type="error" class="mt-3" border>
+        {{ errorMessage }}
+      </v-alert>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="submitPasswordChange">Guardar</v-btn>
-          <v-btn color="secondary" @click="closePasswordModal">Cancelar</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Alerta de errores generales -->
-    <v-alert v-if="errorMessage" type="error" dismissible>
-      {{ errorMessage }}
-    </v-alert>
-
-    <!-- Alerta de éxito general -->
-    <v-alert v-if="successMessage" type="success" dismissible>
-      {{ successMessage }}
-    </v-alert>
-
-    <!-- Botones -->
-    <v-btn class="me-4" color="primary" type="submit">
-      Guardar
-    </v-btn>
-    <v-btn color="secondary" @click="cancel">
-      Cancelar
-    </v-btn>
-  </form>
+      <!-- Alerta de éxito general -->
+      <v-alert v-if="successMessage" type="success" class="mt-3" border>
+        {{ successMessage }}
+      </v-alert>
+    </v-form>
+  </v-sheet>
 </template>
 
 
@@ -107,6 +120,8 @@
 import { mapActions, mapGetters } from 'vuex';
 import { useVuelidate } from '@vuelidate/core';
 import { editCredentialValidations } from '@/validators/credentialValidations.js';
+import '@/assets/styles/buttons.css';
+import '@/assets/styles/forms.css';
 
 export default {
   data() {
@@ -128,9 +143,9 @@ export default {
       passwordErrorMessage: '',
       passwordSuccessMessage: '',
       passwordModal: false,
-      showCurrentPassword: false,
-      showNewPassword: false,
-      showConfirmPassword: false,
+      showCurrentPassword: 'password',
+      showNewPassword: 'password',
+      showConfirmPassword: 'password',
     };
   },
   computed: {
@@ -156,11 +171,13 @@ export default {
         this.successMessage = success || message;
         setTimeout(() => {
           this.successMessage = '';
+          this.$router.push({ name: 'CredentialUser' });
         }, 2000);
       } else {
         this.passwordSuccessMessage = success || message;
         setTimeout(() => {
           this.passwordSuccessMessage = '';
+          this.closePasswordModal();
         }, 2000);
       }
     },
@@ -176,7 +193,7 @@ export default {
         };
         this.userID = user._id;
       } catch (error) {
-        this.formattedError(1,this.error, "Error al cargar los datos");
+        this.formattedError(1, this.error, "Error al cargar los datos");
       }
     },
 
@@ -193,10 +210,9 @@ export default {
 
       try {
         await this.updateUser({ id: this.userID, userData });
-        this.formattedSuccess(1,this.success, "Usuario actualizado con éxito");
-        this.$router.push({ name: 'CredentialUser' });
+        this.formattedSuccess(1, this.success, "Usuario actualizado con éxito");
       } catch (error) {
-        this.formattedError(1,this.error, "Error al modificar el usuario");
+        this.formattedError(1, this.error, "Error al modificar el usuario");
       }
     },
     cancel() {
@@ -229,7 +245,7 @@ export default {
       const confirmPassword = this.credential.confirmPassword.trim();
 
       if (newPassword !== confirmPassword) {
-        this.formattedError(0,"Las contraseñas no coinciden", "Revise las contraseñas ingresadas");
+        this.formattedError(0, "Las contraseñas no coinciden", "Revise las contraseñas ingresadas");
         return;
       }
 
@@ -241,21 +257,20 @@ export default {
 
       try {
         await this.updatePasswordCredential({ id: this.$route.params.id, credentialData: credentialData });
-        this.formattedSuccess(0,this.success, "Contraseña actualizada con éxito");
-        this.closePasswordModal();
+        this.formattedSuccess(0, this.success, "Contraseña actualizada con éxito");
       } catch (error) {
-        this.formattedError(0,this.error, "Revise las contraseñas ingresadas");
+        this.formattedError(0, this.error, "Revise las contraseñas ingresadas");
       }
     },
 
-    toggleCurrentPasswordVisibility() {
-      this.showCurrentPassword = !this.showCurrentPassword;
+    togglePasswordVisibilityCurrent() {
+      this.showCurrentPassword = this.showCurrentPassword === 'password' ? 'text' : 'password';
     },
-    toggleNewPasswordVisibility() {
-      this.showNewPassword = !this.showNewPassword;
+    togglePasswordVisibilityNew() {
+      this.showNewPassword = this.showNewPassword === 'password' ? 'text' : 'password';
     },
-    toggleConfirmPasswordVisibility() {
-      this.showConfirmPassword = !this.showConfirmPassword;
+    togglePasswordVisibilityConfirm() {
+      this.showConfirmPassword = this.showConfirmPassword === 'password' ? 'text' : 'password';
     },
   },
   validations() {

@@ -9,7 +9,7 @@
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
           variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
           Crear Usuario
         </v-btn>
       </v-toolbar>
@@ -47,22 +47,22 @@
 
     <!-- Columna de Estado -->
     <template v-slot:[`item.isActive`]="{ item }">
-      <v-chip :color="item.isActive ? 'green' : 'red'" class="text-uppercase" size="small" label>
+      <v-chip :color="item.isActive ? 'green' : 'red'" class="text-uppercase"
+      label>
         {{ item.isActive ? 'Activo' : 'Inactivo' }}
       </v-chip>
     </template>
-
     <!-- Columna de Estado de Credencial -->
     <template v-slot:[`item.credentialStatus`]="{ item }">
       <v-btn @click="toggleCredentialStatus(item)" :color="item.credentialStatus ? 'green' : 'red'"
-        class="text-uppercase" small>
+        class="text-uppercase custom-isActive-btn rounded-lg">
         {{ item.credentialStatus ? 'Activo' : 'Inactivo' }}
       </v-btn>
     </template>
 
     <!-- Columna de Resetear Contraseña -->
     <template v-slot:[`item.resetPassword`]="{ item }">
-      <v-btn @click="resetPassword(item)" color="primary" small>
+      <v-btn @click="resetPassword(item)" class="text-uppercase custom-reset-btn rounded-lg">
         Resetear
       </v-btn>
     </template>

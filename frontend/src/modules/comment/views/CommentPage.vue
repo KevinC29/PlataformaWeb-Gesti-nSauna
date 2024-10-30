@@ -9,7 +9,7 @@
         <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
           variant="solo-filled" hide-details single-line></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
+        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
           Crear Comentario
         </v-btn>
       </v-toolbar>
@@ -27,7 +27,7 @@
 
     <!-- Columna de Estado -->
     <template v-slot:[`item.isActive`]="{ item }">
-      <v-btn :color="item.isActive ? 'green' : 'red'" @click="confirmStatusToggle(item)" class="text-uppercase" small>
+      <v-btn :color="item.isActive ? 'green' : 'red'" @click="confirmStatusToggle(item)" class="text-uppercase custom-isActive-btn rounded-lg">
         {{ item.isActive ? 'Activo' : 'Inactivo' }}
       </v-btn>
     </template>

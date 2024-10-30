@@ -11,6 +11,25 @@
     transform: translateY(-2px);
 }
 
+.custom-isActive-btn:hover {
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-reset-btn {
+    background-color: #ffc53c;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.custom-reset-btn:hover {
+    background-color: #f0c61e;
+    color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
 .custom-viewInvoice-btn {
     background-color: #29B6F6;
     padding: 8px 16px;
@@ -25,7 +44,7 @@
 }
 
 .custom-sendInvoice-btn {
-    background-color: red-lighten-1;
+    background-color: #b95a5a;
     padding: 8px 16px;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -33,6 +52,49 @@
 .custom-sendInvoice-btn:hover {
     background-color: #C62828;
     color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-submit-btn,
+.custom-cancel-btn,
+.custom-warning-btn {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.custom-submit-btn {
+    background-color: #0f8d15;
+    color: white;
+    margin-right: 8px;
+}
+
+.custom-submit-btn:hover {
+    background-color: #3fc546;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-cancel-btn {
+    background-color: #ac1111;
+    color: white;
+}
+
+.custom-cancel-btn:hover {
+    background-color: #c05252;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.custom-warning-btn {
+    background-color: #ffb300;
+    color: white;
+}
+
+.custom-warning-btn:hover {
+    background-color: #f0c61e;
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }

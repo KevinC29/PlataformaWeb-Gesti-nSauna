@@ -10,7 +10,7 @@
           <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
             variant="solo-filled" hide-details single-line></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" dark @click="navigateToCreate">
+          <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
             Crear Cliente
           </v-btn>
         </v-toolbar>
@@ -28,7 +28,7 @@
 
       <!-- Columna de Estado de Cuenta -->
       <template v-slot:[`item.accountState`]="{ item }">
-        <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase black-text" size="small"
+        <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase black-text"
           label>
           {{ item.accountState === 'paid' ? 'Pagada' : 'Pendiente' }}
         </v-chip>
