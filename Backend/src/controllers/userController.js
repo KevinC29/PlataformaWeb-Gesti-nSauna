@@ -149,7 +149,7 @@ export const getUser = async (req, res) => {
       return handleError(res, null, null, 400, 'ID de usuario no válido');
     }
     const user = await User.findById(id)
-      .select("_id name lastName phone dni email isActive role")
+      .select("_id name lastName address phone dni email isActive role")
       .populate({
         path: 'role',
         select: '_id name'
