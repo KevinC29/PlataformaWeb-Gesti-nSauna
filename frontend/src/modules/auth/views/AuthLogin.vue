@@ -3,20 +3,14 @@
     <AppHeader :items="headerItems" />
 
     <v-main>
-      <v-container fluid class="background-container">
-        <section id="inicio">
-          <v-container class="d-flex flex-column align-center justify-center text-center" style="min-height: 50vh;">
+      <v-container fluid class="background-container d-flex align-center justify-center">
+        <v-alert v-if="sessionExpired" type="warning" class="mb-4">
+          Su sesión ha expirado. Por favor, vuelva a iniciar sesión.
+        </v-alert>
 
-            <!-- Mensaje de sesión expirada -->
-            <v-alert v-if="sessionExpired" type="warning" class="mb-4">
-              Su sesión ha expirado. Por favor, vuelva a iniciar sesión.
-            </v-alert>
-
-            <v-sheet class="pa-4 form-container" elevation="2">
-              <LoginForm />
-            </v-sheet>
-          </v-container>
-        </section>
+        <v-sheet class="pa-4 form-container" elevation="2">
+          <LoginForm />
+        </v-sheet>
       </v-container>
     </v-main>
 
@@ -77,7 +71,10 @@ export default {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .form-container {
@@ -85,7 +82,10 @@ export default {
   max-height: 400px;
   background: linear-gradient(135deg, #388e3c, #5fe6da);
   border-radius: 12px;
-  position: relative;
-  z-index: 1;
+  margin-bottom: 40px;
+}
+
+.v-main {
+  flex-grow: 1;
 }
 </style>

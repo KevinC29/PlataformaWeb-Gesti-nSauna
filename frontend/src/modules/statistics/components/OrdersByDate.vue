@@ -1,9 +1,9 @@
 <template>
-  <v-container v-if="total">
-    <h3 class="text-center">Total Ganado en el Rango de Fechas: $ {{ totalSum.toFixed(2) }}</h3>
+  <v-container v-if="section" class="container-total">
+    <h3 v-if="total" class="text-center">Total Ganado en el Rango de Fechas: $ {{ totalSum.toFixed(2) }}</h3>
 
-    <label class="field-label">Buscar Ítem</label>
-    <v-autocomplete v-model="selectedItem" :items="itemNames" item-value="name" clearable bg-color="cyan-lighten-5"
+    <label v-if="total" class="field-label">Buscar Ítem</label>
+    <v-autocomplete v-if="searchItem" v-model="selectedItem" :items="itemNames" item-value="name" clearable bg-color="cyan-lighten-5"
       color="#388e3c" rounded variant="solo-filled" @update:modelValue="filterChartByItem" />
 
     <apexchart v-if="chartSeries[0].data.length" type="bar" height="350" :options="chartOptions"
@@ -39,6 +39,8 @@ export default {
       errorMessage: '',
       successMessage: '',
       total: false,
+      searchItem: false,
+      section: false,
       selectedItem: null,
       itemNames: [],
       chartOptions: {
@@ -101,9 +103,19 @@ export default {
         try {
           await this.fetchOrders({ startDate: this.startDate, endDate: this.endDate });
           if (this.success) {
-            this.formattedSuccess(this.success, 'No hay datos disponibles para mostrar');
-            this.updateChart();
-            this.total = true;
+            if (this.orders.length) {
+              this.formattedSuccess(this.success, 'Datos extraidos con éxito');
+              this.updateChart();
+              this.total = true;
+              this.searchItem = true;
+              this.section = true;
+            } else {
+              this.formattedSuccess(this.success, 'No hay datos disponibles para mostrar');
+              this.total = false;
+              this.section = true;
+              this.searchItem = false;
+            }
+
           }
         } catch (error) {
           this.formattedError(this.error, 'Error al obtener las estadísticas');
@@ -181,3 +193,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.container-total {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+</style>

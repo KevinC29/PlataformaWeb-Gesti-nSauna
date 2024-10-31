@@ -2,48 +2,42 @@
   <div class="profile-page">
     <!-- Alerta de éxito general -->
     <div class="alert-container">
-      <v-alert v-if="successMessage" type="success" dismissible>
+      <v-alert v-if="successMessage" type="success" class="mt-3" border>
         {{ successMessage }}
       </v-alert>
     </div>
 
-    <v-card class="mx-auto" max-width="600">
-      <v-card-title class="headline">Perfil del Usuario</v-card-title>
+    <!-- Contenedor de perfil -->
+    <div class="profile-container">
+      <div class="profile-header">Perfil del Usuario</div>
       <v-divider></v-divider>
-      <v-card-text>
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title><strong>Nombre:</strong></v-list-item-title>
-            <v-list-item-subtitle>{{ user.name }}</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title><strong>Apellido:</strong></v-list-item-title>
-            <v-list-item-subtitle>{{ user.lastName }}</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title><strong>DNI:</strong></v-list-item-title>
-            <v-list-item-subtitle>{{ user.dni }}</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title><strong>Email:</strong></v-list-item-title>
-            <v-list-item-subtitle>{{ user.email || 'N/A' }}</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-card-text>
+
+      <div class="profile-content">
+        <div class="profile-item">
+          <span class="profile-title">Nombres:</span>
+          <span class="profile-subtitle">{{ user.name }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="profile-title">Apellidos:</span>
+          <span class="profile-subtitle">{{ user.lastName }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="profile-title">DNI:</span>
+          <span class="profile-subtitle">{{ user.dni }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="profile-title">Email:</span>
+          <span class="profile-subtitle">{{ user.email || 'N/A' }}</span>
+        </div>
+      </div>
 
       <!-- Botón para Editar Perfil -->
-      <v-card-actions>
-        <v-btn color="primary" @click="navigateToEdit">
+      <div class="profile-actions">
+        <v-btn class="custom-edit-btn" @click="navigateToEdit">
           Editar Perfil
         </v-btn>
-      </v-card-actions>
-    </v-card>
+      </div>
+    </div>
 
     <!-- Error de carga -->
     <div class="alert-container">
@@ -56,6 +50,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import '@/assets/styles/buttons.css';
+import '@/assets/styles/profile.css';
 
 export default {
   data() {
@@ -99,20 +95,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.profile-page {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.alert-container {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 50px;
-}
-</style>

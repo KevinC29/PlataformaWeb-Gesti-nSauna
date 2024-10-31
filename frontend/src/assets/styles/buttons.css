@@ -11,6 +11,19 @@
     transform: translateY(-2px);
 }
 
+.custom-edit-btn {
+    background-color: #2054ff;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-edit-btn:hover {
+    background-color: #2091dd;
+    color: white;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
 .custom-isActive-btn:hover {
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
@@ -21,7 +34,6 @@
     padding: 8px 16px;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
-
 
 .custom-reset-btn:hover {
     background-color: #f0c61e;
