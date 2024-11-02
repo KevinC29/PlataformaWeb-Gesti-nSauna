@@ -1,98 +1,99 @@
 <template>
   <v-container class="my-4">
-  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
-    <template v-slot:top>
-      <v-toolbar class="toolbar-container">
-        <v-toolbar-title><strong>COMENTARIOS</strong></v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
-        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" hide-details single-line></v-text-field>
-        <v-spacer></v-spacer>
-        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
-          Crear Comentario
+    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10"
+      class="bordered-table">
+      <template v-slot:top>
+        <v-toolbar class="toolbar-container">
+          <v-toolbar-title><strong>COMENTARIOS</strong></v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+            variant="solo-filled" hide-details single-line></v-text-field>
+          <v-spacer></v-spacer>
+          <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
+            Crear Comentario
+          </v-btn>
+        </v-toolbar>
+      </template>
+
+      <!-- Columna de Fecha -->
+      <template v-slot:[`item.date`]="{ item }">
+        {{ new Date(item.date).toLocaleDateString() }}
+      </template>
+
+      <!-- Columna de Mensaje -->
+      <template v-slot:[`item.message`]="{ item }">
+        {{ item.message }}
+      </template>
+
+      <!-- Columna de Estado -->
+      <template v-slot:[`item.isActive`]="{ item }">
+        <v-btn :color="item.isActive ? 'green' : 'red'" @click="confirmStatusToggle(item)"
+          class="text-uppercase custom-isActive-btn rounded-lg">
+          {{ item.isActive ? 'Activo' : 'Inactivo' }}
         </v-btn>
-      </v-toolbar>
-    </template>
+      </template>
 
-    <!-- Columna de Fecha -->
-    <template v-slot:[`item.date`]="{ item }">
-      {{ new Date(item.date).toLocaleDateString() }}
-    </template>
+      <!-- Columna de Cliente -->
+      <template v-slot:[`item.client`]="{ item }">
+        {{ item.client.user ? `${item.client.user.name} ${item.client.user.lastName}` : 'N/A' }}
+      </template>
 
-    <!-- Columna de Mensaje -->
-    <template v-slot:[`item.message`]="{ item }">
-      {{ item.message }}
-    </template>
+      <!-- Columna de Acciones -->
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon size="small" @click="confirmDelete(item)">
+          mdi-delete
+        </v-icon>
+      </template>
 
-    <!-- Columna de Estado -->
-    <template v-slot:[`item.isActive`]="{ item }">
-      <v-btn :color="item.isActive ? 'green' : 'red'" @click="confirmStatusToggle(item)" class="text-uppercase custom-isActive-btn rounded-lg">
-        {{ item.isActive ? 'Activo' : 'Inactivo' }}
-      </v-btn>
-    </template>
-
-    <!-- Columna de Cliente -->
-    <template v-slot:[`item.client`]="{ item }">
-      {{ item.client.user ? `${item.client.user.name} ${item.client.user.lastName}` : 'N/A' }}
-    </template>
-
-    <!-- Columna de Acciones -->
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon size="small" @click="confirmDelete(item)">
-        mdi-delete
-      </v-icon>
-    </template>
-
-    <!-- Sin datos -->
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="fetchComments">
-        Reiniciar
-      </v-btn>
-    </template>
-  </v-data-table>
+      <!-- Sin datos -->
+      <template v-slot:no-data>
+        <v-btn color="primary" @click="fetchComments">
+          Reiniciar
+        </v-btn>
+      </template>
+    </v-data-table>
   </v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        ¿Estás seguro de querer eliminar este comentario?
-      </v-card-title>
-      <v-alert v-if="errorMessage" type="error" class="mt-3">
-        {{ errorMessage }}
-      </v-alert>
-      <v-alert v-if="successMessage" type="success" class="mt-3">
-        {{ successMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">
-          Cancelar
-        </v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">
+    <v-sheet class="mx-auto custom-dialog">
+      <h2 class="text-center mb-4">¿Estás seguro de querer eliminar este comentario?</h2>
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="errorMessage" type="error" class="mt-3" border>
+            {{ errorMessage }}
+          </v-alert>
+          <v-alert v-if="successMessage" type="success" class="mt-3" border>
+            {{ successMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+      <v-row justify="end">
+        <v-btn class="custom-submit-btn" type="submit" @click="deleteCommentConfirm">
           Eliminar
         </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-btn class="custom-cancel-btn" @click="closeDelete">
+          Cancelar
+        </v-btn>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 
   <!-- Status Update Dialog -->
   <v-dialog v-model="dialogStatusUpdate" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        {{ statusUpdateSuccessMessage }}
-      </v-card-title>
-      <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3">
-        {{ statusUpdateErrorMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeStatusUpdate">
-          Cerrar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+    <v-sheet class="mx-auto custom-dialog-status">
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="statusUpdateSuccessMessage" type="success" class="mt-3" border>
+            {{ statusUpdateSuccessMessage }}
+          </v-alert>
+          <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3" border>
+            {{ statusUpdateErrorMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 </template>
 
@@ -100,6 +101,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import '@/assets/styles/dataTable.css';
 import '@/assets/styles/buttons.css';
+import '@/assets/styles/dialog.css';
 
 export default {
   data() {
@@ -147,6 +149,7 @@ export default {
         this.statusUpdateErrorMessage = error || message;
         setTimeout(() => {
           this.statusUpdateErrorMessage = '';
+          this.closeStatusUpdate();
         }, 2000);
       }
     },
@@ -160,6 +163,7 @@ export default {
         this.statusUpdateSuccessMessage = success || message;
         setTimeout(() => {
           this.statusUpdateSuccessMessage = '';
+          this.closeStatusUpdate();
         }, 2000);
       }
     },
@@ -172,7 +176,7 @@ export default {
       this.successMessage = '';
       this.errorMessage = '';
     },
-    async deleteItemConfirm() {
+    async deleteCommentConfirm() {
       if (this.editedItem) {
         try {
           await this.deleteComment(this.editedItem._id);

@@ -1,0 +1,27 @@
+.custom-dialog {
+    padding: 30px;
+    background: linear-gradient(135deg, #ff4800fb, #FF6347 );
+    border: 1px solid #e0e0e0;
+}
+
+.custom-dialog-status {
+    padding: 30px;
+    background: linear-gradient(180deg, #59b877, #5fe6da);
+    border: 1px solid #e0e0e0;
+}
+
+.custom-dialog-reset {
+    padding: 30px;
+    background: linear-gradient(180deg, #59b877, #5fe6da);
+    border: 1px solid #e0e0e0;
+}
+
+.custom-dialog-invoice {
+    padding: 30px;
+    background: linear-gradient(180deg, #59b877, #5fe6da);
+    border: 1px solid #e0e0e0;
+}
+
+.v-alert {
+    font-size: 15px;
+}

@@ -1,149 +1,146 @@
 <template>
   <v-container class="my-4">
-  <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10" class="bordered-table">
-    <template v-slot:top>
-      <v-toolbar class="toolbar-container">
-        <v-toolbar-title><strong>USUARIOS</strong></v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
-        <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
-          variant="solo-filled" hide-details single-line></v-text-field>
-        <v-spacer></v-spacer>
-        <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
-          Crear Usuario
+    <v-data-table :headers="headers" :items="filteredItems" v-model:sort-by="sortBy" :items-per-page="10"
+      class="bordered-table">
+      <template v-slot:top>
+        <v-toolbar class="toolbar-container">
+          <v-toolbar-title><strong>USUARIOS</strong></v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" density="compact" label="Buscar" prepend-inner-icon="mdi-magnify"
+            variant="solo-filled" hide-details single-line></v-text-field>
+          <v-spacer></v-spacer>
+          <v-btn class="ml-10 mr-10 custom-create-btn rounded-lg" @click="navigateToCreate">
+            Crear Usuario
+          </v-btn>
+        </v-toolbar>
+      </template>
+
+      <!-- Columna de Nombre -->
+      <template v-slot:[`item.name`]="{ item }">
+        {{ item.name }}
+      </template>
+
+      <!-- Columna de Apellido -->
+      <template v-slot:[`item.lastName`]="{ item }">
+        {{ item.lastName }}
+      </template>
+
+      <!-- Columna de   Telefono -->
+      <template v-slot:[`item.dni`]="{ item }">
+        {{ item.dni }}
+      </template>
+
+      <!-- Columna de DNI -->
+      <template v-slot:[`item.phone`]="{ item }">
+        {{ item.phone ? item.phone : 'N/A' }}
+      </template>
+
+      <!-- Columna de Correo Electrónico -->
+      <template v-slot:[`item.email`]="{ item }">
+        {{ item.email ? item.email : 'N/A' }}
+      </template>
+
+      <!-- Columna de Rol -->
+      <template v-slot:[`item.role`]="{ item }">
+        {{ item.role.name }} <!-- Asumiendo que 'role' es un objeto con una propiedad 'name' -->
+      </template>
+
+      <!-- Columna de Estado -->
+      <template v-slot:[`item.isActive`]="{ item }">
+        <v-chip :color="item.isActive ? 'green' : 'red'" class="text-uppercase" label>
+          {{ item.isActive ? 'Activo' : 'Inactivo' }}
+        </v-chip>
+      </template>
+      <!-- Columna de Estado de Credencial -->
+      <template v-slot:[`item.credentialStatus`]="{ item }">
+        <v-btn @click="toggleCredentialStatus(item)" :color="item.credentialStatus ? 'green' : 'red'"
+          class="text-uppercase custom-isActive-btn rounded-lg">
+          {{ item.credentialStatus ? 'Activo' : 'Inactivo' }}
         </v-btn>
-      </v-toolbar>
-    </template>
+      </template>
 
-    <!-- Columna de Nombre -->
-    <template v-slot:[`item.name`]="{ item }">
-      {{ item.name }}
-    </template>
+      <!-- Columna de Resetear Contraseña -->
+      <template v-slot:[`item.resetPassword`]="{ item }">
+        <v-btn @click="resetPassword(item)" class="text-uppercase custom-reset-btn rounded-lg">
+          Resetear
+        </v-btn>
+      </template>
 
-    <!-- Columna de Apellido -->
-    <template v-slot:[`item.lastName`]="{ item }">
-      {{ item.lastName }}
-    </template>
+      <!-- Columnas de acciones -->
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon class="me-2" size="small" @click="navigateToEdit(item)">
+          mdi-pencil
+        </v-icon>
+        <v-icon size="small" @click="confirmDelete(item)">
+          mdi-delete
+        </v-icon>
+      </template>
 
-    <!-- Columna de   Telefono -->
-    <template v-slot:[`item.dni`]="{ item }">
-      {{ item.dni }}
-    </template>
-
-    <!-- Columna de DNI -->
-    <template v-slot:[`item.phone`]="{ item }">
-      {{ item.phone ? item.phone : 'N/A' }}
-    </template>
-
-    <!-- Columna de Correo Electrónico -->
-    <template v-slot:[`item.email`]="{ item }">
-      {{ item.email ? item.email : 'N/A' }}
-    </template>
-
-    <!-- Columna de Rol -->
-    <template v-slot:[`item.role`]="{ item }">
-      {{ item.role.name }} <!-- Asumiendo que 'role' es un objeto con una propiedad 'name' -->
-    </template>
-
-    <!-- Columna de Estado -->
-    <template v-slot:[`item.isActive`]="{ item }">
-      <v-chip :color="item.isActive ? 'green' : 'red'" class="text-uppercase"
-      label>
-        {{ item.isActive ? 'Activo' : 'Inactivo' }}
-      </v-chip>
-    </template>
-    <!-- Columna de Estado de Credencial -->
-    <template v-slot:[`item.credentialStatus`]="{ item }">
-      <v-btn @click="toggleCredentialStatus(item)" :color="item.credentialStatus ? 'green' : 'red'"
-        class="text-uppercase custom-isActive-btn rounded-lg">
-        {{ item.credentialStatus ? 'Activo' : 'Inactivo' }}
-      </v-btn>
-    </template>
-
-    <!-- Columna de Resetear Contraseña -->
-    <template v-slot:[`item.resetPassword`]="{ item }">
-      <v-btn @click="resetPassword(item)" class="text-uppercase custom-reset-btn rounded-lg">
-        Resetear
-      </v-btn>
-    </template>
-
-    <!-- Columnas de acciones -->
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="me-2" size="small" @click="navigateToEdit(item)">
-        mdi-pencil
-      </v-icon>
-      <v-icon size="small" @click="confirmDelete(item)">
-        mdi-delete
-      </v-icon>
-    </template>
-
-    <!-- Sin datos -->
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="fetchUsers">
-        Reiniciar
-      </v-btn>
-    </template>
-  </v-data-table>
-</v-container>
+      <!-- Sin datos -->
+      <template v-slot:no-data>
+        <v-btn color="primary" @click="fetchUsers">
+          Reiniciar
+        </v-btn>
+      </template>
+    </v-data-table>
+  </v-container>
 
   <!-- Delete Confirmation Dialog -->
   <v-dialog v-model="dialogDelete" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        ¿Estás seguro de querer eliminar este usuario?
-      </v-card-title>
-      <v-alert v-if="errorMessage" type="error" class="mt-3">
-        {{ errorMessage }}
-      </v-alert>
-      <v-alert v-if="successMessage" type="success" class="mt-3">
-        {{ successMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">
-          Cancelar
-        </v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">
+    <v-sheet class="mx-auto custom-dialog">
+      <h2 class="text-center mb-4">¿Estás seguro de querer eliminar este usuario?</h2>
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="errorMessage" type="error" class="mt-3" border>
+            {{ errorMessage }}
+          </v-alert>
+          <v-alert v-if="successMessage" type="success" class="mt-3" border>
+            {{ successMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+      <v-row justify="end">
+        <v-btn class="custom-submit-btn" type="submit" @click="deleteUserConfirm">
           Eliminar
         </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-btn class="custom-cancel-btn" @click="closeDelete">
+          Cancelar
+        </v-btn>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 
   <!-- Status Update Dialog -->
   <v-dialog v-model="dialogStatusUpdate" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        {{ statusUpdateSuccessMessage }}
-      </v-card-title>
-      <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3">
-        {{ statusUpdateErrorMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeStatusUpdate">
-          Cerrar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+    <v-sheet class="mx-auto custom-dialog-status">
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="statusUpdateSuccessMessage" type="success" class="mt-3" border>
+            {{ statusUpdateSuccessMessage }}
+          </v-alert>
+          <v-alert v-if="statusUpdateErrorMessage" type="error" class="mt-3" border>
+            {{ statusUpdateErrorMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 
   <!-- Password Reset Dialog -->
   <v-dialog v-model="dialogResetPassword" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        {{ passwordResetSuccessMessage }}
-      </v-card-title>
-      <v-alert v-if="passwordResetErrorMessage" type="error" class="mt-3">
-        {{ passwordResetErrorMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closePasswordReset">
-          Cerrar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+    <v-sheet class="mx-auto custom-dialog-reset">
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="passwordResetSuccessMessage" type="success" class="mt-3" border>
+            {{ passwordResetSuccessMessage }}
+          </v-alert>
+          <v-alert v-if="passwordResetErrorMessage" type="error" class="mt-3" border>
+            {{ passwordResetErrorMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 </template>
 
@@ -151,6 +148,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import '@/assets/styles/dataTable.css';
 import '@/assets/styles/buttons.css';
+import '@/assets/styles/dialog.css';
 
 export default {
   data() {
@@ -211,11 +209,13 @@ export default {
         this.statusUpdateErrorMessage = error || message;
         setTimeout(() => {
           this.statusUpdateErrorMessage = '';
+          this.closeStatusUpdate();
         }, 2000);
       } else {
         this.passwordResetErrorMessage = error || message;
         setTimeout(() => {
           this.passwordResetErrorMessage = '';
+          this.closePasswordReset();
         }, 2000);
       }
     },
@@ -229,11 +229,13 @@ export default {
         this.statusUpdateSuccessMessage = success || message;
         setTimeout(() => {
           this.statusUpdateSuccessMessage = '';
+          this.closeStatusUpdate();
         }, 2000);
       } else {
         this.passwordResetSuccessMessage = success || message;
         setTimeout(() => {
           this.passwordResetSuccessMessage = '';
+          this.closePasswordReset();
         }, 2000);
       }
     },
@@ -249,7 +251,7 @@ export default {
       this.successMessage = '';
       this.errorMessage = '';
     },
-    async deleteItemConfirm() {
+    async deleteUserConfirm() {
       if (this.editedItem) {
         try {
           await this.deleteUser(this.editedItem._id);

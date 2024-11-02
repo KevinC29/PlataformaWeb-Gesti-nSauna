@@ -1,0 +1,109 @@
+.list-unstyled {
+    list-style: none;
+    padding: 0;
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.bordered-table-cash {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bordered-table-cash th,
+.bordered-table-cash td {
+    border: 1px solid black;
+    padding: 8px;
+}
+
+.bordered-table-cash th {
+    background-color: #f2f2f2;
+}
+
+.bordered-table-detail {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid black;
+}
+
+.bordered-table-emisor td {
+    border-collapse: collapse;
+    border: 1px solid black;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.bordered-table-client {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bordered-table-client th,
+.bordered-table-client td {
+    border: 1px solid black;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.bordered-table-date {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bordered-table-date th,
+.bordered-table-date td {
+    border: 1px solid black;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.bordered-table-date th {
+    background-color: #f2f2f2;
+}
+
+.width-table {
+    width: 100%;
+}
+
+.small-text {
+    font-size: 0.8rem;
+}
+
+.small-text-2 {
+    font-size: 0.56rem;
+}
+
+/* Animaciones de envio de correo */
+.email-animation-container {
+    position: relative;
+    display: flex;
+    width: 100px; /* Ancho de contenedor de animación */
+    height: 40px;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+  
+  .email-icon {
+    font-size: 36px;
+    color: black; /* Azul para el icono de correo */
+    position: absolute;
+    animation: sendEmailAnimation 2s infinite; /* Animación infinita */
+  }
+  
+  @keyframes sendEmailAnimation {
+    0% {
+      left: 0;
+      opacity: 1;
+    }
+    50% {
+      left: 60px;
+      opacity: 0.5;
+    }
+    100% {
+      left: 100px;
+      opacity: 0; /* El icono desaparece al final */
+    }
+  }

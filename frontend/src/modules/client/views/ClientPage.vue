@@ -28,8 +28,7 @@
 
       <!-- Columna de Estado de Cuenta -->
       <template v-slot:[`item.accountState`]="{ item }">
-        <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase black-text"
-          label>
+        <v-chip :color="item.accountState === 'paid' ? 'green' : 'red'" class="text-uppercase black-text" label>
           {{ item.accountState === 'paid' ? 'Pagada' : 'Pendiente' }}
         </v-chip>
       </template>
@@ -53,28 +52,28 @@
     </v-data-table>
   </v-container>
 
-  <!-- Delete Confirmation Dialog -->
-  <v-dialog v-model="dialogDelete" max-width="500px">
-    <v-card>
-      <v-card-title class="text-h5">
-        ¿Estás seguro de querer eliminar este cliente?
-      </v-card-title>
-      <v-alert v-if="errorMessage" type="error" class="mt-3">
-        {{ errorMessage }}
-      </v-alert>
-      <v-alert v-if="successMessage" type="success" class="mt-3">
-        {{ successMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeDelete">
-          Cancelar
-        </v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">
+  <v-dialog v-model="dialogDelete">
+    <v-sheet class="mx-auto custom-dialog">
+      <h2 class="text-center mb-4">¿Estás seguro de querer eliminar este cliente?</h2>
+      <v-row>
+        <v-col cols="12">
+          <v-alert v-if="errorMessage" type="error" class="mt-3" border>
+            {{ errorMessage }}
+          </v-alert>
+          <v-alert v-if="successMessage" type="success" class="mt-3" border>
+            {{ successMessage }}
+          </v-alert>
+        </v-col>
+      </v-row>
+      <v-row justify="end">
+        <v-btn class="custom-submit-btn" type="submit" @click="deleteClientConfirm">
           Eliminar
         </v-btn>
-      </v-card-actions>
-    </v-card>
+        <v-btn class="custom-cancel-btn" @click="closeDelete">
+          Cancelar
+        </v-btn>
+      </v-row>
+    </v-sheet>
   </v-dialog>
 </template>
 
@@ -82,6 +81,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import '@/assets/styles/dataTable.css';
 import '@/assets/styles/buttons.css';
+import '@/assets/styles/dialog.css';
 
 export default {
   data() {
@@ -126,6 +126,7 @@ export default {
       this.successMessage = success || message;
       setTimeout(() => {
         this.successMessage = '';
+        this.dialogDelete = false;
       }, 2000);
     },
     navigateToCreate() {
@@ -140,12 +141,11 @@ export default {
       this.successMessage = '';
       this.errorMessage = '';
     },
-    async deleteItemConfirm() {
+    async deleteClientConfirm() {
       if (this.editedItem) {
         try {
           await this.deleteClient(this.editedItem._id);
           this.formattedSuccess(this.success, "Cliente eliminado con éxito");
-          this.dialogDelete = false;
           this.fetchClients();
         } catch (error) {
           this.formattedError(this.error, "Error al eliminar el cliente");

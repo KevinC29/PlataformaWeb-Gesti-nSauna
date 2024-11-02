@@ -154,6 +154,8 @@
 </template>
 
 <script>
+import '@/assets/styles/invoice.css';
+
 export default {
   name: 'InvoiceOrder',
   props: {
@@ -200,84 +202,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.list-unstyled {
-  list-style: none;
-  padding: 0;
-}
-
-.vertical-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-}
-
-.bordered-table-cash {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-.bordered-table-cash th,
-.bordered-table-cash td {
-  border: 1px solid black;
-  padding: 8px;
-}
-
-.bordered-table-cash th {
-  background-color: #f2f2f2;
-}
-
-.bordered-table-detail {
-  border-collapse: collapse;
-  width: 100%;
-  border: 1px solid black;
-}
-
-.bordered-table-emisor td {
-  border-collapse: collapse;
-  border: 1px solid black;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.bordered-table-client {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-.bordered-table-client th,
-.bordered-table-client td {
-  border: 1px solid black;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.bordered-table-date {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-.bordered-table-date th,
-.bordered-table-date td {
-  border: 1px solid black;
-  padding-left: 40px;
-  padding-right: 40px;
-}
-
-.bordered-table-date th {
-  background-color: #f2f2f2;
-}
-
-.width-table {
-  width: 100%;
-}
-
-.small-text {
-  font-size: 0.8rem;
-}
-
-.small-text-2 {
-  font-size: 0.56rem;
-}
-
-</style>
