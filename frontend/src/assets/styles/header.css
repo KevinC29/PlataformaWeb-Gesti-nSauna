@@ -1,0 +1,32 @@
+.custom-app-bar {
+    background: linear-gradient(to right, #388e3c, #66bb6a) !important;
+}
+
+.custom-breadcrumb-btn {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 8px 16px;
+    text-transform: none;
+    transition: background-color 0.3s ease;
+}
+
+.custom-breadcrumb-btn:hover {
+    background-color: #66bb6a;
+    color: white;
+}
+
+.app-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: black;
+}
+
+.logo-header {
+    width: 75px;
+    height: 64px;
+    background-image: url('@/assets/img/logo1.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 35%;
+    margin-left: 10px;
+    margin-right: 10px;
+}

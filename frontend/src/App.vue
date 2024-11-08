@@ -1,11 +1,11 @@
 <template>
-  <router-view></router-view>
+    <router-view />
 </template>
 
 <script>
+import '@/assets/styles/app.css';
+
 export default {
-  name: 'App'
+  name: 'App',
 };
 </script>
-
-<style></style>

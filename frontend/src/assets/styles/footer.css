@@ -1,0 +1,54 @@
+.custom-footer {
+    background: linear-gradient(to right, #66bb6a, #388e3c);
+}
+
+.icon-container {
+    background-color: rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.d-flex {
+    width: 100%;
+}
+
+.services-container,
+.contact-container,
+.hours-container {
+    margin: 0 10px;
+    flex: 1;
+}
+
+h4 {
+    margin-bottom: 10px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+li {
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.facebook-btn:hover {
+    background-color: rgba(59, 89, 152, 0.8);
+}
+
+.twitter-btn:hover {
+    background-color: rgba(29, 161, 242, 0.8);
+}
+
+.whatsapp-btn:hover {
+    background-color: rgba(37, 211, 102, 0.8);
+}
+
+.instagram-btn:hover {
+    background-color: rgba(225, 48, 108, 0.8);
+}
+
+@media (max-width: 768px) {
+    .d-flex {
+        flex-direction: column;
+    }
+}

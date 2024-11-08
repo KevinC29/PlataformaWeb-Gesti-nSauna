@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import '@/assets/styles/sidebar.css';
+
 export default {
   name: 'AppSidebar',
   props: {
@@ -71,14 +73,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.sidebar {
-  height: 100vh;
-  background-image: linear-gradient(to bottom, #4caf50, #f5f5f5)
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>

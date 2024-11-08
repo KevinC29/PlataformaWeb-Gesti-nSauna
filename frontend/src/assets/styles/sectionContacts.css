@@ -1,0 +1,61 @@
+.section-contacts {
+    background: conic-gradient(from 0deg, #4EA549, #2C6E2F);
+    background-size: cover;
+    background-position: center;
+    padding: 50px 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.section-left,
+.section-right {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+}
+
+.content {
+    width: 80%;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    font-family: 'Times New Roman';
+    color: black;
+}
+
+.map-container {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.contact-list, .hours-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.contact-list li, .hours-list li {
+    margin-bottom: 10px;
+    text-align: left;
+    color: white;
+}
+
+.v-row {
+    width: 100%;
+}
+
+.v-col {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 20px;
+}

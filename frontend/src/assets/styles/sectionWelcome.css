@@ -1,0 +1,165 @@
+.section-welcome {
+    display: flex;
+    width: 100%;
+    background: linear-gradient(to right, #45d878, #3bd685, #2fd295, #2bc8a2, #29bcad);
+    position: relative;
+    min-height: 100vh;
+}
+
+.contenedor-izquierdo {
+    width: 50%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.titulo {
+    font-size: 4rem;
+    text-align: center;
+    margin: 0;
+    margin-top: 100px;
+    font-family: 'Times New Roman';
+}
+
+.descripcion {
+    font-size: 1.5rem;
+    text-align: left;
+    margin-top: 30px;
+    margin-left: 30px;
+    align-self: flex-start;
+}
+
+.contenedor-video {
+    position: relative;
+    width: 75%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.video {
+    width: 90%;
+    height: 75%;
+    object-fit: cover;
+    border: 2px solid white;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+
+.burbuja {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    opacity: .3;
+    bottom: 0;
+    animation: burbujas 3s linear infinite;
+    z-index: 1;
+}
+
+@keyframes burbujas {
+    0% {
+        bottom: 0;
+        opacity: 0;
+    }
+
+    30% {
+        transform: translateX(30px);
+    }
+
+    50% {
+        opacity: .4;
+    }
+
+    100% {
+        bottom: 100vh;
+        opacity: 0;
+    }
+}
+
+/* Estilo individual para cada burbuja */
+.burbuja-1 {
+    width: 80px;
+    height: 80px;
+    left: 5%;
+    animation-duration: 3s;
+    animation-delay: 3s;
+}
+
+.burbuja-2 {
+    width: 100px;
+    height: 100px;
+    left: 35%;
+    animation-duration: 3s;
+    animation-delay: 5s;
+}
+
+.burbuja-3 {
+    width: 20px;
+    height: 20px;
+    left: 15%;
+    animation-duration: 1.5s;
+    animation-delay: 7s;
+}
+
+.burbuja-4 {
+    width: 50px;
+    height: 50px;
+    left: 90%;
+    animation-duration: 6s;
+    animation-delay: 3s;
+}
+
+.burbuja-5 {
+    width: 70px;
+    height: 70px;
+    left: 65%;
+    animation-duration: 3s;
+    animation-delay: 1s;
+}
+
+.burbuja-6 {
+    width: 20px;
+    height: 20px;
+    left: 50%;
+    animation-duration: 4s;
+    animation-delay: 5s;
+}
+
+.burbuja-7 {
+    width: 20px;
+    height: 20px;
+    left: 50%;
+    animation-duration: 4s;
+    animation-delay: 5s;
+}
+
+.burbuja-8 {
+    width: 100px;
+    height: 100px;
+    left: 52%;
+    animation-duration: 5s;
+    animation-delay: 5s;
+}
+
+.burbuja-9 {
+    width: 65px;
+    height: 65px;
+    left: 51%;
+    animation-duration: 3s;
+    animation-delay: 2s;
+}
+
+.burbuja-10 {
+    width: 40px;
+    height: 40px;
+    left: 35%;
+    animation-duration: 3s;
+    animation-delay: 4s;
+}

@@ -10,7 +10,7 @@ const routes = [
   ...HomeRoutes,
   {
     path: '/:catchAll(.*)',
-    redirect: '/login',
+    redirect: '/Home',
   },
 ];
 
@@ -24,7 +24,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
-      next({ name: 'Login' });
+      next({ name: 'Home' });
     } else {
       next();
     }
